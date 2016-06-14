@@ -33,12 +33,14 @@ public class CardViewActivity extends AppCompatActivity {
     int index=0;
     Firebase ref= new Firebase(Constants.FIREBASE_URL);
     final ArrayList list = new ArrayList<TruckDetailsActivity>();
+    String typeofuser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_view);
         String mUserId = getIntent().getStringExtra("UniqueID");
+        typeofuser=getIntent().getStringExtra("typeofuser");
         ref.child("users").child(mUserId).runTransaction(new Transaction.Handler() {
             public Transaction.Result doTransaction(MutableData mutableData) {
                 mutableData.setValue(null); // This removes the node.
@@ -121,4 +123,5 @@ class fetchdata extends AsyncTask<Context,String,String>{
 
     }
 }
+
 }
