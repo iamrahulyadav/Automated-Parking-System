@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.kushagr_jolly.potenza_pvt_ltd" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".ToDoApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".LoginActivity"
+            android:label="@string/title_activity_admin_login" >
+        </activity>
+        <activity
+            android:name=".SubmitActivity"
+            android:label="@string/title_activity_truck_details" >
+        </activity>
+        <activity
+            android:name=".TypeofOperator"
+            android:label="@string/title_activity_typeof_operator" >
+        </activity>
+        <activity
+            android:name=".ParkingSlot"
+            android:label="@string/title_activity_parking_slot" >
+        </activity>
+        <activity
+            android:name=".Manager"
+            android:label="@string/title_activity_manager" >
+        </activity>
+        <activity
+            android:name=".CardViewActivity"
+            android:label="@string/title_activity_card_view" >
+        </activity>
+        <activity
+            android:name=".Admin"
+            android:label="@string/title_activity_admin" >
+        </activity>
+    </application>
+
+</manifest>
