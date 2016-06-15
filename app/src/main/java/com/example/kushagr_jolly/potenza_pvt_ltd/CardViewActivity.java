@@ -20,13 +20,16 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.MutableData;
 import com.firebase.client.Transaction;
 import com.firebase.client.ValueEventListener;
+import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class CardViewActivity extends AppCompatActivity {
-    private RecyclerView.Adapter mAdapter;
+    private MyRecyclerViewAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     int count = 0;
@@ -56,11 +59,52 @@ public class CardViewActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new MyRecyclerViewAdapter(list);
+        mRecyclerView.setAdapter(mAdapter);
+        if(typeofuser.contentEquals("Admin")) {
+            SwipeableRecyclerViewTouchListener swipeTouchListener =
+                    new SwipeableRecyclerViewTouchListener(mRecyclerView,
+                            new SwipeableRecyclerViewTouchListener.SwipeListener() {
+                                @Override
+                                public boolean canSwipeLeft(int position) {
+                                    return false;
+                                }
 
+                                @Override
+                                public boolean canSwipeRight(int position) {
+                                    return true;
+                                }
 
+                                @Override
+                                public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                    for (int position : reverseSortedPositions) {
+
+                                        mAdapter.notifyItemRemoved(position);
+                                    }
+                                    mAdapter.notifyDataSetChanged();
+                                }
+
+                                @Override
+                                public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                    for (int position : reverseSortedPositions) {
+                                        Log.d("Hello", "right");
+                                        String key =mAdapter.deleteItem(position);
+                                        deletedata(key,position);
+                                        mAdapter.notifyItemRemoved(position);
+                                    }
+                                    mAdapter.notifyDataSetChanged();
+                                }
+                            });
+
+            mRecyclerView.addOnItemTouchListener(swipeTouchListener);
+        }
     }
 
-class fetchdata extends AsyncTask<Context,String,String>{
+    private void deletedata(String key, int position) {
+        ref.child("users").child(key).setValue(null);
+    }
+
+    class fetchdata extends AsyncTask<Context,String,String>{
 
     Context ApplicationContext;
     Activity mActivity;
@@ -74,6 +118,9 @@ class fetchdata extends AsyncTask<Context,String,String>{
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                list.clear();
+                index=0;
+                count=0;
 //                Log.d("key",dataSnapshot.getKey());
                 for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
                     count= (int) postSnapshot.getChildrenCount();
@@ -81,15 +128,16 @@ class fetchdata extends AsyncTask<Context,String,String>{
                     for (DataSnapshot postpostSnapshot : postSnapshot.getChildren()) {
                         Log.d("sas",postpostSnapshot.getKey());
                         TruckDetailsActivity post = postpostSnapshot.getValue(TruckDetailsActivity.class);
-                        Log.d("post", String.valueOf(post));
-                        TruckDetailsActivity obj = new TruckDetailsActivity(post.getEmail(),post.getContractorname(),post.getDrivername(),post.getDriverno(),post.getDate(),post.getAPS());
+                        post.setKey(postpostSnapshot.getKey());
+                        Log.d("post", post.getKey());
+                        TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(),post.getEmail(),post.getContractorname(),post.getDrivername(),post.getDriverno(),post.getDate(),post.getAPS());
                         list.add(index, obj);
                         Log.d("list", String.valueOf(list.get(index)));
                         index++;
                     }
                 }
-                mAdapter = new MyRecyclerViewAdapter(list);
-                mRecyclerView.setAdapter(mAdapter);
+                mAdapter.notifyDataSetChanged();
+
             }
             @Override
             public void onCancelled(FirebaseError firebaseError) {

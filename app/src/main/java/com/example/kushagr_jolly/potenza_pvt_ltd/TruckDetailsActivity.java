@@ -17,12 +17,18 @@ public class TruckDetailsActivity {
         private String email;
     private String manager;
     private String admin;
+    private String key;
 
     public TruckDetailsActivity() {
+
             /*Blank default constructor essential for Firebase*/
         }
+    public TruckDetailsActivity(String a){
 
-    public TruckDetailsActivity(String s, String index, String index1, String index2, String index3, String index4) {
+    }
+
+    public TruckDetailsActivity(String k,String s, String index, String index1, String index2, String index3, String index4) {
+        this.key=k;
         email=s;
         contractorname=index;
         drivername=index1;
@@ -31,7 +37,13 @@ public class TruckDetailsActivity {
         APS=index4;
     }
 
-
+    @JsonProperty("Key")
+    public String getKey(){
+        return key;
+    }
+    public void setKey(String key){
+        this.key=key;
+    }
     //Getters and setters
     @JsonProperty("Contractor Name")
         public String getContractorname() {

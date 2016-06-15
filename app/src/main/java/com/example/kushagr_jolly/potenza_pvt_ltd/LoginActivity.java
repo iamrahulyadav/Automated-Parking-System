@@ -22,12 +22,10 @@ import java.util.Map;
  */
 
 public class LoginActivity extends AppCompatActivity {
-    private Handler mHandler = new Handler();
     protected EditText emailEditText;
     protected EditText passwordEditText;
     protected Button loginButton;
     String typeofuser;
-    int[] arr = new int[9];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -92,6 +90,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
                             else if (typeofuser.contentEquals("Admin")){
                                 Intent intent = new Intent(LoginActivity.this, Admin.class);
+                                intent.putExtra("typeofuser",typeofuser);
                                 intent.putExtra("UniqueID", postId);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
