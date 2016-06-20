@@ -27,7 +27,7 @@ public class Manager extends AppCompatActivity {
         addentry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Manager.this, LoginActivity.class);
+                Intent intent = new Intent(Manager.this, SubmitActivity.class);
                 intent.putExtra("typeofuser", typeofuser);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
