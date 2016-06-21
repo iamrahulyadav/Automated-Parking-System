@@ -1,6 +1,8 @@
 package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.content.Intent;
+import android.graphics.pdf.PdfDocument;
+import android.graphics.pdf.PdfDocument.*;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,16 +13,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 
-import java.util.ArrayList;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.TimeZone;
+
 
 public class SubmitActivity extends AppCompatActivity {
     protected EditText contractorname;
@@ -50,12 +53,15 @@ public class SubmitActivity extends AppCompatActivity {
         int mm = c.get(Calendar.MONTH);
         int dd = c.get(Calendar.DAY_OF_MONTH);
 
-        // set current date into textview
         date.setText(new StringBuilder().append(dd).append("/").append(mm+1).append("/").append(yy));
-                // Month is 0 based, just add 1
-                //.append(yy).append("-").append(mm + 1).append("-")
-                //.append(dd));
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+5:30"));
+        Date currentLocalTime = cal.getTime();
+        DateFormat date1 = new SimpleDateFormat("HH:mm a");
+// you can get seconds by adding  "...:ss" to it
+        date1.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
 
+        final String localTime = date1.format(currentLocalTime);
+        Log.d("locaoltime",localTime);
         // Check Authentication
         mRef = new Firebase(Constants.FIREBASE_URL);
         if (mRef.getAuth() == null) {
@@ -71,14 +77,6 @@ public class SubmitActivity extends AppCompatActivity {
                 String drvrno = driverno.getText().toString();
                 String vhclno = vehicleno.getText().toString();
                 String final_date = date.getText().toString();
-
-                /*TruckDetailsActivity truck = new TruckDetailsActivity();
-                truck.setContractorname(contrnm);
-                truck.setDrivername(drvrnm);
-                truck.setDriverno(drvrno);
-                truck.setVehicleno(vhclno);
-                truck.setDate(final_date);
-                truck.setAPS("free");*/
                 Map<String, Object> graceNickname = new HashMap<>();
                 graceNickname.put("Contractor Name", contrnm);
                 graceNickname.put("Driver Name", drvrnm);
@@ -86,9 +84,9 @@ public class SubmitActivity extends AppCompatActivity {
                 graceNickname.put("Vehicle Number", vhclno);
                 graceNickname.put("Date", final_date);
                 graceNickname.put("aps", "free");
-
-
+                graceNickname.put("Time",localTime);
                 mRef.child("users").child(mUserId).updateChildren(graceNickname);
+
             }
         });
 

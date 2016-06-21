@@ -1,10 +1,12 @@
 package com.example.kushagr_jolly.potenza_pvt_ltd;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by Kushagr_Jolly on 6/5/2016.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TruckDetailsActivity {
         //name and address string
         private String contractorname;
@@ -18,6 +20,7 @@ public class TruckDetailsActivity {
     private String manager;
     private String admin;
     private String key;
+    private String localtime;
 
     public TruckDetailsActivity() {
 
@@ -108,6 +111,10 @@ public class TruckDetailsActivity {
     @JsonProperty("Admin")
      public String getAdmin() {
         return admin;
+    }
+    @JsonProperty("Time")
+    public String getTime() {
+        return localtime;
     }
 
 }

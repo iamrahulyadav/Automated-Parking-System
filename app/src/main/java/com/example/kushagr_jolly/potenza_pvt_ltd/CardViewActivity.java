@@ -18,6 +18,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.MutableData;
+import com.firebase.client.Query;
 import com.firebase.client.Transaction;
 import com.firebase.client.ValueEventListener;
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
@@ -115,7 +116,53 @@ public class CardViewActivity extends AppCompatActivity {
     }
     @Override
     protected String doInBackground(Context... params) {
-        ref.addValueEventListener(new ValueEventListener() {
+        Query queryRef = ref.child("users").orderByChild("Vehicle Number");
+        queryRef.addChildEventListener(new ChildEventListener() {
+                                           @Override
+                                           public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                                           }
+
+                                           @Override
+                                           public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                                               list.clear();
+                                               index=0;
+                                               count=0;
+//                Log.d("key",dataSnapshot.getKey());
+                                               for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
+                                                   count= (int) postSnapshot.getChildrenCount();
+                                                   Log.d("count", String.valueOf(count));
+                                                   for (DataSnapshot postpostSnapshot : postSnapshot.getChildren()) {
+                                                       Log.d("sas",postpostSnapshot.getKey());
+                                                       TruckDetailsActivity post = postpostSnapshot.getValue(TruckDetailsActivity.class);
+                                                       post.setKey(postpostSnapshot.getKey());
+                                                       Log.d("post", post.getKey());
+                                                       TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(),post.getEmail(),post.getContractorname(),post.getDrivername(),post.getDriverno(),post.getDate(),post.getAPS());
+                                                       list.add(index, obj);
+                                                       Log.d("list", String.valueOf(list.get(index)));
+                                                       index++;
+                                                   }
+                                               }
+                                               mAdapter.notifyDataSetChanged();
+
+
+                                           }
+
+                                           @Override
+                                           public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                                           }
+
+                                           @Override
+                                           public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                                           }
+
+                                           @Override
+                                           public void onCancelled(FirebaseError firebaseError) {
+
+                                           }
+                                       });
+                /*ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 list.clear();
@@ -148,8 +195,7 @@ public class CardViewActivity extends AppCompatActivity {
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }
-
-        });
+        });*/
         return null;
     }
 

@@ -111,6 +111,8 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
                         driverno.setText(truck.getDriverno());
                         vehicleno.setText(truck.getVehicleno());
                         date.setText(truck.getDate());
+                        String localtime=truck.getTime();
+                        Log.d("askjdh",localtime);
                     }
 
                     @Override

@@ -9,7 +9,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="User"
+        android:text="Operator"
         android:id="@+id/button_user"
         android:layout_above="@+id/button_manager"
         android:layout_centerHorizontal="true"

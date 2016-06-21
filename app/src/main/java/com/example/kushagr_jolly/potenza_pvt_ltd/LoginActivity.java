@@ -11,8 +11,11 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.firebase.client.AuthData;
+import com.firebase.client.ChildEventListener;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Query;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +29,9 @@ public class LoginActivity extends AppCompatActivity {
     protected EditText passwordEditText;
     protected Button loginButton;
     String typeofuser;
+    String postId;
+    Firebase ref;
+    String emailAddress;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -37,7 +43,7 @@ public class LoginActivity extends AppCompatActivity {
         passwordEditText = (EditText) findViewById(R.id.passwordField);
         loginButton = (Button) findViewById(R.id.loginButton);
 
-        final Firebase ref = new Firebase(Constants.FIREBASE_URL);
+        ref = new Firebase(Constants.FIREBASE_URL);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 } else {
-                    final String emailAddress = email;
+                    emailAddress = email;
                     Log.d("Email", email);
                     Log.d("Password",password);
 
@@ -63,39 +69,80 @@ public class LoginActivity extends AppCompatActivity {
                     ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
                         @Override
                         public void onAuthenticated(AuthData authData) {
+
+
                             // Authenticated successfully with payload authData
-                            Map<String, Object> map = new HashMap<String, Object>();
-                            map.put("email", emailAddress);
-                            map.put(typeofuser, "true");
+                            Query queryRef = ref.child("users").orderByChild("emailID").equalTo(emailAddress);
+                            queryRef.addChildEventListener(new ChildEventListener() {
+                                @Override
+                                public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                                    Log.d("key123",snapshot.getKey());
+                                    Log.d("value", String.valueOf(typeofuser.contentEquals(snapshot.getKey())));
+                                    if(typeofuser.contentEquals(snapshot.getKey())) {
+                                        if(snapshot.getKey().contentEquals("Operator") ){
+                                            callme();
+                                            Log.d("operator", "function");
+                                            Intent intent = new Intent(LoginActivity.this, TypeofOperator.class);
+                                            intent.putExtra("UniqueID", postId);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                        }
+                                        else if (snapshot.getKey().contentEquals("Manager")){
+                                            callme();
+                                            Log.d("manager", "function");
+                                            Intent intent = new Intent(LoginActivity.this, Manager.class);
+                                            intent.putExtra("typeofuser",typeofuser);
+                                            intent.putExtra("UniqueID", postId);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                        }
+                                        else if (snapshot.getKey().contentEquals("Admin")){
+                                            callme();
+                                            Log.d("admin", "function");
+                                            Intent intent = new Intent(LoginActivity.this, Admin.class);
+                                            intent.putExtra("typeofuser",typeofuser);
+                                            intent.putExtra("UniqueID", postId);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                        }
+                                    }
+                                    else {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+                                        builder.setMessage("Please Login through your section")
+                                                .setTitle(R.string.login_error_title)
+                                                .setPositiveButton(android.R.string.ok, null);
+                                        AlertDialog dialog = builder.create();
+                                        dialog.show();
+                                        emailEditText.setText("");
+                                        passwordEditText.setText("");
+                                    }
+                                }
 
-                            Firebase newpostref = ref.child("users").push();
+                                @Override
+                                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                            newpostref.setValue(map);
-                            String postId = newpostref.getKey();
-                            Log.d("userid",postId);
-                            Log.d("type",typeofuser);
-                            if(typeofuser.contentEquals("User")) {
-                                Intent intent = new Intent(LoginActivity.this, TypeofOperator.class);
-                                intent.putExtra("UniqueID", postId);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                            }
-                            else if (typeofuser.contentEquals("Manager")){
-                                Intent intent = new Intent(LoginActivity.this, Manager.class);
-                                intent.putExtra("UniqueID", postId);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                            }
-                            else if (typeofuser.contentEquals("Admin")){
-                                Intent intent = new Intent(LoginActivity.this, Admin.class);
-                                intent.putExtra("typeofuser",typeofuser);
-                                intent.putExtra("UniqueID", postId);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                            }
+                                }
+
+                                @Override
+                                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                                }
+
+                                @Override
+                                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+
+                                }
+                                // ....
+                            });
+
 
                         }
 
@@ -115,5 +162,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+    }
+    public void callme(){
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("email", emailAddress);
+        map.put(typeofuser, "true");
+        Firebase newpostref = ref.child("users").push();
+        newpostref.setValue(map);
+        postId = newpostref.getKey();
     }
 }
