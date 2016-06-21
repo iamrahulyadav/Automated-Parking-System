@@ -54,13 +54,9 @@ public class SubmitActivity extends AppCompatActivity {
         int dd = c.get(Calendar.DAY_OF_MONTH);
 
         date.setText(new StringBuilder().append(dd).append("/").append(mm+1).append("/").append(yy));
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+5:30"));
-        Date currentLocalTime = cal.getTime();
-        DateFormat date1 = new SimpleDateFormat("HH:mm a");
-// you can get seconds by adding  "...:ss" to it
-        date1.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
-
-        final String localTime = date1.format(currentLocalTime);
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        final String localTime = sdf.format(calendar.getTime());
         Log.d("locaoltime",localTime);
         // Check Authentication
         mRef = new Firebase(Constants.FIREBASE_URL);

@@ -170,5 +170,13 @@
             android:layout_alignLeft="@+id/textView_date1_ps"
             android:layout_alignStart="@+id/textView_date1_ps"
             android:spinnerMode="dropdown" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Calculate Amount"
+            android:id="@+id/button_calculate_fare"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
     </RelativeLayout>
 </RelativeLayout>

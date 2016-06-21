@@ -15,10 +15,7 @@ public class TruckDetailsActivity {
         private String vehicleno;
         private String date;
         private String APS;
-        private String user;
         private String email;
-    private String manager;
-    private String admin;
     private String key;
     private String localtime;
 
@@ -96,24 +93,18 @@ public class TruckDetailsActivity {
         public void setAPS(String APS) {
         this.APS= APS;
     }
-    @JsonProperty("User")
-    public String getUser() {
-        return user;
-    }
+
     @JsonProperty("email")
     public String getEmail() {
         return email;
     }
-    @JsonProperty("Manager")
-    public String getManager() {
-        return manager;
-    }
-    @JsonProperty("Admin")
-     public String getAdmin() {
-        return admin;
+
+    @JsonProperty("Time")
+    public void settime(String T) {
+        this.localtime = T;
     }
     @JsonProperty("Time")
-    public String getTime() {
+    public String gettime() {
         return localtime;
     }
 

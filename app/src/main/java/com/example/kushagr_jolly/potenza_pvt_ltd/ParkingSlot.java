@@ -26,11 +26,16 @@ import com.firebase.client.ValueEventListener;
 
 import org.w3c.dom.Text;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     protected EditText contractorname;
@@ -39,12 +44,18 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
     protected EditText vehicleno;
     protected TextView date;
     protected Button submitButton;
+    protected Button calculateButton;
     protected EditText search;
     protected ImageButton imageButton;
     private Firebase mRef;
     private String mUserId;
     protected String aps;
     private String useridold;
+    String localtime;
+    private long currenttime;
+    private long timetocharge;
+    private long globalmillis;
+    private int cost=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +86,7 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
         vehicleno = (EditText) findViewById(R.id.editText4_ps);
         date= (TextView) findViewById(R.id.textView_date1_ps);
         submitButton= (Button) findViewById(R.id.button_submit_ps);
+        calculateButton=(Button)findViewById(R.id.button_calculate_fare);
         final Calendar c = Calendar.getInstance();
         int yy = c.get(Calendar.YEAR);
         int mm = c.get(Calendar.MONTH);
@@ -104,15 +116,25 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
                 queryRef.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                        useridold=snapshot.getKey();
+                        useridold = snapshot.getKey();
                         TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
                         contractorname.setText(truck.getContractorname());
                         drivername.setText(truck.getDrivername());
                         driverno.setText(truck.getDriverno());
                         vehicleno.setText(truck.getVehicleno());
                         date.setText(truck.getDate());
-                        String localtime=truck.getTime();
-                        Log.d("askjdh",localtime);
+                        localtime = truck.gettime();
+                        Log.d("asda", localtime);
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // I assume d-M, you may refer to M-d for month-day instead.
+                        Date date = null; // You will need try/catch around this
+                        try {
+                            date = formatter.parse(localtime);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        globalmillis= date.getTime();
+                        Log.d("askjdh", String.valueOf(globalmillis));
+
                     }
 
                     @Override
@@ -139,9 +161,7 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
                         AlertDialog dialog = builder.create();
                         dialog.show();
                     }
-
                 });
-                Log.d("alert", "not printed");
             }
         });
 
@@ -153,15 +173,33 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
                 mRef.child("users").child(useridold).updateChildren(graceNickname);
             }
         });
-
+        calculateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar calendar = Calendar.getInstance();
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                currenttime = System.currentTimeMillis();
+                timetocharge=currenttime-globalmillis;
+                calendar.setTimeInMillis(timetocharge);
+                String t = sdf.format(calendar.getTime());
+                if(timetocharge>=18*60*1000 && timetocharge<24*60*1000){
+                    cost+=75;
+                }
+                else if(timetocharge>=24*60*1000 && timetocharge<48*60*1000){
+                    cost+=150;
+                }
+                Map<String, Object> graceNickname = new HashMap<>();
+                graceNickname.put("Cost", cost);
+                mRef.child("users").child(useridold).updateChildren(graceNickname);
+            }
+        });
         mRef.child("users").child(mUserId).runTransaction(new Transaction.Handler() {
             public Transaction.Result doTransaction(MutableData mutableData) {
                 mutableData.setValue(null); // This removes the node.
                 return Transaction.success(mutableData);
             }
-
             public void onComplete(FirebaseError error, boolean b, DataSnapshot data) {
-                // Handle completion
+
             }
         });
     }
