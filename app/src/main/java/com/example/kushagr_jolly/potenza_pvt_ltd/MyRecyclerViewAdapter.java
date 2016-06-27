@@ -2,6 +2,7 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.support.v7.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +17,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
     private ArrayList<TruckDetailsActivity> mDataset;
 
-
-
     public MyRecyclerViewAdapter(ArrayList<TruckDetailsActivity> myDataset) {
         mDataset = myDataset;
+        for (int i=0;i<mDataset.size();i++) {
+            Log.d("dataset", mDataset.get(i).getContractorname());
+        }
     }
     @Override
     public MyRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {

@@ -14,6 +14,7 @@
     <string name="signup_success">Account successfully created! You can now Login.</string>
     <string name="login_error_message">Please make sure you enter an email address and password!</string>
     <string name="login_error_title">Error!</string>
+    <string name="submit_title">Successful</string>
     <string name="login_button_label">Login</string>
     <string name="sign_up_text">Sign Up!</string>
     <string name="title_activity_login">Sign in</string>
@@ -25,4 +26,5 @@
     <string name="title_activity_manager">Manager</string>
     <string name="title_activity_card_view">CardViewActivity</string>
     <string name="title_activity_admin">Admin</string>
+    <string name="hint_search">abcs</string>
 </resources>

@@ -45,7 +45,7 @@ public class CardViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_card_view);
         String mUserId = getIntent().getStringExtra("UniqueID");
         typeofuser=getIntent().getStringExtra("typeofuser");
-        ref.child("users").child(mUserId).runTransaction(new Transaction.Handler() {
+        ref.child("users").child("data").child(mUserId).runTransaction(new Transaction.Handler() {
             public Transaction.Result doTransaction(MutableData mutableData) {
                 mutableData.setValue(null); // This removes the node.
                 return Transaction.success(mutableData);
@@ -55,13 +55,15 @@ public class CardViewActivity extends AppCompatActivity {
                 // Handle completion
             }
         });
-        new fetchdata(CardViewActivity.this).execute();
+        Log.d("Before", "FetchData");
+        new FetchData(CardViewActivity.this).execute();
+        Log.d("After", "FetchData");
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MyRecyclerViewAdapter(list);
-        mRecyclerView.setAdapter(mAdapter);
+
         if(typeofuser.contentEquals("Admin")) {
             SwipeableRecyclerViewTouchListener swipeTouchListener =
                     new SwipeableRecyclerViewTouchListener(mRecyclerView,
@@ -99,122 +101,86 @@ public class CardViewActivity extends AppCompatActivity {
 
             mRecyclerView.addOnItemTouchListener(swipeTouchListener);
         }
+
+        mRecyclerView.setAdapter(mAdapter);
+
+
     }
 
     private void deletedata(String key, int position) {
-        ref.child("users").child(key).setValue(null);
+        ref.child("users").child("data").child(key).setValue(null);
     }
 
-    class fetchdata extends AsyncTask<Context,String,String>{
-
-    Context ApplicationContext;
-    Activity mActivity;
-    public fetchdata (Activity activity)
+    class FetchData extends AsyncTask<Context,String,String>{
+        Activity mActivity;
+    public FetchData (Activity activity)
     {
         super();
         mActivity = activity;
     }
     @Override
     protected String doInBackground(Context... params) {
+        Log.d("in Do inadsada", "asdasdasdasd)");
         Query queryRef = ref.child("users").orderByChild("Vehicle Number");
         queryRef.addChildEventListener(new ChildEventListener() {
-                                           @Override
-                                           public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                                           }
-
-                                           @Override
-                                           public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                                               list.clear();
-                                               index=0;
-                                               count=0;
-//                Log.d("key",dataSnapshot.getKey());
-                                               for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                                                   count= (int) postSnapshot.getChildrenCount();
-                                                   Log.d("count", String.valueOf(count));
-                                                   for (DataSnapshot postpostSnapshot : postSnapshot.getChildren()) {
-                                                       Log.d("sas",postpostSnapshot.getKey());
-                                                       TruckDetailsActivity post = postpostSnapshot.getValue(TruckDetailsActivity.class);
-                                                       post.setKey(postpostSnapshot.getKey());
-                                                       Log.d("post", post.getKey());
-                                                       TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(),post.getEmail(),post.getContractorname(),post.getDrivername(),post.getDriverno(),post.getDate(),post.getAPS());
-                                                       list.add(index, obj);
-                                                       Log.d("list", String.valueOf(list.get(index)));
-                                                       index++;
-                                                   }
-                                               }
-                                               mAdapter.notifyDataSetChanged();
-
-
-                                           }
-
-                                           @Override
-                                           public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                                           }
-
-                                           @Override
-                                           public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                                           }
-
-                                           @Override
-                                           public void onCancelled(FirebaseError firebaseError) {
-
-                                           }
-                                       });
-                /*ref.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                Log.d("child", snapshot.getKey());
                 list.clear();
-                index=0;
-                count=0;
-//                Log.d("key",dataSnapshot.getKey());
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()) {
-                    count= (int) postSnapshot.getChildrenCount();
-                    Log.d("count", String.valueOf(count));
-                    for (DataSnapshot postpostSnapshot : postSnapshot.getChildren()) {
-                        Log.d("sas",postpostSnapshot.getKey());
-                        TruckDetailsActivity post = postpostSnapshot.getValue(TruckDetailsActivity.class);
-                        post.setKey(postpostSnapshot.getKey());
+                index = 0;
+                count = 0;
+                for (DataSnapshot postsnapshot : snapshot.getChildren()) {
+                    count = (int) postsnapshot.getChildrenCount();
+                    if (count == 9) {
+                        Log.d("count", String.valueOf(count));
+                        Log.d("sas", postsnapshot.getKey());
+                        TruckDetailsActivity post = postsnapshot.getValue(TruckDetailsActivity.class);
+                        post.setKey(postsnapshot.getKey());
                         Log.d("post", post.getKey());
-                        TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(),post.getEmail(),post.getContractorname(),post.getDrivername(),post.getDriverno(),post.getDate(),post.getAPS());
+                        TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(), post.getEmail(), post.getContractorname(), post.getDrivername(), post.getDriverno(), post.getDate(), post.getAPS());
                         list.add(index, obj);
                         Log.d("list", String.valueOf(list.get(index)));
                         index++;
                     }
                 }
+                Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
                 mAdapter.notifyDataSetChanged();
 
             }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(ApplicationContext);
-                builder.setMessage(firebaseError.getMessage())
-                        .setTitle(R.string.login_error_title)
-                        .setPositiveButton(android.R.string.ok, null);
-                AlertDialog dialog = builder.create();
-                dialog.show();
             }
-        });*/
+        });
         return null;
     }
 
     @Override
     protected void onPreExecute(){
-
     }
 
 
     @Override
     protected void onCancelled(String s) {
-
         super.onCancelled(s);
     }
 
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-
     }
 }
 

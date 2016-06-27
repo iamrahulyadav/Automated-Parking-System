@@ -1,11 +1,19 @@
 package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.app.AlertDialog;
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -167,8 +175,28 @@ public class LoginActivity extends AppCompatActivity {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("email", emailAddress);
         map.put(typeofuser, "true");
-        Firebase newpostref = ref.child("users").push();
+        Firebase newpostref = ref.child("users").child("data").push();
         newpostref.setValue(map);
         postId = newpostref.getKey();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+
+        SearchManager searchManager = (SearchManager)
+                getSystemService(Context.SEARCH_SERVICE);
+        MenuItem searchMenuItem = menu.findItem(R.id.search);
+        SearchView searchView = (SearchView) searchMenuItem.getActionView();
+
+        searchView.setSearchableInfo(searchManager.
+                getSearchableInfo(getComponentName()));
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setOnQueryTextListener(null);
+
+        return true;
     }
 }

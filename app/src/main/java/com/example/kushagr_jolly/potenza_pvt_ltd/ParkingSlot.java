@@ -1,6 +1,7 @@
 package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.app.AlertDialog;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -44,7 +46,6 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
     protected EditText vehicleno;
     protected TextView date;
     protected Button submitButton;
-    protected Button calculateButton;
     protected EditText search;
     protected ImageButton imageButton;
     private Firebase mRef;
@@ -52,10 +53,7 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
     protected String aps;
     private String useridold;
     String localtime;
-    private long currenttime;
-    private long timetocharge;
-    private long globalmillis;
-    private int cost=0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +84,6 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
         vehicleno = (EditText) findViewById(R.id.editText4_ps);
         date= (TextView) findViewById(R.id.textView_date1_ps);
         submitButton= (Button) findViewById(R.id.button_submit_ps);
-        calculateButton=(Button)findViewById(R.id.button_calculate_fare);
         final Calendar c = Calendar.getInstance();
         int yy = c.get(Calendar.YEAR);
         int mm = c.get(Calendar.MONTH);
@@ -112,7 +109,7 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
                 Log.d("vehicle", vhlno);
 
                 // Attach an listener to read the data at our posts reference
-                Query queryRef = mRef.child("users").orderByChild("Vehicle Number").equalTo(vhlno);
+                Query queryRef = mRef.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
                 queryRef.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot snapshot, String previousChild) {
@@ -125,16 +122,6 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
                         date.setText(truck.getDate());
                         localtime = truck.gettime();
                         Log.d("asda", localtime);
-                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // I assume d-M, you may refer to M-d for month-day instead.
-                        Date date = null; // You will need try/catch around this
-                        try {
-                            date = formatter.parse(localtime);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        globalmillis= date.getTime();
-                        Log.d("askjdh", String.valueOf(globalmillis));
-
                     }
 
                     @Override
@@ -170,30 +157,19 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
             public void onClick(View v) {
                 Map<String, Object> graceNickname = new HashMap<>();
                 graceNickname.put("aps", aps);
-                mRef.child("users").child(useridold).updateChildren(graceNickname);
+                mRef.child("users").child("data").child(useridold).updateChildren(graceNickname);
+                AlertDialog.Builder builder = new AlertDialog.Builder(ParkingSlot.this);
+                builder.setMessage("You have successfully Updated the details!")
+                        .setTitle(R.string.submit_title)
+                        .setPositiveButton(android.R.string.ok, null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         });
-        calculateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Calendar calendar = Calendar.getInstance();
-                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-                currenttime = System.currentTimeMillis();
-                timetocharge=currenttime-globalmillis;
-                calendar.setTimeInMillis(timetocharge);
-                String t = sdf.format(calendar.getTime());
-                if(timetocharge>=18*60*1000 && timetocharge<24*60*1000){
-                    cost+=75;
-                }
-                else if(timetocharge>=24*60*1000 && timetocharge<48*60*1000){
-                    cost+=150;
-                }
-                Map<String, Object> graceNickname = new HashMap<>();
-                graceNickname.put("Cost", cost);
-                mRef.child("users").child(useridold).updateChildren(graceNickname);
-            }
-        });
-        mRef.child("users").child(mUserId).runTransaction(new Transaction.Handler() {
+
+
+
+        mRef.child("users").child("data").child(mUserId).runTransaction(new Transaction.Handler() {
             public Transaction.Result doTransaction(MutableData mutableData) {
                 mutableData.setValue(null); // This removes the node.
                 return Transaction.success(mutableData);
@@ -204,27 +180,6 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_parking_slot, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

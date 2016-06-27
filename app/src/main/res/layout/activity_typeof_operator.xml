@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:text="Main Gate Operator"
         android:id="@+id/button_mainoperator"
-        android:layout_marginTop="125dp"
+        android:layout_marginTop="53dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
@@ -20,7 +20,14 @@
         android:layout_height="wrap_content"
         android:text="Slot Operator"
         android:id="@+id/button_slotoperator"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Calculate Amount"
+        android:id="@+id/button_calculate_fare"
+        android:layout_marginBottom="70dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="125dp" />
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

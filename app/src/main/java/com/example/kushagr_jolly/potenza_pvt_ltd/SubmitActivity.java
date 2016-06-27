@@ -1,5 +1,6 @@
 package com.example.kushagr_jolly.potenza_pvt_ltd;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.pdf.PdfDocument;
 import android.graphics.pdf.PdfDocument.*;
@@ -81,34 +82,21 @@ public class SubmitActivity extends AppCompatActivity {
                 graceNickname.put("Date", final_date);
                 graceNickname.put("aps", "free");
                 graceNickname.put("Time",localTime);
-                mRef.child("users").child(mUserId).updateChildren(graceNickname);
+                mRef.child("users").child("data").child(mUserId).updateChildren(graceNickname);
+                AlertDialog.Builder builder = new AlertDialog.Builder(SubmitActivity.this);
+                builder.setMessage("You have successfully uploaded the details!")
+                        .setTitle(R.string.submit_title)
+                        .setPositiveButton(android.R.string.ok, null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
 
             }
         });
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_truck_details, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
     private void loadLoginView() {
         Intent intent = new Intent(this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
