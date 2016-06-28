@@ -64,7 +64,7 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
         // Check Authentication
         mRef = new Firebase(Constants.FIREBASE_URL);
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
-
+        Button logout=(Button)findViewById(R.id.button_logout);
         // Spinner click listener
         spinner.setOnItemSelectedListener(this);
         List<Integer> categories = new ArrayList<Integer>();
@@ -167,7 +167,12 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
             }
         });
 
-
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRef.unauth();
+            }
+        });
 
         mRef.child("users").child("data").child(mUserId).runTransaction(new Transaction.Handler() {
             public Transaction.Result doTransaction(MutableData mutableData) {

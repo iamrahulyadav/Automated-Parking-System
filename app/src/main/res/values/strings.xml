@@ -27,4 +27,6 @@
     <string name="title_activity_card_view">CardViewActivity</string>
     <string name="title_activity_admin">Admin</string>
     <string name="hint_search">abcs</string>
+    <string name="title_activity_calculate_fare">CalculateFare</string>
+    <string name="title_activity_signup">SignupActivity</string>
 </resources>

@@ -25,10 +25,7 @@ public class TypeofOperator extends AppCompatActivity {
 
     private Button maingate,slotgate;
     protected Button calculateButton;
-    private long currenttime;
-    private long timetocharge;
-    private long globalmillis;
-    private int cost=0;
+
     Firebase mRef;
 
     @Override
@@ -36,6 +33,7 @@ public class TypeofOperator extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_typeof_operator);
         final String postid=getIntent().getStringExtra("UniqueID");
+        Button logout=(Button)findViewById(R.id.button_logout);
         maingate=(Button)findViewById(R.id.button_mainoperator);
         slotgate=(Button)findViewById(R.id.button_slotoperator);
         calculateButton=(Button)findViewById(R.id.button_calculate_fare);
@@ -57,21 +55,25 @@ public class TypeofOperator extends AppCompatActivity {
                 intent.putExtra("UniqueID",postid);
                 startActivity(intent);
             }
+        });
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRef.unauth();
+            }
         });/*
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // I assume d-M, you may refer to M-d for month-day instead.
-        Date date = null; // You will need try/catch around this
-        try {
-            //date = formatter.parse(localtime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        globalmillis= date.getTime();
-        Log.d("askjdh", String.valueOf(globalmillis));
 
+*/
         calculateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar calendar = Calendar.getInstance();
+                Intent intent = new Intent(TypeofOperator.this, CalculateFare.class);
+                intent.putExtra("UniqueID",postid);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+            /*  Calendar calendar = Calendar.getInstance();
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
                 currenttime = System.currentTimeMillis();
                 timetocharge=currenttime-globalmillis;
@@ -86,8 +88,8 @@ public class TypeofOperator extends AppCompatActivity {
                 Map<String, Object> graceNickname = new HashMap<>();
                 graceNickname.put("Cost", cost);
                 mRef.child("users").child("data").child(postid).updateChildren(graceNickname);
-            }
-        });*/
+            }*/
+        });
     }
 
 }

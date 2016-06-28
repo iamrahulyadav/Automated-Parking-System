@@ -43,6 +43,7 @@ public class SubmitActivity extends AppCompatActivity {
         setContentView(R.layout.activity_submit);
         mUserId=getIntent().getStringExtra("UniqueID");
         Log.d("xyz",mUserId);
+        Button logout=(Button)findViewById(R.id.button_logout);
         contractorname= (EditText) findViewById(R.id.editText);
         drivername= (EditText) findViewById(R.id.editText2);
         driverno= (EditText) findViewById(R.id.editText3);
@@ -92,7 +93,12 @@ public class SubmitActivity extends AppCompatActivity {
 
             }
         });
-
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRef.unauth();
+            }
+        });
     }
 
 

@@ -22,8 +22,6 @@ public class Manager extends AppCompatActivity {
         muserid=getIntent().getStringExtra("UniqueID");
         addentry=(Button)findViewById(R.id.button_addent);
         view=(Button)findViewById(R.id.button_view);
-
-
         addentry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

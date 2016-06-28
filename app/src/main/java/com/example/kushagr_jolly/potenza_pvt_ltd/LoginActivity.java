@@ -1,5 +1,6 @@
 package com.example.kushagr_jolly.potenza_pvt_ltd;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -32,10 +33,10 @@ import java.util.Map;
  * Created by Kushagr_Jolly on 6/4/2016.
  */
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends Activity {
     protected EditText emailEditText;
     protected EditText passwordEditText;
-    protected Button loginButton;
+    protected Button loginButton,signupButton;
     String typeofuser;
     String postId;
     Firebase ref;
@@ -50,7 +51,7 @@ public class LoginActivity extends AppCompatActivity {
         emailEditText = (EditText) findViewById(R.id.emailField);
         passwordEditText = (EditText) findViewById(R.id.passwordField);
         loginButton = (Button) findViewById(R.id.loginButton);
-
+        signupButton=(Button)findViewById(R.id.signupbutton);
         ref = new Firebase(Constants.FIREBASE_URL);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -169,7 +170,17 @@ public class LoginActivity extends AppCompatActivity {
 
             }
         });
-
+        signupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
+                intent.putExtra("typeofuser",typeofuser);
+                intent.putExtra("UniqueID", postId);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
     }
     public void callme(){
         Map<String, Object> map = new HashMap<String, Object>();
@@ -178,25 +189,5 @@ public class LoginActivity extends AppCompatActivity {
         Firebase newpostref = ref.child("users").child("data").push();
         newpostref.setValue(map);
         postId = newpostref.getKey();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-
-        SearchManager searchManager = (SearchManager)
-                getSystemService(Context.SEARCH_SERVICE);
-        MenuItem searchMenuItem = menu.findItem(R.id.search);
-        SearchView searchView = (SearchView) searchMenuItem.getActionView();
-
-        searchView.setSearchableInfo(searchManager.
-                getSearchableInfo(getComponentName()));
-        searchView.setSubmitButtonEnabled(true);
-        searchView.setOnQueryTextListener(null);
-
-        return true;
     }
 }
