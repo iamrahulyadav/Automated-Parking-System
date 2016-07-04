@@ -2,6 +2,7 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,12 +45,10 @@ public class CalculateFare extends Activity {
         setContentView(R.layout.activity_calculate_fare);
         postid=getIntent().getStringExtra("UniqueID");
         et_search=(EditText)findViewById(R.id.editText_search);
-        search=(ImageButton)findViewById(R.id.search);
+        search=(ImageButton)findViewById(R.id.imageButton);
         tv=(TextView)findViewById(R.id.textView7);
         tv1=(TextView)findViewById(R.id.textView8);
         mRef = new Firebase(Constants.FIREBASE_URL);
-
-        
 
         search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,17 +111,28 @@ public class CalculateFare extends Activity {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
         currenttime = System.currentTimeMillis();
         timetocharge=currenttime-globalmillis;
+        Log.d("timetocharge", String.valueOf(timetocharge));
         calendar.setTimeInMillis(timetocharge);
         String t = sdf.format(calendar.getTime());
         if(timetocharge>=18*60*1000 && timetocharge<24*60*1000){
-            cost+=75;
+            cost=cost+75;
         }
         else if(timetocharge>=24*60*1000 && timetocharge<48*60*1000){
-            cost+=150;
+            cost=cost+150;
+        }else{
+            cost=cost+200;
         }
+        Log.d("cost", String.valueOf(cost));
         tv1.setText(String.valueOf(cost));
         Map<String, Object> graceNickname = new HashMap<>();
         graceNickname.put("Cost", cost);
         mRef.child("users").child("data").child(postid).updateChildren(graceNickname);
     }
+   /* @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(CalculateFare.this, LoginActivity.class);
+        startActivity(i);
+    }*/
 }

@@ -27,6 +27,7 @@ public class Manager extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(Manager.this, SubmitActivity.class);
                 intent.putExtra("typeofuser", typeofuser);
+                intent.putExtra("UniqueID",muserid);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

@@ -14,6 +14,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -25,7 +26,7 @@ public class TypeofOperator extends AppCompatActivity {
 
     private Button maingate,slotgate;
     protected Button calculateButton;
-
+    //Button logout;
     Firebase mRef;
 
     @Override
@@ -33,7 +34,7 @@ public class TypeofOperator extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_typeof_operator);
         final String postid=getIntent().getStringExtra("UniqueID");
-        Button logout=(Button)findViewById(R.id.button_logout);
+        //logout=(Button)findViewById(R.id.button_logout);
         maingate=(Button)findViewById(R.id.button_mainoperator);
         slotgate=(Button)findViewById(R.id.button_slotoperator);
         calculateButton=(Button)findViewById(R.id.button_calculate_fare);
@@ -56,14 +57,12 @@ public class TypeofOperator extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        logout.setOnClickListener(new View.OnClickListener() {
+       /* logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mRef.unauth();
             }
-        });/*
-
-*/
+        });*/
         calculateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
