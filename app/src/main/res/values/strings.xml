@@ -29,4 +29,12 @@
     <string name="hint_search">abcs</string>
     <string name="title_activity_calculate_fare">CalculateFare</string>
     <string name="title_activity_signup">SignupActivity</string>
+    <string name="title_activity_shift_open">ShiftOpen</string>
+    <string name="title_activity_collections">Collections</string>
+    <string name="title_activity_shift_close">ShiftClose</string>
+    <string name="title_activity_masters">Masters</string>
+    <string name="title_activity_create_manager">CreateManager</string>
+    <string name="title_activity_custom_adapter">CustomAdapter</string>
+    <string name="title_activity_create_operator">CreateOperator</string>
+    <string name="title_activity_vehicle__type">Vehicle_Type</string>
 </resources>

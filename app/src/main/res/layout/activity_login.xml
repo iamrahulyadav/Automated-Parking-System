@@ -30,19 +30,10 @@
         android:inputType="textPassword" />
 
     <Button
-        android:id="@+id/loginButton"
+        android:id="@+id/shiftopenbutton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/passwordField"
         android:layout_below="@+id/passwordField"
         android:text="@string/login_button_label" />
-    <Button
-        android:id="@+id/signupbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/sign_up_button_label"
-        android:layout_marginTop="42dp"
-        android:layout_below="@+id/loginButton"
-        android:layout_centerHorizontal="true" />
-
 </RelativeLayout>

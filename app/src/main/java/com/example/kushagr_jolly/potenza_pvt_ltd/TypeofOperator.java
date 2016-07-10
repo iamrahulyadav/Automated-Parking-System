@@ -24,9 +24,8 @@ import java.util.Map;
 
 public class TypeofOperator extends AppCompatActivity {
 
-    private Button maingate,slotgate;
+    private Button receiptbutton,collectionbutton,shiftclose_button;
     protected Button calculateButton;
-    //Button logout;
     Firebase mRef;
 
     @Override
@@ -34,12 +33,11 @@ public class TypeofOperator extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_typeof_operator);
         final String postid=getIntent().getStringExtra("UniqueID");
-        //logout=(Button)findViewById(R.id.button_logout);
-        maingate=(Button)findViewById(R.id.button_mainoperator);
-        slotgate=(Button)findViewById(R.id.button_slotoperator);
+        receiptbutton=(Button)findViewById(R.id.button_mainoperator);
+        collectionbutton=(Button)findViewById(R.id.button_collection);
         calculateButton=(Button)findViewById(R.id.button_calculate_fare);
-
-        maingate.setOnClickListener(new View.OnClickListener() {
+        shiftclose_button=(Button)findViewById(R.id.button_shiftclose);
+        receiptbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(TypeofOperator.this,SubmitActivity.class);
@@ -49,24 +47,28 @@ public class TypeofOperator extends AppCompatActivity {
             }
         });
         mRef=new Firebase(Constants.FIREBASE_URL);
-        slotgate.setOnClickListener(new View.OnClickListener() {
+        collectionbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(TypeofOperator.this,ParkingSlot.class);
+                Intent intent=new Intent(TypeofOperator.this,Collections.class);
                 intent.putExtra("UniqueID",postid);
                 startActivity(intent);
             }
         });
-       /* logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mRef.unauth();
-            }
-        });*/
         calculateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(TypeofOperator.this, CalculateFare.class);
+                intent.putExtra("UniqueID",postid);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+        shiftclose_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(TypeofOperator.this, ShiftClose.class);
                 intent.putExtra("UniqueID",postid);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

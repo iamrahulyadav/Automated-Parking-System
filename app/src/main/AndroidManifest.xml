@@ -11,17 +11,13 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name=".LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".LoginActivity"
-            android:label="@string/title_activity_admin_login" >
         </activity>
         <activity
             android:name=".SubmitActivity"
@@ -54,6 +50,38 @@
         <activity
             android:name=".SignupActivity"
             android:label="@string/title_activity_signup" >
+        </activity>
+        <activity
+            android:name=".ShiftOpen"
+            android:label="@string/title_activity_shift_open" >
+        </activity>
+        <activity
+            android:name=".Collections"
+            android:label="@string/title_activity_collections" >
+        </activity>
+        <activity
+            android:name=".ShiftClose"
+            android:label="@string/title_activity_shift_close" >
+        </activity>
+        <activity
+            android:name=".Masters"
+            android:label="@string/title_activity_masters" >
+        </activity>
+        <activity
+            android:name=".CreateManager"
+            android:label="@string/title_activity_create_manager" >
+        </activity>
+        <activity
+            android:name=".CustomAdapter"
+            android:label="@string/title_activity_custom_adapter" >
+        </activity>
+        <activity
+            android:name=".CreateOperator"
+            android:label="@string/title_activity_create_operator" >
+        </activity>
+        <activity
+            android:name=".Vehicle_Type"
+            android:label="@string/title_activity_vehicle__type" >
         </activity>
     </application>
 

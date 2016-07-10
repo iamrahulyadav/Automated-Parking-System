@@ -10,51 +10,22 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Contractor Name"
+        android:text="Transporter :"
         android:id="@+id/textView_contractor"
-        android:layout_alignParentTop="true"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@+id/spinner2"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:id="@+id/editText"
-        android:layout_below="@+id/textView_contractor"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/textView_date1"
-        android:layout_alignEnd="@+id/textView_date1" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Driver Name"
-        android:id="@+id/textView2"
-        android:layout_below="@+id/editText"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:id="@+id/editText2"
-        android:layout_below="@+id/textView2"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/editText3"
-        android:layout_alignEnd="@+id/editText3" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Driver  Number"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textvView_driver_no"
-        android:layout_below="@+id/editText2" />
+        android:layout_below="@+id/spinner3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -64,16 +35,15 @@
         android:id="@+id/editText3"
         android:layout_below="@+id/textvView_driver_no"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Vehicle Number"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textView_Vehicle_No"
-        android:layout_below="@+id/editText3"
+        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -81,18 +51,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText4"
+        android:inputType="textPassword"
         android:layout_below="@+id/textView_Vehicle_No"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignRight="@+id/button_submit"
+        android:layout_alignEnd="@+id/button_submit" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Date"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/textView_date"
-        android:layout_below="@+id/editText4"
+        android:layout_below="@+id/editText3"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -110,20 +82,39 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Submit"
+        android:text="Save &amp; Print"
         android:id="@+id/button_submit"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-    <Button
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Logout"
-        android:id="@+id/button_logout"
-        android:layout_alignParentBottom="true"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/Vehicle_Type"
+        android:text="Vehicle Type: "
+        android:layout_below="@+id/editText4"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/textView_contractor"
-        android:layout_alignEnd="@+id/textView_contractor" />
+        android:layout_alignParentStart="true" />
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner2"
+        android:spinnerMode="dropdown"
+        android:layout_alignTop="@+id/Vehicle_Type"
+        android:layout_toRightOf="@+id/Vehicle_Type"
+        android:layout_toEndOf="@+id/Vehicle_Type" />
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/spinner3"
+        android:spinnerMode="dropdown"
+        android:layout_alignTop="@+id/textView_contractor"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_toRightOf="@+id/textView_contractor"
+        android:layout_toEndOf="@+id/textView_contractor" />
 
 </RelativeLayout>
