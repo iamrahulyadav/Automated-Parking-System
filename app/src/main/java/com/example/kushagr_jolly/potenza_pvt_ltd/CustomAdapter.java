@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CustomAdapter extends ArrayAdapter<String> {
     final String[] value= new String[2];
@@ -42,7 +43,7 @@ public class CustomAdapter extends ArrayAdapter<String> {
         TextView textView2 = (TextView)rowView.findViewById(R.id.textview2);
         TextView textView3=(TextView)rowView.findViewById(R.id.textview3);
         RadioButton radioButton = (RadioButton) rowView.findViewById(R.id.radiobutton);
-        if(email!=null || pwd!=null){
+        if(email.isEmpty()==false|| pwd.isEmpty()==false || code.isEmpty()==false){
             textView3.setText(code.get(position).toString());
             textView1.setText(email.get(position).toString());
             textView2.setText(pwd.get(position).toString());
