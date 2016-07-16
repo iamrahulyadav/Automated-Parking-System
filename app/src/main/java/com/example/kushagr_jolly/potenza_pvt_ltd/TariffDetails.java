@@ -1,17 +1,18 @@
 package com.example.kushagr_jolly.potenza_pvt_ltd;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Created by Kushagr_Jolly on 7/10/2016.
+ * Created by Kushagr on 15-Jul-16.
  */
 public class TariffDetails {
-    //name and address string
+
     private String vehicle_type;
     private String key;
-    private String code;
-    private String inslip_tariff;
+    private String total_slab_hrs;
+    private String no_of_slab_hrs;
+    private String inc_dur_hrs;
+    private String tariff;
 
     public TariffDetails() {
 
@@ -36,19 +37,34 @@ public class TariffDetails {
         this.vehicle_type=key;
     }
 
-    @JsonProperty("code")
-    public String getCode(){
-        return code;
+    @JsonProperty("total_slab_hrs")
+    public String getTotal_slab_hrs(){
+        return total_slab_hrs;
     }
-    public void setCode(String key){
-        this.code=key;
+    public void setTotal_slab_hrs(String key){
+        this.total_slab_hrs=key;
     }
 
-    @JsonProperty("inslip_tariff")
-    public String getInslip_tariff(){
-        return inslip_tariff;
+    @JsonProperty("no_of_slab_hrs")
+    public String getNo_of_slab_hrs(){
+        return no_of_slab_hrs;
     }
-    public void setInslip_tariff(String key){
-        this.inslip_tariff=key;
+    public void setNo_of_slab_hrs(String key){
+        this.no_of_slab_hrs=key;
     }
+    @JsonProperty("inc_dur_hrs")
+    public String getInc_dur_hrs(){
+        return inc_dur_hrs;
+    }
+    public void setInc_dur_hrs(String key){
+        this.inc_dur_hrs=key;
+    }
+    @JsonProperty("tariff")
+    public String getTariff(){
+        return tariff;
+    }
+    public void setTariff(String key){
+        this.tariff=key;
+    }
+
 }

@@ -35,19 +35,19 @@ public class Masters extends Activity {
         startActivity(intent);
     }
     public void parking_slot(View v){
-        Intent intent = new Intent(Masters.this, CreateManager.class);
+        Intent intent = new Intent(Masters.this, PSActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
     public void transporter(View v){
-        Intent intent = new Intent(Masters.this, CreateManager.class);
+        Intent intent = new Intent(Masters.this, Transporter.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
     public void tariff(View v){
-        Intent intent = new Intent(Masters.this, CreateManager.class);
+        Intent intent = new Intent(Masters.this, TariffActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

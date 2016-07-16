@@ -2,8 +2,11 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,30 +25,29 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Vehicle_Type extends Activity implements AdapterView.OnItemClickListener, AdapterView.OnItemSelectedListener {
-
+public class PSActivity extends Activity implements AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener {
     private Firebase ref;
     private EditText et1,et3;
     private Spinner spinner;
     private ListView listView;
     private CustomAdapter customAdapter;
     String code_value_1;
-    private ArrayList code_value,vehicle_type,tariff;
+    private ArrayList code_value,slot_name,slot_number;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_vehicle__type);
+        setContentView(R.layout.activity_ps);
         ref=new Firebase(Constants.FIREBASE_URL);
         et1=(EditText)findViewById(R.id.editText6);
         spinner=(Spinner)findViewById(R.id.spinner4);
         et3=(EditText)findViewById(R.id.editText7);
         code_value=new ArrayList();
-        vehicle_type=new ArrayList();
-        tariff= new ArrayList();
+        slot_name=new ArrayList();
+        slot_number= new ArrayList();
         // Spinner click listener
         spinner.setOnItemSelectedListener(this);
-         String[] Letter={"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
+        String[] Letter={"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
         final ArrayList<String> code = new ArrayList<String>(Arrays.asList(Letter));
         // Creating adapter for spinner
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, code);
@@ -58,17 +60,17 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
 
         listView = (ListView)findViewById(R.id.listView);
         listView.setOnItemClickListener(this);
-        customAdapter = new CustomAdapter(getApplication(), vehicle_type,tariff,code_value,0);
+        customAdapter = new CustomAdapter(getApplication(), slot_name,slot_number,code_value);
         listView.setAdapter(customAdapter);
-        Query queryRef = ref.child("users").child("Vehicle_Type");
+        Query queryRef = ref.child("users").child("Parking_Slot_Details");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("value of", String.valueOf(dataSnapshot.getKey()));
-                VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
+                ParkingSlotDetails post = dataSnapshot.getValue(ParkingSlotDetails.class);
                 code_value.add(post.getCode());
-                vehicle_type.add(post.getVehicle_type());
-                tariff.add(post.getInslip_tariff());
+                slot_name.add(post.getSlot_name());
+                slot_number.add(post.getSlot_number());
                 customAdapter.notifyDataSetChanged();
             }
 
@@ -96,25 +98,25 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
 
     public void save(View v){
         final String code = code_value_1;
-       final String vehicle = et1.getText().toString();
+        final String vehicle = et1.getText().toString();
         final String inslip = et3.getText().toString();
         Map<String, Object> value = new HashMap<String, Object>();
         value.put("code",code);
-        value.put("vehicle_type",vehicle);
-        value.put("inslip_tariff",inslip);
-        ref.child("users").child("Vehicle_Type").push().setValue(value);
+        value.put("slot_name",vehicle);
+        value.put("slot_number",inslip);
+        ref.child("users").child("Parking_Slot_Details").push().setValue(value);
         customAdapter.notifyDataSetChanged();
     }
 
 
     public void delete(View v){
         final String []item=customAdapter.getValue();
-        Query queryRef = ref.child("users").child("Vehicle_Type").orderByChild("vehicle_type").equalTo(item[0]);
+        Query queryRef = ref.child("users").child("Parking_Slot_Details").orderByChild("slot_name").equalTo(item[0]);
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                 Log.d("delte func", String.valueOf(item));
-                ref.child("users").child("Vehicle_Type").child(snapshot.getKey()).removeValue();
+                ref.child("users").child("Parking_Slot_Details").child(snapshot.getKey()).removeValue();
                 customAdapter.notifyDataSetChanged();
             }
 
@@ -135,7 +137,7 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(Vehicle_Type.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(PSActivity.this);
                 builder.setMessage(firebaseError.getMessage())
                         .setTitle(R.string.login_error_title)
                         .setPositiveButton(android.R.string.ok, null);
@@ -152,7 +154,7 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-    code_value_1=parent.getItemAtPosition(position).toString();
+        code_value_1=parent.getItemAtPosition(position).toString();
     }
 
     @Override

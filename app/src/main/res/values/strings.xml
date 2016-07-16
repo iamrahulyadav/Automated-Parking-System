@@ -37,4 +37,9 @@
     <string name="title_activity_custom_adapter">CustomAdapter</string>
     <string name="title_activity_create_operator">CreateOperator</string>
     <string name="title_activity_vehicle__type">Vehicle_Type</string>
+    <string name="title_activity_ps">PSActivity</string>
+    <string name="title_activity_transporter">Transporter</string>
+    <string name="title_activity_tariff">TariffActivity</string>
+    <string name="title_activity_reports">ReportsActivity</string>
+    <string name="title_activity_summary_reports">SummaryReports</string>
 </resources>

@@ -25,6 +25,7 @@ public class CustomAdapter extends ArrayAdapter<String> {
     private ArrayList email=new ArrayList();
     private ArrayList pwd= new ArrayList();
     private ArrayList code= new ArrayList();
+    private int flag;
 
     /** Constructor Class */
     public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList code) {
@@ -34,28 +35,37 @@ public class CustomAdapter extends ArrayAdapter<String> {
         this.pwd=values;
         this.code=code;
     }
-
+    public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList code,int num) {
+        super(c,R.layout.activity_custom_adapter ,values);
+        this.context = c.getApplicationContext();
+        this.email = strings;
+        this.pwd=values;
+        this.code=code;
+        this.flag=num;
+    }
 
     /** Implement getView method for customizing row of list view. */
     public View getView(final int position, View convertView, ViewGroup parent) {
         View rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_custom_adapter, parent, false);
-        TextView textView1 = (TextView)rowView.findViewById(R.id.textview1);
-        TextView textView2 = (TextView)rowView.findViewById(R.id.textview2);
-        TextView textView3=(TextView)rowView.findViewById(R.id.textview3);
-        RadioButton radioButton = (RadioButton) rowView.findViewById(R.id.radiobutton);
-        if(email.isEmpty()==false|| pwd.isEmpty()==false || code.isEmpty()==false){
-            textView3.setText(code.get(position).toString());
-            textView1.setText(email.get(position).toString());
-            textView2.setText(pwd.get(position).toString());
-        }
-        radioButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                value[0]=email.get(position).toString();
-                value[1]=pwd.get(position).toString();
+        TextView textView1 = (TextView) rowView.findViewById(R.id.textview1);
+        TextView textView2 = (TextView) rowView.findViewById(R.id.textview2);
+        TextView textView3 = (TextView) rowView.findViewById(R.id.textview3);
+        if (flag == 0) {
+            RadioButton radioButton = (RadioButton) rowView.findViewById(R.id.radiobutton);
+            if (email.isEmpty() == false || pwd.isEmpty() == false || code.isEmpty() == false) {
+                textView3.setText(code.get(position).toString());
+                textView1.setText(email.get(position).toString());
+                textView2.setText(pwd.get(position).toString());
             }
-        });
+            radioButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    value[0] = email.get(position).toString();
+                    value[1] = pwd.get(position).toString();
+                }
 
+            });
+        }
         return rowView;
     }
     public String[] getValue(){

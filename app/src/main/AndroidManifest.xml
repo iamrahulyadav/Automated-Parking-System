@@ -83,6 +83,26 @@
             android:name=".Vehicle_Type"
             android:label="@string/title_activity_vehicle__type" >
         </activity>
+        <activity
+            android:name=".PSActivity"
+            android:label="@string/title_activity_ps" >
+        </activity>
+        <activity
+            android:name=".Transporter"
+            android:label="@string/title_activity_transporter" >
+        </activity>
+        <activity
+            android:name=".TariffActivity"
+            android:label="@string/title_activity_tariff" >
+        </activity>
+        <activity
+            android:name=".ReportsActivity"
+            android:label="@string/title_activity_reports" >
+        </activity>
+        <activity
+            android:name=".SummaryReports"
+            android:label="@string/title_activity_summary_reports" >
+        </activity>
     </application>
 
 </manifest>

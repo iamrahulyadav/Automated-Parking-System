@@ -18,6 +18,7 @@ public class TruckDetailsActivity {
         private String email;
     private String key;
     private String localtime;
+    private String cost;
 
     public TruckDetailsActivity() {
 
@@ -99,13 +100,22 @@ public class TruckDetailsActivity {
         return email;
     }
 
-    @JsonProperty("Time")
+    @JsonProperty("Time of Arrival")
     public void settime(String T) {
         this.localtime = T;
     }
-    @JsonProperty("Time")
+    @JsonProperty("Time of Arrival")
     public String gettime() {
         return localtime;
     }
+    @JsonProperty("Cost")
+    public void setCost(String T) {
+        this.cost = T;
+    }
+    @JsonProperty("Cost")
+    public String getCost() {
+        return cost;
+    }
+
 
 }
