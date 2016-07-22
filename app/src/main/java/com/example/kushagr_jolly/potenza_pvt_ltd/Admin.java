@@ -35,7 +35,7 @@ public class Admin extends AppCompatActivity {
         startActivity(intent);
     }
     public void data_management(View v) {
-        Intent intent = new Intent(Admin.this, Admin.class);
+        Intent intent = new Intent(Admin.this, CardViewActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

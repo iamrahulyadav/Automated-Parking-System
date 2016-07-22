@@ -60,7 +60,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
     final ArrayList<String> email_operator = new ArrayList<String>();
     final ArrayList<String> amt_operator = new ArrayList<String>();
     private Button button;
-    int count;
+    int count=1;
     private String globatime;
     private long globalmillis;
     private long timefrom,timeto;
@@ -291,6 +291,10 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
         for(int i=0;i<email_operator.size();i++){
             Row row3 = sheet1.createRow(k);
 
+            c = row3.createCell(3);
+            c.setCellValue(count);
+            c.setCellStyle(cs);
+            count++;
 
             c = row3.createCell(4);
             c.setCellValue(email_operator.get(i));
@@ -309,7 +313,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
         sheet1.setColumnWidth(2, (15 * 500));
 
         // Create a path where we will place our List of objects on external storage
-        File file = new File(this.getExternalFilesDir(null), "myExcel.xls");
+        File file = new File(this.getExternalFilesDir(null), "Summary-Reports.xls");
         FileOutputStream os = null;
 
         try {

@@ -20,21 +20,21 @@ public class ReportsActivity extends Activity {
     }
 
     public void inslip(View v){
-        Intent intent = new Intent(ReportsActivity.this, ReportsActivity.class);
+        Intent intent = new Intent(ReportsActivity.this, InslipReports.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 
     public void outslip(View v){
-        Intent intent = new Intent(ReportsActivity.this, ReportsActivity.class);
+        Intent intent = new Intent(ReportsActivity.this, OutslipReports.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
     }
 
     public void slot(View v){
-        Intent intent = new Intent(ReportsActivity.this, ReportsActivity.class);
+        Intent intent = new Intent(ReportsActivity.this, SlotReport.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

@@ -42,4 +42,8 @@
     <string name="title_activity_tariff">TariffActivity</string>
     <string name="title_activity_reports">ReportsActivity</string>
     <string name="title_activity_summary_reports">SummaryReports</string>
+    <string name="title_activity_device_setting">DeviceSetting</string>
+    <string name="title_activity_inslip_reports">InslipReports</string>
+    <string name="title_activity_outslip_reports">OutslipReports</string>
+    <string name="title_activity_slot_report">SlotReport</string>
 </resources>

@@ -103,6 +103,22 @@
             android:name=".SummaryReports"
             android:label="@string/title_activity_summary_reports" >
         </activity>
+        <activity
+            android:name=".DeviceSetting"
+            android:label="@string/title_activity_device_setting" >
+        </activity>
+        <activity
+            android:name=".InslipReports"
+            android:label="@string/title_activity_inslip_reports" >
+        </activity>
+        <activity
+            android:name=".OutslipReports"
+            android:label="@string/title_activity_outslip_reports" >
+        </activity>
+        <activity
+            android:name=".SlotReport"
+            android:label="@string/title_activity_slot_report" >
+        </activity>
     </application>
 
 </manifest>
