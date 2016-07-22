@@ -2,6 +2,8 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,11 +11,13 @@ import android.view.MenuItem;
 import android.view.View;
 
 public class Masters extends Activity {
-
+String typeofuser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_masters);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        typeofuser=preferences.getString("typeofuser",null);
     }
 
     public void manager(View v){
@@ -51,6 +55,20 @@ public class Masters extends Activity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+    }
+    @Override
+    public void onBackPressed()
+    {
+        if (typeofuser.contentEquals("Manager")) {
+            finish(); //finishes the current activity and doesnt save in stock
+            Intent i = new Intent(Masters.this, Manager.class);
+            startActivity(i);
+        }
+        else if(typeofuser.contentEquals("Admin")){
+            finish(); //finishes the current activity and doesnt save in stock
+            Intent i = new Intent(Masters.this, Admin.class);
+            startActivity(i);
+        }
     }
 
 

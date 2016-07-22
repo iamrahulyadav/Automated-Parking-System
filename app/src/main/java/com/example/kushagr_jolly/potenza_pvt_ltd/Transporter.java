@@ -3,6 +3,7 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -181,6 +182,14 @@ public class Transporter extends Activity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
         }
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(Transporter.this, Masters.class);
+        startActivity(i);
     }
 
 }

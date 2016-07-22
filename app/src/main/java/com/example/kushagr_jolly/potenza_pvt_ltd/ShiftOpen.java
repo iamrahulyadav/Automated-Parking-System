@@ -193,4 +193,11 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(ShiftOpen.this, LoginActivity.class);
+        startActivity(i);
+    }
 }

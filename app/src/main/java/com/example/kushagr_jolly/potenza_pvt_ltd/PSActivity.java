@@ -2,6 +2,7 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -166,5 +167,12 @@ public class PSActivity extends Activity implements AdapterView.OnItemSelectedLi
     protected void onResume() {
         super.onResume();
         customAdapter.notifyDataSetChanged();
+    }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(PSActivity.this, Masters.class);
+        startActivity(i);
     }
 }

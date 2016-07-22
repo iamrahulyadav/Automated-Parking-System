@@ -2,6 +2,7 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -102,11 +103,12 @@ public class CreateManager extends Activity implements AdapterView.OnItemClickLi
             public void onSuccess(Map<String, Object> result) {
                 Map<String, Object> value = new HashMap<String, Object>();
                 value.put("email-address", email);
-                value.put("code",code);
-                value.put("pass",pass);
+                value.put("code", code);
+                value.put("pass", pass);
                 ref.child("users").child("Manager").push().setValue(value);
                 Log.d("Successfully", String.valueOf(result.get("uid")));
             }
+
             @Override
             public void onError(FirebaseError firebaseError) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(CreateManager.this);
@@ -130,7 +132,7 @@ public class CreateManager extends Activity implements AdapterView.OnItemClickLi
                 values.add(post.getEmail());
                 pwd.add(post.getPwd());
                 code.add(post.getCode());
-                customAdapter = new CustomAdapter(getApplication(), values, pwd,code);
+                customAdapter = new CustomAdapter(getApplication(), values, pwd, code);
                 customAdapter.notifyDataSetChanged();
                 listView.setAdapter(customAdapter);
             }
@@ -206,6 +208,7 @@ public class CreateManager extends Activity implements AdapterView.OnItemClickLi
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }
+
             @Override
             public void onError(FirebaseError firebaseError) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(CreateManager.this);
@@ -216,5 +219,12 @@ public class CreateManager extends Activity implements AdapterView.OnItemClickLi
                 dialog.show();
             }
         });
+    }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(CreateManager.this, Masters.class);
+        startActivity(i);
     }
 }

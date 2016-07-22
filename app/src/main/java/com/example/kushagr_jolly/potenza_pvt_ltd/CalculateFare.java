@@ -128,11 +128,11 @@ public class CalculateFare extends Activity {
         graceNickname.put("Cost", cost);
         mRef.child("users").child("data").child(postid).updateChildren(graceNickname);
     }
-   /* @Override
+    @Override
     public void onBackPressed()
     {
         finish();   //finishes the current activity and doesnt save in stock
         Intent i = new Intent(CalculateFare.this, LoginActivity.class);
         startActivity(i);
-    }*/
+    }
 }

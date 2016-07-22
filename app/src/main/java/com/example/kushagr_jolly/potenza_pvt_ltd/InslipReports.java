@@ -3,6 +3,7 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -183,14 +184,6 @@ public class InslipReports extends Activity implements View.OnClickListener {
                         vehicle_type.add(post.getVehicleno());
                         contractor_name.add(post.getContractorname());
                     }
-                /*Set<String> set2 = findDuplicates(email_operator);
-                for(int i=0;i<email_operator.size();i++){
-                    if(email_operator.get(i).contentEquals(set2.iterator().next().toString())){
-                        amt_operator.add(i+1,amt_operator.get(i));
-                        email_operator.remove(i);
-                        amt_operator.remove(i);
-                    }
-                }*/
                 }
 
                 @Override
@@ -401,6 +394,13 @@ public class InslipReports extends Activity implements View.OnClickListener {
             return true;
         }
         return false;
+    }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(InslipReports.this, ReportsActivity.class);
+        startActivity(i);
     }
 
 }

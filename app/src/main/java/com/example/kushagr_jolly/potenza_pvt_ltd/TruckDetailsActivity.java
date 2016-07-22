@@ -46,11 +46,11 @@ public class TruckDetailsActivity {
         this.key=key;
     }
     //Getters and setters
-    @JsonProperty("Contractor Name")
+    @JsonProperty("Transporter")
         public String getContractorname() {
             return contractorname;
         }
-    @JsonProperty("Contractor Name")
+    @JsonProperty("Transporter")
         public void setContractorname(String contractorname) {
             this.contractorname = contractorname;
         }

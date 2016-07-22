@@ -9,26 +9,38 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Entry"
-        android:id="@+id/button_addent"
+        android:text="Masters"
+        android:id="@+id/button_masters"
+        android:layout_marginTop="48dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="93dp" />
-
+        android:onClick="masters"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="View All Records"
-        android:id="@+id/button_view"
+        android:text="Device Setting"
+        android:id="@+id/button_device_setting"
+        android:layout_above="@+id/button_vehicle_type"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="45dp"
+        android:onClick="device_setting"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reports"
+        android:id="@+id/button_vehicle_type"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
-    <!-- <Button
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:text="Logout"
-         android:id="@+id/button_logout"
-         android:layout_marginBottom="81dp"
-         android:layout_alignParentBottom="true"
-         android:layout_centerHorizontal="true" /> -->
+        android:layout_centerHorizontal="true"
+        android:onClick="reports"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Transporter Accounts"
+        android:id="@+id/button_tariff"
+        android:onClick="transporter_accounts"
+        android:layout_below="@+id/button_vehicle_type"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="89dp" />
+
 
  </RelativeLayout>

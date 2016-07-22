@@ -10,42 +10,42 @@ import android.view.View;
 import android.widget.Button;
 
 public class Manager extends Activity {
-    protected Button addentry,view;
-    private String typeofuser;
-    String muserid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manager);
-        Bundle bundle = getIntent().getExtras();
-        typeofuser = bundle.getString("typeofuser");
-        muserid=getIntent().getStringExtra("UniqueID");
-        addentry=(Button)findViewById(R.id.button_addent);
-        view=(Button)findViewById(R.id.button_view);
-        addentry.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Manager.this, SubmitActivity.class);
-                intent.putExtra("typeofuser", typeofuser);
-                intent.putExtra("UniqueID",muserid);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-        });
+    }
 
-
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Manager.this, CardViewActivity.class);
-                intent.putExtra("typeofuser",typeofuser);
-                intent.putExtra("UniqueID",muserid);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-        });
+    public void masters(View v) {
+        Intent intent = new Intent(Manager.this, Masters.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+    public void device_setting(View v) {
+        Intent intent = new Intent(Manager.this, Manager.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+    public void reports(View v) {
+        Intent intent = new Intent(Manager.this, ReportsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+    public void transporter_accounts(View v) {
+        Intent intent = new Intent(Manager.this, Transporter.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(Manager.this, LoginActivity.class);
+        startActivity(i);
     }
 }

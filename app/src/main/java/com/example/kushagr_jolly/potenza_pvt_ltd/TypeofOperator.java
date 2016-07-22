@@ -92,5 +92,12 @@ public class TypeofOperator extends AppCompatActivity {
             }*/
         });
     }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(TypeofOperator.this, ShiftOpen.class);
+        startActivity(i);
+    }
 
 }

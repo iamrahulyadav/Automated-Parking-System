@@ -3,6 +3,7 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -478,5 +479,12 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
             super.onPostExecute(s);
 
         }
+    }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(SummaryReports.this, ReportsActivity.class);
+        startActivity(i);
     }
 }

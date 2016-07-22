@@ -1,17 +1,25 @@
 package com.example.kushagr_jolly.potenza_pvt_ltd;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.firebase.client.ChildEventListener;
@@ -23,10 +31,15 @@ import com.firebase.client.Query;
 import com.firebase.client.Transaction;
 import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
-public class CardViewActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+public class CardViewActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, View.OnClickListener {
     private MyRecyclerViewAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
@@ -37,14 +50,30 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
     String typeofuser;
     Spinner sp1;
     private String sort;
+    private EditText fromDateEtxt;
+    private Button d;
+    private EditText toDateEtxt;
+    private DatePickerDialog fromDatePickerDialog;
+    private DatePickerDialog toDatePickerDialog;
+    private String datefrom,dateto;
+    private SimpleDateFormat dateFormatter;
+    private String globatime;
+    private long globalmillis;
+    private long timefrom,timeto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_view);
-        String mUserId = getIntent().getStringExtra("UniqueID");
         Button logout=(Button)findViewById(R.id.button_logout);
         sp1=(Spinner)findViewById(R.id.spinner1);
+        fromDateEtxt = (EditText) findViewById(R.id.etxt_fromdate);
+        fromDateEtxt.setInputType(InputType.TYPE_NULL);
+        fromDateEtxt.requestFocus();
+        d=(Button)findViewById(R.id.button5);
+        toDateEtxt = (EditText) findViewById(R.id.etxt_todate);
+        toDateEtxt.setInputType(InputType.TYPE_NULL);
+        setDateTimeField();
         sp1.setOnItemSelectedListener(this);
         List<String> categories = new ArrayList<>();
         categories.add("Sort by Date");
@@ -57,11 +86,11 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
 
         // Drop down layout style - list view with radio button
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
         // attaching data adapter to spinner
         sp1.setAdapter(dataAdapter);
-        typeofuser=getIntent().getStringExtra("typeofuser");
-        ref.child("users").child("data").child(mUserId).runTransaction(new Transaction.Handler() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        typeofuser=preferences.getString("typeofuser", null);
+        /*ref.child("users").child("data").child(mUserId).runTransaction(new Transaction.Handler() {
             public Transaction.Result doTransaction(MutableData mutableData) {
                 mutableData.setValue(null); // This removes the node.
                 return Transaction.success(mutableData);
@@ -70,7 +99,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
             public void onComplete(FirebaseError error, boolean b, DataSnapshot data) {
                 // Handle completion
             }
-        });
+        });*/
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,6 +112,33 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         mLayoutManager = new LinearLayoutManager(this);
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(mLayoutManager);
+    }
+    private void setDateTimeField() {
+        fromDateEtxt.setOnClickListener(this);
+        toDateEtxt.setOnClickListener(this);
+
+        Calendar newCalendar = Calendar.getInstance();
+        fromDatePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Calendar newDate = Calendar.getInstance();
+                newDate.set(year, monthOfYear, dayOfMonth);
+                fromDateEtxt.setText(dateFormatter.format(newDate.getTime()));
+                datefrom=dateFormatter.format(newDate.getTime());
+            }
+
+        },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+        toDatePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Calendar newDate = Calendar.getInstance();
+                newDate.set(year, monthOfYear, dayOfMonth);
+                toDateEtxt.setText(dateFormatter.format(newDate.getTime()));
+                dateto=dateFormatter.format(newDate.getTime());
+            }
+
+        },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
     }
 
     private void deletedata(String key, int position) {
@@ -97,9 +153,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         Log.d("abc", sort);
         new FetchData(CardViewActivity.this).execute();
         Log.d("After", "FetchData");
-
         mAdapter = new MyRecyclerViewAdapter(list);
-
         if(typeofuser.contentEquals("Admin")) {
             SwipeableRecyclerViewTouchListener swipeTouchListener =
                     new SwipeableRecyclerViewTouchListener(mRecyclerView,
@@ -137,7 +191,6 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
 
             mRecyclerView.addOnItemTouchListener(swipeTouchListener);
         }
-
         mRecyclerView.setAdapter(mAdapter);
 
     }
@@ -145,6 +198,15 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v == fromDateEtxt) {
+            fromDatePickerDialog.show();
+        } else if(v == toDateEtxt) {
+            toDatePickerDialog.show();
+        }
     }
 
     class FetchData extends AsyncTask<Context,String,String>{
@@ -156,28 +218,25 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
     }
     @Override
     protected String doInBackground(Context... params) {
-       Query queryRef = ref.child("users").orderByChild(sort);
+        list.clear();
+        index = 0;
+        count = 0;
+       Query queryRef = ref.child("users").child("data").orderByChild(sort);
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                Log.d("child", snapshot.getKey());
-                list.clear();
-                index = 0;
-                count = 0;
-                for (DataSnapshot postsnapshot : snapshot.getChildren()) {
-                    count = (int) postsnapshot.getChildrenCount();
+                    count = (int) snapshot.getChildrenCount();
                     if (count == 9) {
                         Log.d("count", String.valueOf(count));
-                        Log.d("sas", postsnapshot.getKey());
-                        TruckDetailsActivity post = postsnapshot.getValue(TruckDetailsActivity.class);
-                        post.setKey(postsnapshot.getKey());
+                        Log.d("sas", snapshot.getKey());
+                        TruckDetailsActivity post = snapshot.getValue(TruckDetailsActivity.class);
+                        post.setKey(snapshot.getKey());
                         Log.d("post", post.getKey());
                         TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(), post.getEmail(), post.getContractorname(), post.getDrivername(), post.getDriverno(), post.getDate(), post.getAPS());
                         list.add(index, obj);
                         Log.d("list", String.valueOf(list.get(index)));
                         index++;
                     }
-                }
                 Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
                 mAdapter.notifyDataSetChanged();
 
@@ -219,5 +278,57 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         super.onPostExecute(s);
     }
 }
+
+    public void delete(View v){
+        Query queryRef = ref.child("users").child("data");
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d("asda", String.valueOf(dataSnapshot.getChildrenCount()));
+                TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
+                //post.setKey(dataSnapshot.getKey());
+                globatime=post.gettime();
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // I assume d-M, you may refer to M-d for month-day instead.
+                Date d = null; // You will need try/catch around this
+                try {
+                    d = formatter.parse(globatime);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                globalmillis= d.getTime();
+                Log.d("globaltime", String.valueOf(globalmillis));
+                if(globalmillis>timefrom && globalmillis<timeto){
+                    ref.child("users").child("data").child(dataSnapshot.getKey()).setValue(null);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+    }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(CardViewActivity.this, Admin.class);
+        startActivity(i);
+    }
 
 }

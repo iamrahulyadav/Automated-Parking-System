@@ -160,4 +160,11 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(SubmitActivity.this, TypeofOperator.class);
+        startActivity(i);
+    }
 }

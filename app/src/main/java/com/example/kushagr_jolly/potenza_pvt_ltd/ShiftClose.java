@@ -238,4 +238,11 @@ public class ShiftClose extends Activity {
         });
 
     }
+    @Override
+    public void onBackPressed()
+    {
+        finish();   //finishes the current activity and doesnt save in stock
+        Intent i = new Intent(ShiftClose.this, ShiftOpen.class);
+        startActivity(i);
+    }
 }
