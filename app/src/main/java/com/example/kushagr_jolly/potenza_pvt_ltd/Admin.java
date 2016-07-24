@@ -41,7 +41,7 @@ public class Admin extends AppCompatActivity {
         startActivity(intent);
     }
     public void transporter_accounts(View v) {
-        Intent intent = new Intent(Admin.this, Transporter.class);
+        Intent intent = new Intent(Admin.this, TransporterAccounts.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);

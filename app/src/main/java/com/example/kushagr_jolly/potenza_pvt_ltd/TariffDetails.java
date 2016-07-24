@@ -1,10 +1,12 @@
 package com.example.kushagr_jolly.potenza_pvt_ltd;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by Kushagr on 15-Jul-16.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TariffDetails {
 
     private String vehicle_type;
@@ -13,6 +15,7 @@ public class TariffDetails {
     private String no_of_slab_hrs;
     private String inc_dur_hrs;
     private String tariff;
+    private String code;
 
     public TariffDetails() {
 
@@ -59,12 +62,19 @@ public class TariffDetails {
     public void setInc_dur_hrs(String key){
         this.inc_dur_hrs=key;
     }
-    @JsonProperty("tariff")
+    @JsonProperty("inslip_tariff")
     public String getTariff(){
         return tariff;
     }
     public void setTariff(String key){
         this.tariff=key;
+    }
+    @JsonProperty("code")
+    public String getCode(){
+        return code;
+    }
+    public void setCode(String key){
+        this.code=key;
     }
 
 }

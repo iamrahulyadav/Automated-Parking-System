@@ -129,7 +129,8 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                         .setPositiveButton(android.R.string.ok, null);
                 AlertDialog dialog = builder.create();
                 dialog.show();
-
+                driverno.setText("");
+                vehicleno.setText("");
             }
         });
     }

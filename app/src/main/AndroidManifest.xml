@@ -119,6 +119,10 @@
             android:name=".SlotReport"
             android:label="@string/title_activity_slot_report" >
         </activity>
+        <activity
+            android:name=".TransporterAccounts"
+            android:label="@string/title_activity_transporter_accounts" >
+        </activity>
     </application>
 
 </manifest>

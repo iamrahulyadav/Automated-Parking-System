@@ -33,7 +33,10 @@ public class TariffActivity extends Activity implements AdapterView.OnItemSelect
     private String code_value_1;
     private ListView listView;
     private CustomAdapter customAdapter;
-    private ArrayList vehicle_type,code_value,tariff;
+    final ArrayList<String> vehicle_type= new ArrayList<String>();
+    final ArrayList<String> tariff = new ArrayList<String>();
+    final ArrayList<String> code_value= new ArrayList<String>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,16 +88,19 @@ public class TariffActivity extends Activity implements AdapterView.OnItemSelect
         listView.setOnItemClickListener(this);
         customAdapter = new CustomAdapter(getApplication(), vehicle_type,tariff,code_value,1);
         listView.setAdapter(customAdapter);
+        customAdapter.notifyDataSetChanged();
         Query queryRef1 = ref.child("users").child("Vehicle_Type");
         queryRef1.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("value of", String.valueOf(dataSnapshot.getKey()));
+                Log.d("value of", dataSnapshot.getKey());
                 TariffDetails post = dataSnapshot.getValue(TariffDetails.class);
+                Log.d("hell", post.getVehicle_type());
+                Log.d("hell", post.getTotal_slab_hrs());
+                Log.d("hell", post.getTariff());
                 code_value.add(post.getVehicle_type());
                 vehicle_type.add(post.getTotal_slab_hrs());
                 tariff.add(post.getTariff());
-                customAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -140,7 +146,7 @@ public class TariffActivity extends Activity implements AdapterView.OnItemSelect
         value.put("total_slab_hrs",total_slab);
         value.put("no_of_slab_hrs", no_of_slab);
         value.put("inc_dur_hrs", inc_dur_hrs);
-        value.put("tariff", tariff);
+        value.put("inslip-tariff", tariff);
 
         ref.child("users").child("Tariff_Details").push().setValue(value);
         customAdapter.notifyDataSetChanged();

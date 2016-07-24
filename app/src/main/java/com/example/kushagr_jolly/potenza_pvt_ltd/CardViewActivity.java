@@ -65,6 +65,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_view);
+        dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         Button logout=(Button)findViewById(R.id.button_logout);
         sp1=(Spinner)findViewById(R.id.spinner1);
         fromDateEtxt = (EditText) findViewById(R.id.etxt_fromdate);

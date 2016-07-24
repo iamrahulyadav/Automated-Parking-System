@@ -46,4 +46,5 @@
     <string name="title_activity_inslip_reports">InslipReports</string>
     <string name="title_activity_outslip_reports">OutslipReports</string>
     <string name="title_activity_slot_report">SlotReport</string>
+    <string name="title_activity_transporter_accounts">TransporterAccounts</string>
 </resources>

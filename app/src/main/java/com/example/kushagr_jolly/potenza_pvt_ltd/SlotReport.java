@@ -458,7 +458,6 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
             wb.write(os);
             Log.w("FileUtils", "Writing file" + file);
             filename= "/"+String.valueOf(file);
-
         } catch (IOException e) {
             Log.w("FileUtils", "Error writing " + file, e);
         } catch (Exception e) {

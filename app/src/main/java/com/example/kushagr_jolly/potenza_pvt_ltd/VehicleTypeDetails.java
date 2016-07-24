@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Created by Kushagr_Jolly on 7/10/2016.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VehicleTypeDetails {
     //name and address string
     private String vehicle_type;
