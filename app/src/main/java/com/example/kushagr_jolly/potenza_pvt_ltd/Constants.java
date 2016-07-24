@@ -5,4 +5,5 @@ package com.example.kushagr_jolly.potenza_pvt_ltd;
  */
 public class Constants {
     public static final String FIREBASE_URL = "https://testing-project-15.firebaseio.com";
+    public static final String EMAIL_TO = "kushagrjolly15@gmail.com";
 }

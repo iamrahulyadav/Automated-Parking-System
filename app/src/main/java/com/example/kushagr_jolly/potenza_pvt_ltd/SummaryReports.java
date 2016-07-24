@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -65,6 +66,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
     private String globatime;
     private long globalmillis;
     private long timefrom,timeto;
+    private String filename;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -321,6 +323,8 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
             os = new FileOutputStream(file);
             wb.write(os);
             Log.w("FileUtils", "Writing file" + file);
+            filename= "/"+String.valueOf(file);
+
         } catch (IOException e) {
             Log.w("FileUtils", "Error writing " + file, e);
         } catch (Exception e) {
@@ -460,6 +464,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
                 }
             });
             getdata();
+            sendEmailWithAttachment(Constants.EMAIL_TO, "", "", filename);
             return null;
         }
 
@@ -479,6 +484,29 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
             super.onPostExecute(s);
 
         }
+    }
+    public void sendEmailWithAttachment(String to, String subject, String message, String fileAndLocation)
+    {
+        Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+        emailIntent.setType("application/excel");
+        emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{to});
+        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,  subject);
+        emailIntent.putExtra(android.content.Intent.EXTRA_TEXT,  message);
+        File file = new File(fileAndLocation);
+        //  File file = getFileStreamPath();
+        if (file.exists())
+        {
+            Log.v("Farmgraze", "Email file_exists!" );
+        }
+        else
+        {
+            Log.v("Farmgraze", "Email file does not exist!" );
+        }
+        Log.v("FarmGraze", "SEND EMAIL FileUri=" + Uri.parse("file:/" + fileAndLocation));
+        emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:/"+  fileAndLocation));
+        emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        emailIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(Intent.createChooser(emailIntent, "Send mail..."));
     }
     @Override
     public void onBackPressed()
