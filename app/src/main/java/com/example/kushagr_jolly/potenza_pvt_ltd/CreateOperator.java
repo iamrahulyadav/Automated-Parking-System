@@ -64,12 +64,27 @@ public class CreateOperator extends Activity implements AdapterView.OnItemClickL
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                int pos=customAdapter.getPos();
+                values.remove(pos);
+                pwd.remove(pos);
+                code.remove(pos);
+                DetailofUser post = dataSnapshot.getValue(DetailofUser.class);
+                Log.d("email",post.getEmail());
+                Log.d("pass", post.getPwd());
+                values.add(post.getEmail());
+                pwd.add(post.getPwd());
+                code.add(post.getCode());
+                customAdapter = new CustomAdapter(getApplication(), values, pwd,code);
+                customAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                int pos=customAdapter.getPos();
+                values.remove(pos);
+                pwd.remove(pos);
+                code.remove(pos);
+                customAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -127,7 +142,7 @@ public class CreateOperator extends Activity implements AdapterView.OnItemClickL
         values.clear();
         pwd.clear();
         final String email = et2.getText().toString();
-        Query queryRef = ref.child("users").child("Operator").orderByChild("emailID").equalTo(email);
+        Query queryRef = ref.child("users").child("Operator").orderByChild("email-address").equalTo(email);
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
@@ -168,12 +183,11 @@ public class CreateOperator extends Activity implements AdapterView.OnItemClickL
     }
     public void delete(View v){
         final String []item=customAdapter.getValue();
-        Query queryRef = ref.child("users").child("Operator").orderByChild("emailID").equalTo(item[0]);
+        Query queryRef = ref.child("users").child("Operator").orderByChild("email-address").equalTo(item[0]);
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                 ref.child("users").child("Operator").child(snapshot.getKey()).removeValue();
-                customAdapter.notifyDataSetChanged();
             }
 
             @Override

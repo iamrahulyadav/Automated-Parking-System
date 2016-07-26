@@ -63,12 +63,27 @@ public class CreateManager extends Activity implements AdapterView.OnItemClickLi
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                int pos=customAdapter.getPos();
+                values.remove(pos);
+                pwd.remove(pos);
+                code.remove(pos);
+                DetailofUser post = dataSnapshot.getValue(DetailofUser.class);
+                Log.d("email",post.getEmail());
+                Log.d("pass",post.getPwd());
+                values.add(post.getEmail());
+                pwd.add(post.getPwd());
+                code.add(post.getCode());
+                customAdapter = new CustomAdapter(getApplication(), values, pwd,code);
+                customAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                int pos=customAdapter.getPos();
+                values.remove(pos);
+                pwd.remove(pos);
+                code.remove(pos);
+                customAdapter.notifyDataSetChanged();
             }
 
             @Override

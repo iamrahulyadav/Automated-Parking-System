@@ -31,6 +31,7 @@ public class CustomAdapter extends ArrayAdapter<String> {
     RadioButton selected=null;
     boolean b;
     private int selectedposition;
+    private int pos;
 
     /** Constructor Class */
     public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList code) {
@@ -70,10 +71,9 @@ public class CustomAdapter extends ArrayAdapter<String> {
                 @Override
                 public void onClick(View v) {
                     if (((CheckBox) v).isChecked()) {
-                        Toast.makeText(getContext(),
-                                "Checked", Toast.LENGTH_LONG).show();
                         value[0] = email.get(position).toString();
                         value[1] = pwd.get(position).toString();
+                        pos=position;
                     }
                 }
             });
@@ -83,5 +83,8 @@ public class CustomAdapter extends ArrayAdapter<String> {
     }
     public String[] getValue(){
         return value;
+    }
+    public int getPos(){
+        return pos;
     }
 }
