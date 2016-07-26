@@ -61,7 +61,7 @@ public class TransporterAccounts extends Activity {
                     TransporterDetails post = snapshot.getValue(TransporterDetails.class);
                     post.setKey(snapshot.getKey());
                     Log.d("post", post.getKey());
-                    TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(),post.getVehicle_no());
+                    TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(),post.getVehicle_no(),post.getAmt());
                     list.add(index, obj);
                     Log.d("list", String.valueOf(list.get(index)));
                     index++;
@@ -73,7 +73,21 @@ public class TransporterAccounts extends Activity {
 
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                    index = 0;
+                    count = 0;
+                    int pos=mAdapter.getPos();
+                    list.remove(pos);
+                    TransporterDetails post = dataSnapshot.getValue(TransporterDetails.class);
+                    post.setKey(dataSnapshot.getKey());
+                    Log.d("post", post.getKey());
+                    TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(),post.getVehicle_no(),post.getAmt());
+                    list.add(pos, obj);
+                    Log.d("list", String.valueOf(list.get(pos)));
+                    index++;
+                    mAdapter = new MyRecyclerViewAdapter(list,2);
+                    Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
+                    mAdapter.notifyDataSetChanged();
+                    mRecyclerView.setAdapter(mAdapter);
                 }
 
                 @Override

@@ -20,6 +20,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
 
 import java.util.AbstractCollection;
 import java.util.ArrayList;
@@ -55,6 +56,41 @@ public class Transporter extends Activity {
         mLayoutManager = new LinearLayoutManager(this);
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(mLayoutManager);
+        SwipeableRecyclerViewTouchListener swipeTouchListener =
+                new SwipeableRecyclerViewTouchListener(mRecyclerView,
+                        new SwipeableRecyclerViewTouchListener.SwipeListener() {
+                            @Override
+                            public boolean canSwipeLeft(int position) {
+                                return false;
+                            }
+
+                            @Override
+                            public boolean canSwipeRight(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+
+                                    mAdapter.notifyItemRemoved(position);
+                                }
+                                mAdapter.notifyDataSetChanged();
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+                                    Log.d("Hello", "right");
+                                    String key =mAdapter.deleteItem(position);
+                                    deletedata(key,position);
+                                    mAdapter.notifyItemRemoved(position);
+                                }
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        });
+
+        mRecyclerView.addOnItemTouchListener(swipeTouchListener);
         new FetchData(Transporter.this).execute();
 
     }
@@ -70,16 +106,18 @@ public class Transporter extends Activity {
         Map<String, Object> value = new HashMap<String, Object>();
         value.put("Name",name);
         value.put("Address", address);
-        value.put("sms_no",sms);
+        value.put("sms_no", sms);
         value.put("contact_person",contact);
         value.put("mobile_no", mobile);
-        value.put("no_of_vhcl",no_of_vhcl);
+        value.put("no_of_vhcl", no_of_vhcl);
         value.put("vehicle_no", vehicle_no);
 
         ref.child("users").child("Transporter_Details").push().setValue(value);
         //customAdapter.notifyDataSetChanged();
     }
-
+    private void deletedata(String key, int position) {
+        ref.child("users").child("Transporter_Details").child(key).setValue(null);
+    }
     public void delete(View v){
         final String vehicle_no=et7.getText().toString();
         Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("vehicle_no").equalTo(vehicle_no);
@@ -116,6 +154,7 @@ public class Transporter extends Activity {
                 dialog.show();
             }
         });
+        mAdapter.notifyDataSetChanged();
     }
 
     class FetchData extends AsyncTask<Context,String,String> {
@@ -150,7 +189,20 @@ public class Transporter extends Activity {
 
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                    int pos=mAdapter.getPos();
+                    list.remove(pos);
+                    Log.d("child", dataSnapshot.getKey());
+                    TransporterDetails post = dataSnapshot.getValue(TransporterDetails.class);
+                    post.setKey(dataSnapshot.getKey());
+                    Log.d("post", post.getKey());
+                    TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(),post.getVehicle_no(),post.getAmt());
+                    list.add(pos, obj);
+                    Log.d("list", String.valueOf(list.get(pos)));
+                    index++;
+                    mAdapter = new MyRecyclerViewAdapter(list,1);
+                    Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
+                    mAdapter.notifyDataSetChanged();
+                    mRecyclerView.setAdapter(mAdapter);
                 }
 
                 @Override
@@ -182,6 +234,11 @@ public class Transporter extends Activity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override

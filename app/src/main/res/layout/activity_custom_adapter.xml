@@ -9,8 +9,8 @@
         android:layout_height="wrap_content"
         tools:ignore="UselessParent" >
 
-        <RadioButton
-            android:id="@+id/radiobutton"
+        <CheckBox
+            android:id="@+id/checkbox"
             android:layout_width="0sp"
             android:layout_height="wrap_content"
             android:layout_weight=".1" />
@@ -32,5 +32,4 @@
             android:layout_weight=".3" />
 
     </TableRow>
-
 </TableLayout>

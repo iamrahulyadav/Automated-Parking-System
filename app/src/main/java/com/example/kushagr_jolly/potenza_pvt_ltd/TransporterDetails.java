@@ -16,6 +16,7 @@ public class TransporterDetails {
     private String mobile_no;
     private String no_of_vhcl;
     private String vehicle_no;
+    private String amt;
 
     public TransporterDetails(){
 
@@ -30,6 +31,17 @@ public class TransporterDetails {
         mobile_no=index3;
         no_of_vhcl=index4;
         vehicle_no=index5;
+    }
+    public TransporterDetails(String k,String s, String index, String index1, String index2, String index3, String index4, String index5,String index6) {
+        this.key=k;
+        name=s;
+        address=index;
+        sms_no=index1;
+        contact_person=index2;
+        mobile_no=index3;
+        no_of_vhcl=index4;
+        vehicle_no=index5;
+        this.amt=index6;
     }
 
     @JsonProperty("Key")
@@ -97,5 +109,12 @@ public class TransporterDetails {
     public String getVehicle_no() {
         return vehicle_no;
     }
-
+    @JsonProperty("Amt")
+    public void setAmt(String T) {
+        this.amt= T;
+    }
+    @JsonProperty("Amt")
+    public String getAmt() {
+        return amt;
+    }
 }

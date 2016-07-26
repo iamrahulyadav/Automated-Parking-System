@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +28,9 @@ public class CustomAdapter extends ArrayAdapter<String> {
     private ArrayList<String> pwd= new ArrayList<String>();
     private ArrayList<String> code= new ArrayList<String>();
     private int flag;
+    RadioButton selected=null;
+    boolean b;
+    private int selectedposition;
 
     /** Constructor Class */
     public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList code) {
@@ -56,20 +60,24 @@ public class CustomAdapter extends ArrayAdapter<String> {
         TextView textView2 = (TextView) rowView.findViewById(R.id.textview2);
         TextView textView3 = (TextView) rowView.findViewById(R.id.textview3);
         if (flag == 0||flag==1) {
-            RadioButton radioButton = (RadioButton) rowView.findViewById(R.id.radiobutton);
+            final CheckBox checkBox= (CheckBox) rowView.findViewById(R.id.checkbox);
             if (email.isEmpty() == false && pwd.isEmpty() == false && code.isEmpty() == false) {
                 textView1.setText(email.get(position).toString());
                 textView2.setText(pwd.get(position).toString());
                 textView3.setText(code.get(position).toString());
             }
-            radioButton.setOnClickListener(new View.OnClickListener() {
+            checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    value[0] = email.get(position).toString();
-                    value[1] = pwd.get(position).toString();
+                    if (((CheckBox) v).isChecked()) {
+                        Toast.makeText(getContext(),
+                                "Checked", Toast.LENGTH_LONG).show();
+                        value[0] = email.get(position).toString();
+                        value[1] = pwd.get(position).toString();
+                    }
                 }
-
             });
+
         }
         return rowView;
     }

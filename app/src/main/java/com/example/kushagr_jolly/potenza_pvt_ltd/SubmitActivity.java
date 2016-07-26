@@ -122,7 +122,7 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                 graceNickname.put(typeofuser,"true");
                 Firebase newpostref = mRef.child("users").child("data").push();
                 newpostref.setValue(graceNickname);
-                editor.putString("UserID for data",newpostref.getKey());
+                editor.putString("UserID for data", newpostref.getKey());
                 AlertDialog.Builder builder = new AlertDialog.Builder(SubmitActivity.this);
                 builder.setMessage("You have successfully uploaded the details!")
                         .setTitle(R.string.submit_title)
@@ -131,6 +131,10 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                 dialog.show();
                 driverno.setText("");
                 vehicleno.setText("");
+                Intent intent = new Intent(getApplicationContext(), PrintActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             }
         });
     }
