@@ -17,6 +17,7 @@ public class SignupActivity extends Activity {
     Button b1;
     String email,pass;
     String typeofuser,userid;
+
     int i=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
