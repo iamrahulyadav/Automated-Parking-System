@@ -5,7 +5,7 @@ android {
     buildToolsVersion "22.0.1"
 
     defaultConfig {
-        applicationId "com.example.kushagr_jolly.potenza_pvt_ltd"
+        applicationId "com.potenza_pvt_ltd.AAPS"
         minSdkVersion 15
         targetSdkVersion 22
         versionCode 1
