@@ -36,15 +36,6 @@ public class DetailofUser {
     public void setEmail(String key){
         this.email=key;
     }
-
-    @JsonProperty("code")
-    public String getCode(){
-        return code;
-    }
-    public void setCode(String key){
-        this.code=key;
-    }
-
     @JsonProperty("pass")
     public String getPwd(){
         return pwd;

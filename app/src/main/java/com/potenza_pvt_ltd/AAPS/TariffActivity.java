@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -55,48 +54,7 @@ public class TariffActivity extends Activity implements AdapterView.OnItemClickL
         new getSpinnerData(TariffActivity.this).execute();
         listView = (ListView)findViewById(R.id.listView);
         listView.setOnItemClickListener(this);
-
-        Query queryRef1 = ref.child("users").child("Tariff_Details");
-        queryRef1.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("value of", dataSnapshot.getKey());
-                TariffDetails post = dataSnapshot.getValue(TariffDetails.class);
-                Log.d("hell", post.getVehicle_type());
-                Log.d("hell", post.getTotal_slab_hrs());
-                Log.d("hell", post.getTariff());
-                vehicle_type.add(post.getVehicle_type());
-                code_value.add(post.getTotal_slab_hrs());
-                tariff.add(post.getTariff());
-                customAdapter = new CustomAdapter(getApplication(), vehicle_type, code_value, tariff, 1);
-                listView.setAdapter(customAdapter);
-                customAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                int pos = customAdapter.getPos();
-                code_value.remove(pos);
-                vehicle_type.remove(pos);
-                tariff.remove(pos);
-                customAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
+        new getListviewdata(TariffActivity.this).execute();
 
     }
     @Override
@@ -104,7 +62,6 @@ public class TariffActivity extends Activity implements AdapterView.OnItemClickL
         dataAdapter.notifyDataSetChanged();
         code_value_1=parent.getItemAtPosition(position).toString();
         flag_code=flag.get(position);
-      //  Log.d("code-value-1",code_value_1);
     }
 
     @Override
@@ -119,10 +76,20 @@ public class TariffActivity extends Activity implements AdapterView.OnItemClickL
         final String no_of_slab = et2.getText().toString();
         final String inc_dur_hrs = et3.getText().toString();
         final String tariff = et4.getText().toString();
-
+        /*int max=Integer.valueOf(total_slab)/Integer.valueOf(no_of_slab);//slab size of each
+        int[][] arr = new int[max][2];
+        arr[0][0]=0;
+        arr[0][1]=max;
+        arr[1][0]=max+1;
+        arr[1][1]=max+1;
+        arr[2][0]=max+1;
+        arr[2][1]=max+1;
+        arr[3][0]=max+1;
+        arr[3][1]=max+1;
+        */
         Map<String, Object> value = new HashMap<String, Object>();
         value.put("vehicle_type",vehicle_type);
-        value.put("code","B");
+        //value.put("arr",arr);
         value.put("total_slab_hrs",total_slab);
         value.put("no_of_slab_hrs", no_of_slab);
         value.put("inc_dur_hrs", inc_dur_hrs);
@@ -244,6 +211,77 @@ public class TariffActivity extends Activity implements AdapterView.OnItemClickL
             dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(dataAdapter);
             dataAdapter.notifyDataSetChanged();
+
+        }
+
+
+    }
+
+    class getListviewdata extends AsyncTask<Context,String,String> {
+        Activity mActivity;
+        public getListviewdata (Activity activity)
+        {
+            super();
+            mActivity = activity;
+        }
+        @Override
+        protected String doInBackground(Context... params) {
+            Query queryRef1 = ref.child("users").child("Tariff_Details").child("vehicle_type").equalTo(code_value_1);
+            queryRef1.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Log.d("value of", dataSnapshot.getKey());
+                    TariffDetails post = dataSnapshot.getValue(TariffDetails.class);
+                    vehicle_type.add(post.getVehicle_type());
+                    code_value.add(post.getTotal_slab_hrs());
+                    tariff.add(post.getTariff());
+                    customAdapter = new CustomAdapter(getApplication(), vehicle_type, code_value, tariff, 5);
+                    listView.setAdapter(customAdapter);
+                    customAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    int pos = customAdapter.getPos();
+                    code_value.remove(pos);
+                    vehicle_type.remove(pos);
+                    tariff.remove(pos);
+                    customAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute(){
+
+        }
+
+
+        @Override
+        protected void onCancelled(String s) {
+            super.onCancelled(s);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
 
         }
 

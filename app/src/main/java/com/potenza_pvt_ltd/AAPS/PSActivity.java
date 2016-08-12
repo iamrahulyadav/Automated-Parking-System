@@ -80,7 +80,11 @@ public class PSActivity extends Activity implements AdapterView.OnItemSelectedLi
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                int pos = customAdapter.getPos();
+                code_value.remove(pos);
+                slot_name.remove(pos);
+                slot_number.remove(pos);
+                customAdapter.notifyDataSetChanged();
             }
 
             @Override

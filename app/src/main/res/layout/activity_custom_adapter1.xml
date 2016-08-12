@@ -19,12 +19,20 @@
             android:id="@+id/textview1"
             android:layout_width="0sp"
             android:layout_height="wrap_content"
-            android:layout_weight=".6" />
+            android:gravity="center"
+            android:layout_weight=".3" />
 
         <TextView
             android:id="@+id/textview2"
             android:layout_width="0sp"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_weight=".3" />
+        <TextView
+            android:id="@+id/textview3"
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
             android:layout_weight=".3" />
 
     </TableRow>

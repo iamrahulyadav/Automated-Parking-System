@@ -48,7 +48,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Inslip Tariff"
+        android:text="Fixed Tariff"
         android:id="@+id/textView15"
         android:layout_below="@+id/spinner4"
         android:layout_alignParentLeft="true"
@@ -92,7 +92,7 @@
     <TextView
         android:layout_width="0sp"
         android:layout_height="wrap_content"
-        android:text="Inslip Tariff"
+        android:text="Fixed Tariff"
         android:id="@+id/textView18"
         android:layout_weight=".3"
         android:layout_alignParentRight="true"

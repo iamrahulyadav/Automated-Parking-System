@@ -45,7 +45,7 @@ public class VehicleTypeDetails {
         this.code=key;
     }
 
-    @JsonProperty("inslip_tariff")
+    @JsonProperty("fixed_tariff")
     public String getInslip_tariff(){
         return inslip_tariff;
     }

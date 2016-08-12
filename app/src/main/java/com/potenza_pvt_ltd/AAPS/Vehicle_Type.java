@@ -2,7 +2,9 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -33,6 +35,8 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
     private CustomAdapter customAdapter;
     String code_value_1;
     private ArrayList code_value,vehicle_type,tariff;
+    final ArrayList<String> code = new ArrayList<String>();
+    ArrayAdapter<String> dataAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,60 +49,180 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
         code_value=new ArrayList();
         vehicle_type=new ArrayList();
         tariff= new ArrayList();
-        // Spinner click listener
         spinner.setOnItemSelectedListener(this);
-         String[] Letter={"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
-        final ArrayList<String> code = new ArrayList<String>(Arrays.asList(Letter));
-        // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, code);
-
-        // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // attaching data adapter to spinner
-        spinner.setAdapter(dataAdapter);
+        new getSpinnerData(Vehicle_Type.this).execute();
 
         listView = (ListView)findViewById(R.id.listView);
         listView.setOnItemClickListener(this);
-        Query queryRef = ref.child("users").child("Vehicle_Type");
-        queryRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("value of", String.valueOf(dataSnapshot.getKey()));
-                VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
-                code_value.add(post.getCode());
-                vehicle_type.add(post.getVehicle_type());
-                tariff.add(post.getInslip_tariff());
-                customAdapter = new CustomAdapter(getApplication(), vehicle_type,tariff,code_value,0);
-                listView.setAdapter(customAdapter);
-                customAdapter.notifyDataSetChanged();
-            }
+        new getListViewData(Vehicle_Type.this).execute();
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                int pos=customAdapter.getPos();
-                code_value.remove(pos);
-                vehicle_type.remove(pos);
-                tariff.remove(pos);
-                customAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
     }
+    class getSpinnerData extends AsyncTask<Context,String,String> {
+        Activity mActivity;
+        public getSpinnerData (Activity activity)
+        {
+            super();
+            mActivity = activity;
+        }
+        @Override
+        protected String doInBackground(Context... params) {
+            Query queryRef = ref.child("users").child("Vehicle").child("Vehicle_Code");
+            queryRef.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    code.add(String.valueOf(dataSnapshot.getValue()));
+
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+            Query queryRef1 = ref.child("users").child("Vehicle_Type");
+            queryRef1.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Log.d("val of vehicle type", String.valueOf(dataSnapshot.getValue()));
+                    VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
+                    if(code.contains(post.getCode())){
+                        code.remove(post.getCode());
+                    }
+
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute(){
+
+        }
+
+
+        @Override
+        protected void onCancelled(String s) {
+            super.onCancelled(s);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, code);
+            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinner.setAdapter(dataAdapter);
+            dataAdapter.notifyDataSetChanged();
+        }
+
+
+    }
+    class getListViewData extends AsyncTask<Context,String,String> {
+        Activity mActivity;
+        public getListViewData (Activity activity)
+        {
+            super();
+            mActivity = activity;
+        }
+        @Override
+        protected String doInBackground(Context... params) {
+            Query queryRef = ref.child("users").child("Vehicle_Type");
+            queryRef.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Log.d("value of", String.valueOf(dataSnapshot.getKey()));
+                    VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
+                    Log.d("code",post.getCode());
+                    Log.d("vt",post.getVehicle_type());
+                    Log.d("fixed",post.getInslip_tariff());
+                    code_value.add(post.getCode());
+                    vehicle_type.add(post.getVehicle_type());
+                    tariff.add(post.getInslip_tariff());
+                    customAdapter = new CustomAdapter(getApplication(), vehicle_type,tariff,code_value,3);
+                    listView.setAdapter(customAdapter);
+                    customAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    int pos=customAdapter.getPos();
+                    code_value.remove(pos);
+                    vehicle_type.remove(pos);
+                    tariff.remove(pos);
+                    customAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute(){
+
+        }
+
+
+        @Override
+        protected void onCancelled(String s) {
+            super.onCancelled(s);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+
+
+    }
+
 
     public void save(View v){
         final String code = code_value_1;
@@ -106,8 +230,8 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
         final String inslip = et3.getText().toString();
         Map<String, Object> value = new HashMap<String, Object>();
         value.put("code",code);
-        value.put("vehicle_type",vehicle);
-        value.put("inslip_tariff",inslip);
+        value.put("vehicle_type", vehicle);
+        value.put("fixed_tariff", inslip);
         ref.child("users").child("Vehicle_Type").push().setValue(value);
         customAdapter.notifyDataSetChanged();
     }

@@ -140,7 +140,8 @@
         android:layout_alignRight="@+id/editText13"
         android:layout_alignEnd="@+id/editText13"
         android:layout_alignLeft="@+id/editText13"
-        android:layout_alignStart="@+id/editText13" />
+        android:layout_alignStart="@+id/editText13"
+        android:hint="Enter Vehicle No"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -151,28 +152,32 @@
         android:layout_below="@+id/button_list_save"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/my_recycler_view1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        android:layout_below="@+id/textView26"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Save"
         android:id="@+id/button_list_save"
+        android:onClick="save"
         android:layout_below="@+id/editText14"
-        android:layout_centerHorizontal="true"
-        android:onClick="save"/>
-    <Button
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Delete"
-        android:id="@+id/button_list_delete"
+        android:id="@android:id/list"
+        android:layout_below="@+id/textView26"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add More"
+        android:onClick="add"
+        android:id="@+id/button_add_more"
         android:layout_below="@+id/editText14"
-        android:layout_alignRight="@+id/my_recycler_view"
-        android:layout_alignEnd="@+id/my_recycler_view"
-        android:onClick="delete"/>
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

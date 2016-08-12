@@ -151,7 +151,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         new FetchData(CardViewActivity.this).execute();
         Log.d("After", "FetchData");
         mAdapter = new MyRecyclerViewAdapter(list);
-        if(typeofuser.contentEquals("Admin")) {
+        /*if(typeofuser.contentEquals("Admin")) {
             SwipeableRecyclerViewTouchListener swipeTouchListener =
                     new SwipeableRecyclerViewTouchListener(mRecyclerView,
                             new SwipeableRecyclerViewTouchListener.SwipeListener() {
@@ -188,6 +188,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
 
             mRecyclerView.addOnItemTouchListener(swipeTouchListener);
         }
+        */
         mRecyclerView.setAdapter(mAdapter);
 
     }

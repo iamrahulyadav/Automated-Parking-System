@@ -49,8 +49,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     @Override
     public MyRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View view;
-        if(value==1||value==2){
+        if(value==1){
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_transporter_view, viewGroup, false);
+        }
+        else if(value==2){
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_transporter_accounts_view, viewGroup, false);
         }
         else{
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_view_row_records, viewGroup, false);
@@ -64,13 +67,12 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public void onBindViewHolder(ViewHolder holder, final int position) {
         if(value==1){
             holder.tv1.setText(mDataset1.get(position).getName());
-            holder.tv2.setText(mDataset1.get(position).getAddress());
-            holder.tv3.setText(mDataset1.get(position).getSms_no());
-            holder.tv4.setText(mDataset1.get(position).getContact_person());
-            holder.tv5.setText(mDataset1.get(position).getMobile_no());
-            holder.tv6.setText(mDataset1.get(position).getNo_of_vhcl());
-            holder.tv7.setText(mDataset1.get(position).getVehicle_no());
-            holder.tv8.setText(mDataset1.get(position).getAmt());
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pos=position;
+                }
+            });
         }
         else if(value==2) {
             holder.tv1.setText(mDataset1.get(position).getName());
@@ -173,13 +175,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             super(view);
             if(value==1){
                 tv1= (TextView) itemView.findViewById(R.id.textView);
-                tv2= (TextView) itemView.findViewById(R.id.textView2);
-                tv3= (TextView) itemView.findViewById(R.id.textView3);
-                tv4= (TextView) itemView.findViewById(R.id.textView4);
-                tv5= (TextView) itemView.findViewById(R.id.textView5);
-                tv6= (TextView) itemView.findViewById(R.id.textView6);
-                tv7= (TextView) itemView.findViewById(R.id.textView7);
-                tv8= (TextView) itemView.findViewById(R.id.textView8);
             }
             else if(value==2){
                 tv1= (TextView) itemView.findViewById(R.id.textView);

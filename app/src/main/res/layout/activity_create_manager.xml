@@ -10,20 +10,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Manager Code"
-        android:id="@+id/textView10"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="Manager Name"
-        android:id="@+id/textView11"
-        android:layout_below="@+id/editText"
-        android:layout_alignRight="@+id/textView10"
-        android:layout_alignEnd="@+id/textView10" />
+        android:id="@+id/textView11" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -37,22 +25,14 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/editText"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:inputType="textPersonName"
         android:ems="10"
         android:id="@+id/editText2"
-        android:layout_alignTop="@+id/textView11"
-        android:layout_alignRight="@+id/editText"
-        android:layout_alignEnd="@+id/editText" />
+        android:layout_alignParentTop="true"
+        android:layout_alignLeft="@+id/editText5"
+        android:layout_alignStart="@+id/editText5"
+        android:layout_alignRight="@+id/listview"
+        android:layout_alignEnd="@+id/listview" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -60,9 +40,46 @@
         android:inputType="textPassword"
         android:ems="10"
         android:id="@+id/editText5"
-        android:layout_alignTop="@+id/textView12"
-        android:layout_alignRight="@+id/editText2"
-        android:layout_alignEnd="@+id/editText2" />
+        android:layout_below="@+id/editText2"
+        android:layout_alignRight="@+id/listview"
+        android:layout_alignEnd="@+id/listview"
+        android:layout_toRightOf="@+id/textView11"
+        android:layout_toEndOf="@+id/textView11" />
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_list_save"
+        android:id="@+id/table_row"
+        tools:ignore="UselessParent" >
+        <TextView
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:layout_weight=".1"
+            android:id="@+id/textView16"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="45dp"
+            android:layout_marginStart="45dp" />
+
+        <TextView
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:text="Email ID"
+            android:layout_weight=".6"
+            android:id="@+id/textView17"
+            android:layout_centerHorizontal="true" />
+
+        <TextView
+            android:layout_width="0sp"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:id="@+id/textView18"
+            android:layout_weight=".3"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+    </TableRow>
 
 
     <ListView
@@ -70,17 +87,16 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:choiceMode="singleChoice"
-        android:layout_below="@+id/button_list_search" />
+        android:layout_below="@+id/table_row" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Delete"
         android:id="@+id/button_list_delete"
+        android:onClick="delete"
         android:layout_below="@+id/editText5"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:onClick="delete"/>
+        android:layout_centerHorizontal="true" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
@@ -89,8 +105,6 @@
         android:text="Clear"
         android:id="@+id/button_list_clear"
         android:layout_below="@+id/editText5"
-        android:layout_toRightOf="@+id/textView10"
-        android:layout_toEndOf="@+id/textView10"
         android:onClick="clear"/>
 
     <Button
@@ -99,23 +113,8 @@
         android:layout_height="wrap_content"
         android:text="Save"
         android:id="@+id/button_list_save"
-        android:layout_below="@+id/editText5"
-        android:layout_toRightOf="@+id/button_list_clear"
-        android:layout_toEndOf="@+id/button_list_clear"
-        android:layout_marginLeft="29dp"
-        android:layout_marginStart="29dp"
-        android:onClick="save"/>
+        android:onClick="save"
+        android:layout_alignTop="@+id/button_list_delete"
+        android:layout_alignRight="@+id/listview" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Search"
-        android:id="@+id/button_list_search"
-        android:layout_below="@+id/editText5"
-        android:layout_toRightOf="@+id/button_list_save"
-        android:layout_toEndOf="@+id/button_list_save"
-        android:layout_marginLeft="29dp"
-        android:layout_marginStart="29dp"
-        android:onClick="search"/>
 </RelativeLayout>

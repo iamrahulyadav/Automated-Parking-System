@@ -27,15 +27,14 @@ public class CreateOperator extends Activity implements AdapterView.OnItemClickL
     Firebase ref;
     ListView listView;
     CustomAdapter customAdapter;
-    EditText et1,et2,et3;
-    private ArrayList code= new ArrayList();
+    EditText et2,et3;
+    private ArrayList uid= new ArrayList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_operator);
         ref=new Firebase(Constants.FIREBASE_URL);
-        et1=(EditText)findViewById(R.id.editText);
         et2=(EditText)findViewById(R.id.editText2);
         et3=(EditText)findViewById(R.id.editText5);
         listView = (ListView)findViewById(R.id.listview);
@@ -49,41 +48,30 @@ public class CreateOperator extends Activity implements AdapterView.OnItemClickL
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("value of", String.valueOf(dataSnapshot.getKey()));
                 DetailofUser post = dataSnapshot.getValue(DetailofUser.class);
-                Log.d("email",post.getEmail());
-                Log.d("pass",post.getPwd());
+                post.setKey(dataSnapshot.getKey());
+                uid.add(post.getKey());
                 values.add(post.getEmail());
                 pwd.add(post.getPwd());
-                code.add(post.getCode());
-                customAdapter = new CustomAdapter(getApplication(), values, pwd,code);
+                customAdapter = new CustomAdapter(getApplication(), values, pwd,uid,1);
                 customAdapter.notifyDataSetChanged();
                 listView.setAdapter(customAdapter);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                int pos=customAdapter.getPos();
-                values.remove(pos);
-                pwd.remove(pos);
-                code.remove(pos);
-                DetailofUser post = dataSnapshot.getValue(DetailofUser.class);
-                Log.d("email",post.getEmail());
-                Log.d("pass", post.getPwd());
-                values.add(post.getEmail());
-                pwd.add(post.getPwd());
-                code.add(post.getCode());
-                customAdapter = new CustomAdapter(getApplication(), values, pwd,code);
-                customAdapter.notifyDataSetChanged();
+                values.clear();
+                pwd.clear();
+                uid.clear();
+                fetchdata();
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                int pos=customAdapter.getPos();
-                values.remove(pos);
-                pwd.remove(pos);
-                code.remove(pos);
-                customAdapter.notifyDataSetChanged();
+                values.clear();
+                pwd.clear();
+                uid.clear();
+                fetchdata();
             }
 
             @Override
@@ -105,13 +93,11 @@ public class CreateOperator extends Activity implements AdapterView.OnItemClickL
     }
 
     public void clear(View v){
-        et1.setText("");
         et2.setText("");
         et3.setText("");
         fetchdata();
     }
     public void save(View v){
-        final String code = et1.getText().toString();
         String email = et2.getText().toString();
         final String pass = et3.getText().toString();
         email=email.toLowerCase();
@@ -121,7 +107,6 @@ public class CreateOperator extends Activity implements AdapterView.OnItemClickL
             public void onSuccess(Map<String, Object> result) {
                 Map<String, Object> value = new HashMap<String, Object>();
                 value.put("email-address", finalEmail);
-                value.put("code", code);
                 value.put("pass", pass);
                 ref.child("users").child("Operator").push().setValue(value);
                 Log.d("Successfully", String.valueOf(result.get("uid")));
@@ -137,23 +122,24 @@ public class CreateOperator extends Activity implements AdapterView.OnItemClickL
                 dialog.show();
             }
         });
-        et1.setText("");
         et2.setText("");
         et3.setText("");
     }
     public void search(View v){
         values.clear();
         pwd.clear();
+        uid.clear();
         final String email = et2.getText().toString();
         Query queryRef = ref.child("users").child("Operator").orderByChild("email-address").equalTo(email);
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                 DetailofUser post = snapshot.getValue(DetailofUser.class);
+                post.setKey(snapshot.getKey());
+                uid.add(post.getKey());
                 values.add(post.getEmail());
                 pwd.add(post.getPwd());
-                code.add(post.getCode());
-                customAdapter = new CustomAdapter(getApplication(), values, pwd, code);
+                customAdapter = new CustomAdapter(getApplication(), values, pwd, uid,1);
                 customAdapter.notifyDataSetChanged();
                 listView.setAdapter(customAdapter);
             }
@@ -225,7 +211,7 @@ public class CreateOperator extends Activity implements AdapterView.OnItemClickL
             public void onSuccess() {
                 AlertDialog.Builder builder = new AlertDialog.Builder(CreateOperator.this);
                 builder.setMessage("User Removed From Database")
-                        .setTitle(R.string.login_error_title)
+                        .setTitle(R.string.title_msg_dailog_box)
                         .setPositiveButton(android.R.string.ok, null);
                 AlertDialog dialog = builder.create();
                 dialog.show();

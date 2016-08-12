@@ -2,16 +2,25 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CustomAdapter extends ArrayAdapter<String> {
     final String[] value= new String[2];
@@ -19,30 +28,32 @@ public class CustomAdapter extends ArrayAdapter<String> {
     private Context context;
     private ArrayList<String> email=new ArrayList<String>();
     private ArrayList<String> pwd= new ArrayList<String>();
-    private ArrayList<String> code= new ArrayList<String>();
+    private ArrayList<String> uid= new ArrayList<String>();
     private int flag;
     boolean b;
-    private int pos;
+    int pos;
 
     /** Constructor Class */
-    public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList code) {
+    public CustomAdapter(Application c, ArrayList strings, ArrayList values) {
         super(c, R.layout.activity_custom_adapter ,values);
         this.context = c.getApplicationContext();
         this.email = strings;
         this.pwd=values;
-        this.code=code;
     }
-    public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList code,int num) {
-        super(c,R.layout.activity_custom_adapter ,values);
-        Log.d("constructor","constructor");
+    public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList uid) {
+        super(c, R.layout.activity_custom_adapter ,values);
         this.context = c.getApplicationContext();
         this.email = strings;
         this.pwd=values;
-        this.code=code;
+        this.uid=uid;
+    }
+    public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList uid,int num) {
+        super(c, R.layout.activity_custom_adapter, values);
+        this.context = c.getApplicationContext();
+        this.email = strings;
+        this.pwd=values;
+        this.uid=uid;
         this.flag=num;
-        //for(int i=0;i<strings.size();i++){
-        //    Log.d("list",email.get(i).toString()+" "+pwd.get(i).toString()+" "+code.get(i).toString());
-        //}
     }
 
     public CustomAdapter(Application application, ArrayList vehicle_type, ArrayList code_value, int i) {
@@ -55,16 +66,17 @@ public class CustomAdapter extends ArrayAdapter<String> {
 
     /** Implement getView method for customizing row of list view. */
     public View getView(final int position, View convertView, ViewGroup parent) {
-        View rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_custom_adapter, parent, false);
-        TextView textView1 = (TextView) rowView.findViewById(R.id.textview1);
-        TextView textView2 = (TextView) rowView.findViewById(R.id.textview2);
-        TextView textView3 = (TextView) rowView.findViewById(R.id.textview3);
-        if (flag==1) {
-            final CheckBox checkBox= (CheckBox) rowView.findViewById(R.id.checkbox);
-            if (email.isEmpty() == false && pwd.isEmpty() == false && code.isEmpty() == false) {
-                textView1.setText(email.get(position).toString());
-                textView2.setText(pwd.get(position).toString());
-                textView3.setText(code.get(position).toString());
+        View rowView;
+        if (flag == 3) {
+            rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_custom_adapter1, parent, false);
+            TextView textView1 = (TextView) rowView.findViewById(R.id.textview1);
+            TextView textView2 = (TextView) rowView.findViewById(R.id.textview2);
+            TextView textView3 = (TextView) rowView.findViewById(R.id.textview3);
+            final CheckBox checkBox = (CheckBox) rowView.findViewById(R.id.checkbox);
+            if (email.isEmpty() == false && pwd.isEmpty() == false && uid.isEmpty() == false) {
+                textView1.setText(uid.get(position).toString());
+                textView2.setText(email.get(position).toString());
+                textView3.setText(pwd.get(position).toString());
             }
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -72,18 +84,18 @@ public class CustomAdapter extends ArrayAdapter<String> {
                     if (((CheckBox) v).isChecked()) {
                         value[0] = email.get(position).toString();
                         value[1] = pwd.get(position).toString();
-                        pos=position;
+                        pos = position;
                     }
                 }
             });
-
-        }
-        if(flag==0){
-            final CheckBox checkBox= (CheckBox) rowView.findViewById(R.id.checkbox);
-            if (email.isEmpty() == false && pwd.isEmpty() == false && code.isEmpty()==false) {
+        } else {
+            rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_custom_adapter, parent, false);
+            TextView textView1 = (TextView) rowView.findViewById(R.id.textview1);
+            TextView textView2 = (TextView) rowView.findViewById(R.id.textview2);
+            final CheckBox checkBox = (CheckBox) rowView.findViewById(R.id.checkbox);
+            if (email.isEmpty() == false && pwd.isEmpty() == false) {
                 textView1.setText(email.get(position).toString());
                 textView2.setText(pwd.get(position).toString());
-                textView3.setText(code.get(position).toString());
             }
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -91,8 +103,78 @@ public class CustomAdapter extends ArrayAdapter<String> {
                     if (((CheckBox) v).isChecked()) {
                         value[0] = email.get(position).toString();
                         value[1] = pwd.get(position).toString();
-                        pos=position;
+                        pos = position;
                     }
+                }
+            });
+        }
+
+        if (flag == 0 || flag == 1) {
+            rowView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    final String[] pass = new String[1];
+                    final String[] key = new String[1];
+                    android.support.v7.app.AlertDialog.Builder alertDialog = new android.support.v7.app.AlertDialog.Builder(v.getContext());
+
+                    alertDialog.setMessage("Please Enter Updated Password");
+                    final EditText input = new EditText(v.getContext());
+                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.MATCH_PARENT);
+                    input.setLayoutParams(lp);
+                    alertDialog.setView(input);
+                    // Setting Positive "Yes" Button
+                    alertDialog.setPositiveButton("Update",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Write your uid here to execute after dialog
+                                    String mail = String.valueOf(email.get(position));
+                                    pass[0] = input.getText().toString();
+                                    key[0] = String.valueOf(uid.get(position));
+                                    pos = position;
+                                    Log.d("pos", String.valueOf(key[0]));
+                                    final Firebase ref = new Firebase(Constants.FIREBASE_URL);
+                                    ref.changePassword(mail, String.valueOf(pwd.get(position)), pass[0], new Firebase.ResultHandler() {
+                                        @Override
+                                        public void onSuccess() {
+                                            // password changed
+                                            Firebase alanRef = null;
+                                            if (flag == 0) {
+                                                alanRef = ref.child("users").child("Manager").child(key[0]);
+                                            } else if (flag == 1) {
+                                                alanRef = ref.child("users").child("Operator").child(key[0]);
+                                            }
+                                            Map<String, Object> nickname = new HashMap<String, Object>();
+                                            nickname.put("pass", pass[0]);
+                                            alanRef.updateChildren(nickname);
+                                            Toast.makeText(v.getContext(), input.getText(), Toast.LENGTH_SHORT).show();
+                                            Log.d("flag", String.valueOf(flag));
+                                        }
+
+                                        @Override
+                                        public void onError(FirebaseError firebaseError) {
+                                            // error encountered
+                                        }
+                                    });
+
+
+                                }
+                            });
+                    // Setting Negative "NO" Button
+                    alertDialog.setNegativeButton("No",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // Write your uid here to execute after dialog
+                                    dialog.cancel();
+                                }
+                            });
+
+                    // closed
+
+                    // Showing Alert Message
+                    alertDialog.show();
+
                 }
             });
         }

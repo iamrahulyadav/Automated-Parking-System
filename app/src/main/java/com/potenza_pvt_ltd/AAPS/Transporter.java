@@ -2,40 +2,48 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
-import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
-import com.potenza_pvt_ltd.AAPS.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Transporter extends Activity {
+public class Transporter extends ListActivity {
 
-    private RecyclerView mRecyclerView;
-    private LinearLayoutManager mLayoutManager;
     protected EditText et1,et2,et3,et4,et5,et6,et7;
     Firebase ref;
-    final ArrayList list = new ArrayList<TruckDetailsActivity>();
+    final ArrayList<TransporterDetails> list = new ArrayList<TransporterDetails>();
     int count = 0;
     int index=0;
     private MyRecyclerViewAdapter mAdapter;
-
-
+    ArrayAdapter <String>adapter;
+    ListView l;
+    ArrayList<String> name=new ArrayList<String>();
+    ArrayList key=new ArrayList<>();
+    ArrayList<TransporterDetails> dataset;
+    String uid=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,113 +56,129 @@ public class Transporter extends Activity {
         et5=(EditText)findViewById(R.id.editText12);
         et6=(EditText)findViewById(R.id.editText13);
         et7=(EditText)findViewById(R.id.editText14);
-        mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view1);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(this);
-        mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        SwipeableRecyclerViewTouchListener swipeTouchListener =
-                new SwipeableRecyclerViewTouchListener(mRecyclerView,
-                        new SwipeableRecyclerViewTouchListener.SwipeListener() {
-                            @Override
-                            public boolean canSwipeLeft(int position) {
-                                return false;
-                            }
-
-                            @Override
-                            public boolean canSwipeRight(int position) {
-                                return true;
-                            }
-
-                            @Override
-                            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
-                                for (int position : reverseSortedPositions) {
-
-                                    mAdapter.notifyItemRemoved(position);
-                                }
-                                mAdapter.notifyDataSetChanged();
-                            }
-
-                            @Override
-                            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
-                                for (int position : reverseSortedPositions) {
-                                    Log.d("Hello", "right");
-                                    String key =mAdapter.deleteItem(position);
-                                    deletedata(key,position);
-                                    mAdapter.notifyItemRemoved(position);
-                                }
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
-
-        mRecyclerView.addOnItemTouchListener(swipeTouchListener);
-        new FetchData(Transporter.this).execute();
+        l=getListView();
+         new FetchData(Transporter.this).execute();
 
     }
     public void save(View v){
-        final String name = et1.getText().toString();
-        final String address = et2.getText().toString();
-        final String sms = et3.getText().toString();
-        final String contact = et4.getText().toString();
-        final String mobile = et5.getText().toString();
-        final String no_of_vhcl = et6.getText().toString();
-        final String vehicle_no = et7.getText().toString();
-
-        Map<String, Object> value = new HashMap<String, Object>();
-        value.put("Name",name);
-        value.put("Address", address);
-        value.put("sms_no", sms);
-        value.put("contact_person",contact);
-        value.put("mobile_no", mobile);
-        value.put("no_of_vhcl", no_of_vhcl);
-        value.put("vehicle_no", vehicle_no);
-
-        ref.child("users").child("Transporter_Details").push().setValue(value);
-        //customAdapter.notifyDataSetChanged();
-    }
-    private void deletedata(String key, int position) {
-        ref.child("users").child("Transporter_Details").child(key).setValue(null);
-    }
-    public void delete(View v){
-        final String vehicle_no=et7.getText().toString();
-        Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("vehicle_no").equalTo(vehicle_no);
-        queryRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                Log.d("delte func", String.valueOf(vehicle_no));
-                ref.child("users").child("Transporter_Details").child(snapshot.getKey()).removeValue();
-                mAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
+        if(uid==null) {
+            final String name = et1.getText().toString();
+            final String address = et2.getText().toString();
+            final String sms = et3.getText().toString();
+            final String contact = et4.getText().toString();
+            final String mobile = et5.getText().toString();
+            final String no_of_vhcl = et6.getText().toString();
+            final String vehicle_no = et7.getText().toString();
+            if(vehicle_no.contains(",")){
                 AlertDialog.Builder builder = new AlertDialog.Builder(Transporter.this);
-                builder.setMessage(firebaseError.getMessage())
-                        .setTitle(R.string.login_error_title)
+                builder.setMessage("Please Enter Vehicle Number without special characters")
+                        .setTitle(R.string.title_msg_dailog_box)
                         .setPositiveButton(android.R.string.ok, null);
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }
-        });
-        mAdapter.notifyDataSetChanged();
+            else {
+                Map<String, Object> value = new HashMap<String, Object>();
+                value.put("Name", name);
+                value.put("Address", address);
+                value.put("sms_no", sms);
+                value.put("contact_person", contact);
+                value.put("mobile_no", mobile);
+                value.put("no_of_vhcl", no_of_vhcl);
+                value.put("vehicle_no", vehicle_no);
+                ref.child("users").child("Transporter_Details").push().setValue(value);
+            }
+        }
+        else{
+            final String name = et1.getText().toString();
+            final String address = et2.getText().toString();
+            final String sms = et3.getText().toString();
+            final String contact = et4.getText().toString();
+            final String mobile = et5.getText().toString();
+            final String no_of_vhcl = et6.getText().toString();
+            Map<String, Object> value = new HashMap<String, Object>();
+            value.put("Name", name);
+            value.put("Address", address);
+            value.put("sms_no", sms);
+            value.put("contact_person", contact);
+            value.put("mobile_no", mobile);
+            value.put("no_of_vhcl", no_of_vhcl);
+            ref.child("users").child("Transporter_Details").child(uid).updateChildren(value);
+
+        }
+        et1.setText("");
+        et2.setText("");
+        et3.setText("");
+        et4.setText("");
+        et5.setText("");
+        et6.setText("");
+        et7.setText("");
     }
 
-    class FetchData extends AsyncTask<Context,String,String> {
+    public void add(View v){
+        String sms=et3.getText().toString();
+        final String vehicle_no=et7.getText().toString();
+        if(sms==null){
+            AlertDialog.Builder builder = new AlertDialog.Builder(Transporter.this);
+            builder.setMessage("Please Enter SMS Number")
+                    .setTitle(R.string.title_msg_dailog_box)
+                    .setPositiveButton(android.R.string.ok, null);
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+        else if(vehicle_no.contains(",")){
+            if(vehicle_no.contains(",")){
+                AlertDialog.Builder builder = new AlertDialog.Builder(Transporter.this);
+                builder.setMessage("Please Enter Vehicle Number without special characters")
+                        .setTitle(R.string.title_msg_dailog_box)
+                        .setPositiveButton(android.R.string.ok, null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        }
+        else {
+            Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("sms_no").equalTo(sms);
+            queryRef.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                    Log.d("child", snapshot.getKey());
+                    TransporterDetails post = snapshot.getValue(TransporterDetails.class);
+
+                    String vhl_no;
+                    if(post.getVehicle_no()==""){
+                        vhl_no=vehicle_no;
+                    }
+                    else {
+                        vhl_no = post.getVehicle_no() + "," + vehicle_no;
+                    }
+                    Map<String, Object> value = new HashMap<String, Object>();
+                    value.put("vehicle_no", vhl_no);
+                    ref.child("users").child("Transporter_Details").child(snapshot.getKey()).updateChildren(value);
+
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+                }
+            });
+        }
+    et7.setText("");
+    }
+
+
+    class FetchData extends AsyncTask<Context,String,String> implements AdapterView.OnItemClickListener {
         Activity mActivity;
         public FetchData (Activity activity)
         {
@@ -163,43 +187,32 @@ public class Transporter extends Activity {
         }
         @Override
         protected String doInBackground(Context... params) {
+            index = 0;
+            count = 0;
             Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("sms_no");
             queryRef.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                    index = 0;
-                    count = 0;
                     Log.d("child", snapshot.getKey());
                     TransporterDetails post = snapshot.getValue(TransporterDetails.class);
                     post.setKey(snapshot.getKey());
                     Log.d("post", post.getKey());
-                    TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(),post.getVehicle_no());
+                    TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(), post.getVehicle_no());
                     list.add(index, obj);
+                    name.add(index, post.getName());
+                    key.add(index, post.getKey());
                     Log.d("list", String.valueOf(list.get(index)));
                     index++;
-                    mAdapter = new MyRecyclerViewAdapter(list,1);
-                    Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
-                    mAdapter.notifyDataSetChanged();
-                    mRecyclerView.setAdapter(mAdapter);
-
                 }
 
                 @Override
                 public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                    int pos=mAdapter.getPos();
-                    list.remove(pos);
-                    Log.d("child", dataSnapshot.getKey());
-                    TransporterDetails post = dataSnapshot.getValue(TransporterDetails.class);
-                    post.setKey(dataSnapshot.getKey());
-                    Log.d("post", post.getKey());
-                    TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(),post.getVehicle_no(),post.getAmt());
-                    list.add(pos, obj);
-                    Log.d("list", String.valueOf(list.get(pos)));
-                    index++;
-                    mAdapter = new MyRecyclerViewAdapter(list,1);
-                    Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
-                    mAdapter.notifyDataSetChanged();
-                    mRecyclerView.setAdapter(mAdapter);
+                    list.clear();
+                    name.clear();
+                    key.clear();
+                    fetchdata();
+                    adapter.notifyDataSetChanged();
+
                 }
 
                 @Override
@@ -230,7 +243,69 @@ public class Transporter extends Activity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            adapter = new ArrayAdapter<String>(getBaseContext(),R.layout.listview,name);
+            l.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+            l.setMultiChoiceModeListener(new ModeCallback());
+            l.setOnItemClickListener(this);
+            l.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
         }
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            dataset=list;
+            et1.setText(dataset.get(position).getName());
+            et2.setText(dataset.get(position).getAddress());
+            et3.setText(dataset.get(position).getSms_no());
+            et4.setText(dataset.get(position).getContact_person());
+            et5.setText(dataset.get(position).getMobile_no());
+            et6.setText(dataset.get(position).getNo_of_vhcl());
+            uid=dataset.get(position).getKey();
+        }
+    }
+
+    private void fetchdata() {
+        index = 0;
+        count = 0;
+        Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("sms_no");
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                Log.d("child", snapshot.getKey());
+                TransporterDetails post = snapshot.getValue(TransporterDetails.class);
+                post.setKey(snapshot.getKey());
+                Log.d("post", post.getKey());
+                TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(), post.getVehicle_no());
+                list.add(index, obj);
+                name.add(index, post.getName());
+                key.add(index, post.getKey());
+                Log.d("list", String.valueOf(list.get(index)));
+                index++;
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                list.clear();
+                name.clear();
+                key.clear();
+                fetchdata();
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
+
     }
 
     @Override
@@ -245,5 +320,60 @@ public class Transporter extends Activity {
         Intent i = new Intent(Transporter.this, Masters.class);
         startActivity(i);
     }
+    private class ModeCallback implements ListView.MultiChoiceModeListener {
 
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.list_select_menu, menu);
+            mode.setTitle("Select Items");
+            return true;
+        }
+
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return true;
+        }
+
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.del:
+                    final SparseBooleanArray checked=l.getCheckedItemPositions();
+                    for (int i = 0; i < l.getAdapter().getCount(); i++) {
+                        if (checked.get(i)) {
+                            // Do something
+                            Log.d("key", String.valueOf(key.get(i)));
+                            ref.child("users").child("Transporter_Details").child(String.valueOf(key.get(i))).removeValue();
+                        }
+                    }
+                    Toast.makeText(Transporter.this, "Deleted" + getListView().getCheckedItemCount() +
+                            " items", Toast.LENGTH_SHORT).show();
+                    mode.finish();
+                    break;
+                default:
+                    Toast.makeText(Transporter.this, "Clicked " + item.getTitle(),
+                            Toast.LENGTH_SHORT).show();
+                    break;
+            }
+            return true;
+        }
+
+        public void onDestroyActionMode(ActionMode mode) {
+        }
+
+        public void onItemCheckedStateChanged(ActionMode mode,
+                                              int position, long id, boolean checked) {
+            final int checkedCount = getListView().getCheckedItemCount();
+            switch (checkedCount) {
+                case 0:
+                    mode.setSubtitle(null);
+                    break;
+                case 1:
+                    mode.setSubtitle("One item selected");
+                    break;
+                default:
+                    mode.setSubtitle("" + checkedCount + " items selected");
+                    break;
+            }
+        }
+
+    }
 }
