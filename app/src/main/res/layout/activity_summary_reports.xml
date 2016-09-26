@@ -5,84 +5,171 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.potenza_pvt_ltd.AAPS.SummaryReports">
-    <EditText
-        android:id="@+id/etxt_fromdate"
+    <ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight=".5"
-        android:hint="From Date"
+        android:id="@+id/progressBar"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
-
-    <EditText
-        android:id="@+id/etxt_todate"
+    <ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight=".5"
-        android:hint="To Date"
-        android:layout_below="@+id/etxt_fromdate"
-        android:layout_alignLeft="@+id/etxt_fromdate"
-        android:layout_alignStart="@+id/etxt_fromdate" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Date From"
-        android:id="@+id/textView32"
+        android:id="@+id/progressBar1"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
+        android:layout_centerHorizontal="true" />
+    <ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Date To"
-        android:id="@+id/textView33"
-        android:layout_below="@+id/etxt_fromdate"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
+        android:id="@+id/progressBar2"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+    <ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Vehicle Type"
-        android:id="@+id/textView34"
-        android:layout_below="@+id/etxt_todate"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:id="@+id/progressBar3"
+        android:layout_alignParentTop="true"
+        android:visibility="gone"
+        android:layout_centerHorizontal="true" />
 
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinner6"
-        android:layout_below="@+id/etxt_todate"
-        android:layout_alignLeft="@+id/etxt_todate"
-        android:layout_alignStart="@+id/etxt_todate" />
+    <LinearLayout android:orientation="vertical"
+        android:visibility="visible"
+        android:id="@+id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Operator"
-        android:id="@+id/textView35"
-        android:layout_below="@+id/spinner6"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date From"
+            android:id="@+id/textView32"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinner7"
-        android:layout_below="@+id/spinner6"
-        android:layout_alignLeft="@+id/spinner6"
-        android:layout_alignStart="@+id/spinner6" />
+        <EditText
+            android:id="@+id/etxt_fromdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="From Date"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Export"
-        android:id="@+id/button5"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="export"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date To"
+            android:id="@+id/textView33"
+            android:layout_below="@+id/etxt_fromdate"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
+        <EditText
+            android:id="@+id/etxt_todate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="To Date"
+            android:layout_below="@+id/etxt_fromdate"
+            android:layout_alignLeft="@+id/etxt_fromdate"
+            android:layout_alignStart="@+id/etxt_fromdate" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vehicle Type"
+            android:id="@+id/textView34"
+            android:layout_below="@+id/etxt_todate"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner6"
+            android:layout_below="@+id/etxt_todate"
+            android:layout_alignLeft="@+id/etxt_todate"
+            android:layout_alignStart="@+id/etxt_todate" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Operator"
+            android:id="@+id/textView35"
+            android:layout_below="@+id/spinner6"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner7"
+            android:layout_below="@+id/spinner6"
+            android:layout_alignLeft="@+id/spinner6"
+            android:layout_alignStart="@+id/spinner6" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Transporter"
+            android:id="@+id/textView10"
+            android:layout_below="@+id/spinner7"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner5"
+            android:layout_below="@+id/spinner7"
+            android:layout_alignRight="@+id/spinner7"
+            android:layout_alignEnd="@+id/spinner7"
+            android:layout_alignLeft="@+id/spinner7"
+            android:layout_alignStart="@+id/spinner7" />
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/spinner5"
+            android:id="@+id/table_row"
+            tools:ignore="UselessParent" >
+
+            <TextView
+                android:layout_width="0sp"
+                android:layout_height="wrap_content"
+                android:text="Parking Slot Name"
+                android:layout_weight=".6"
+                android:id="@+id/textView17"
+                android:layout_centerHorizontal="true" />
+
+            <TextView
+                android:layout_width="0sp"
+                android:layout_height="wrap_content"
+                android:text="No of Cars"
+                android:id="@+id/textView18"
+                android:layout_weight=".4"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true" />
+        </TableRow>
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/listView2" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Export"
+                android:id="@+id/button5"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:onClick="export"/>
+        </RelativeLayout>
+    </LinearLayout>
 </RelativeLayout>

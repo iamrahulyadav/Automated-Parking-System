@@ -16,7 +16,7 @@ public class TariffDetails {
     private String inc_dur_hrs;
     private String tariff;
     private String code;
-    private int r0c0;
+    private int[][] arr;
 
     public TariffDetails() {
 
@@ -77,19 +77,9 @@ public class TariffDetails {
     public void setCode(String key){
         this.code=key;
     }
-    @JsonProperty("r0c0")
-    public int getr0c0(){
-        return r0c0;
-    }
-
-    @JsonProperty("r0c0")
-    public int getr0c1(){
-        return r0c0;
-    }
-
-    @JsonProperty("r0c0")
-    public int getr2c0(){
-        return r0c0;
+    @JsonProperty("arr")
+    public int[][] getarr(){
+        return arr;
     }
 
 

@@ -16,6 +16,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -44,7 +46,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class SlotReport extends Activity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+public class SlotReport extends Activity implements View.OnClickListener{
     private EditText fromDateEtxt;
     private EditText toDateEtxt;
     private DatePickerDialog fromDatePickerDialog;
@@ -52,7 +54,6 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
     private String datefrom,dateto;
     private SimpleDateFormat dateFormatter;
     Firebase ref;
-    final ArrayList<String> code_operator = new ArrayList<String>();
     final ArrayList<String> date_array = new ArrayList<String>();
     final ArrayList<String> time_array = new ArrayList<String>();
     final ArrayList<String> vehicle_no = new ArrayList<String>();
@@ -60,15 +61,22 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
     final ArrayList<String> email_operator = new ArrayList<String>();
     final ArrayList<String> amt_operator = new ArrayList<String>();
     final ArrayList<String> contractor_name = new ArrayList<String>();
-    Spinner sp1;
     String transporter;
     List<String> categories = new ArrayList<>();
+    ProgressBar pb,pb1,pb2,pb3;
+    private LinearLayout linear_layout;
+    private Spinner spinner;
+    private Spinner spinner2,spinner3;
+    final ArrayList<String> code = new ArrayList<String>();
+    ArrayList<String> values = new ArrayList<String>();
+    private ArrayList<String> name=new ArrayList<>();
     private Button button;
     int count=1;
     private String globatime;
     private long globalmillis;
     private long timefrom,timeto;
     private String filename;
+    private String email,vehicle_type_name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,31 +84,28 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
         setContentView(R.layout.activity_slot_report);
         dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         ref=new Firebase(Constants.FIREBASE_URL);
+        name.add("All");
+        values.add("All");
+        code.add("All");
         findViewsById();
         setDateTimeField();
-    }
-    private void findViewsById() {
-        fromDateEtxt = (EditText) findViewById(R.id.etxt_fromdate);
-        fromDateEtxt.setInputType(InputType.TYPE_NULL);
-        fromDateEtxt.requestFocus();
-        button=(Button)findViewById(R.id.button5);
-        toDateEtxt = (EditText) findViewById(R.id.etxt_todate);
-        toDateEtxt.setInputType(InputType.TYPE_NULL);
-        sp1=(Spinner)findViewById(R.id.spinner8);
-        getSpinnerData();
-    }
-
-    private void getSpinnerData() {
-        sp1.setOnItemSelectedListener(this);
-
-        categories.add("All");
-        Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("Name");
+        Query queryRef = ref.child("users").child("Operator");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("KEY FOR TRANS", dataSnapshot.getKey());
-                TransporterDetails t = dataSnapshot.getValue(TransporterDetails.class);
-                categories.add(t.getName());
+                Log.d("value of", String.valueOf(dataSnapshot.getKey()));
+                DetailofUser post = dataSnapshot.getValue(DetailofUser.class);
+                Log.d("email", post.getEmail());
+                Log.d("pass", post.getPwd());
+                values.add(post.getEmail());
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, values);
+                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner2.setAdapter(dataAdapter);
+                pb.setVisibility(View.GONE);
+                if(pb1.getVisibility()==View.VISIBLE && pb2.getVisibility()==View.VISIBLE) {
+                    linear_layout.setVisibility(View.VISIBLE);
+                }
+
             }
 
             @Override
@@ -123,16 +128,131 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
 
             }
         });
+        Query queryRef1 = ref.child("users").child("Vehicle_Type");
+        queryRef1.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d("value of", String.valueOf(dataSnapshot.getKey()));
+                VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
+                code.add(post.getVehicle_type());
+                ArrayAdapter<String> dataAdapter1 = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, code);
+                dataAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(dataAdapter1);
+                pb1.setVisibility(View.GONE);
+                if(pb.getVisibility()==View.VISIBLE && pb2.getVisibility()==View.VISIBLE) {
+                    linear_layout.setVisibility(View.VISIBLE);
+                }
 
-        // Creating adapter for spinner
-        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, categories);
+            }
 
-        // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-        // attaching data adapter to spinner
-        sp1.setAdapter(dataAdapter);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        Query queryRef3 = ref.child("users").child("Transporter_Details");
+        queryRef3.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d("value of", String.valueOf(dataSnapshot.getKey()));
+                TransporterDetails post = dataSnapshot.getValue(TransporterDetails.class);
+                name.add(post.getName());
+                ArrayAdapter<String> dataAdapter3 = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, name);
+                dataAdapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner3.setAdapter(dataAdapter3);
+                pb2.setVisibility(View.GONE);
+                if(pb1.getVisibility()==View.VISIBLE && pb.getVisibility()==View.VISIBLE) {
+                    linear_layout.setVisibility(View.VISIBLE);
+                }
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                email = parent.getSelectedItem().toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                vehicle_type_name=parent.getSelectedItem().toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        spinner3.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view,
+                                       int position, long id) {
+                transporter = parent.getSelectedItem().toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
+    private void findViewsById() {
+        fromDateEtxt = (EditText) findViewById(R.id.etxt_fromdate);
+        fromDateEtxt.setInputType(InputType.TYPE_NULL);
+        fromDateEtxt.requestFocus();
+        button=(Button)findViewById(R.id.button5);
+        spinner=(Spinner)findViewById(R.id.spinner6);
+        spinner2=(Spinner)findViewById(R.id.spinner7);
+        spinner3=(Spinner)findViewById(R.id.spinner5);
+        toDateEtxt = (EditText) findViewById(R.id.etxt_todate);
+        toDateEtxt.setInputType(InputType.TYPE_NULL);
+        pb=(ProgressBar)findViewById(R.id.progressBar);
+        pb1=(ProgressBar)findViewById(R.id.progressBar1);
+        pb2=(ProgressBar)findViewById(R.id.progressBar2);
+        pb3=(ProgressBar)findViewById(R.id.progressBar3);
+        linear_layout=(LinearLayout)findViewById(R.id.linear_layout);
+    }
+
 
     private void setDateTimeField() {
         fromDateEtxt.setOnClickListener(this);
@@ -170,99 +290,49 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
         }
     }
     public void export(View view){
-        if(datefrom.isEmpty()==false&& dateto.isEmpty()==false) {
-            new FetchData(this).execute();
-        }
-        else{
-            Toast.makeText(getApplicationContext(), "Please enter the date", Toast.LENGTH_LONG);
-        }
-
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        transporter=parent.getSelectedItem().toString();
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
-
-    class FetchData extends AsyncTask<Context,String,String> {
-        Activity mActivity;
-        public FetchData (Activity activity)
-        {
-            super();
-            mActivity = activity;
-        }
-        @Override
-        protected String doInBackground(Context... params) {
-            Log.d("Hello", "Hello");
+        if(toDateEtxt.getText().toString()!=null&& fromDateEtxt.getText().toString()!=null) {
+            pb3.setVisibility(View.VISIBLE);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String timeofarrival = datefrom+" 00:00:01";
-            Date date = null; // You will need try/catch around this
-            try {
-                date = sdf.parse(timeofarrival);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            timefrom=date.getTime();
-            String timetocal = dateto+" 23:59:59";
-            Date date1 = null; // You will need try/catch around this
-            try {
-                date1 = sdf.parse(timetocal);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            timeto=date1.getTime();
-            Log.d("timefrom", String.valueOf(timefrom));
-            Log.d("timeto", String.valueOf(timeto));
-            Query queryRef = ref.child("users").child("data");
-            queryRef.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    Log.d("count", String.valueOf(dataSnapshot.getChildrenCount()));
-                    Log.d("key", dataSnapshot.getKey());
-                    TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
-                    Log.d("Contractor name",post.getContractorname());
-                    Log.d("transporter",transporter);
-                    if(transporter.contentEquals("All")) {
-                        globatime = post.gettime();
-                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // I assume d-M, you may refer to M-d for month-day instead.
-                        Date d = null; // You will need try/catch around this
-                        try {
-                            d = formatter.parse(globatime);
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        globalmillis = d.getTime();
-                        Log.d("globaltime", String.valueOf(globalmillis));
-                        if (globalmillis > timefrom && globalmillis < timeto) {
-                            DateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-                            DateFormat time = new SimpleDateFormat("hh:mm:ss");
-                            date_array.add(date.format(d));
-                            time_array.add(time.format(d));
-                            email_operator.add(post.getEmail());
-                            amt_operator.add(post.getCost());
-                            vehicle_no.add(post.getVehicleno());
-                            vehicle_type.add(post.getVehicleno());
-                            contractor_name.add(post.getContractorname());
-                        }
-                    }
-                    else{
-                        if (post.getContractorname().contentEquals(transporter)){
-                            globatime=post.gettime();
-                            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // I assume d-M, you may refer to M-d for month-day instead.
+            if(datefrom!=null && dateto!=null) {
+                String timeofarrival = datefrom + " 00:00:01";
+                Date date = null; // You will need try/catch around this
+                try {
+                    date = sdf.parse(timeofarrival);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                timefrom = date.getTime();
+                String timetocal = dateto + " 23:59:59";
+                Date date1 = null; // You will need try/catch around this
+                try {
+                    date1 = sdf.parse(timetocal);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                timeto = date1.getTime();
+                Log.d("timefrom", String.valueOf(timefrom));
+                Log.d("timeto", String.valueOf(timeto));
+                Query queryRef = ref.child("users").child("data");
+                queryRef.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        Log.d("count", String.valueOf(dataSnapshot.getChildrenCount()));
+                        Log.d("key", dataSnapshot.getKey());
+                        TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
+                        Log.d("Contractor name", post.getContractorname());
+                        Log.d("transporter", transporter);
+                        if (transporter.contentEquals("All") && vehicle_type_name.contentEquals("All") && email.contentEquals("All")) {
+                            globatime = post.getDate() + " " + post.gettime();
+                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
                             Date d = null; // You will need try/catch around this
                             try {
                                 d = formatter.parse(globatime);
+                                globalmillis = d.getTime();
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
-                            globalmillis= d.getTime();
-                            Log.d("globaltime", String.valueOf(globalmillis));
-                            if(globalmillis>timefrom && globalmillis<timeto){
+                            Log.d("globaltime", String.valueOf(globalmillis) + " " + String.valueOf(globatime));
+                            if (globalmillis > timefrom && globalmillis < timeto) {
                                 DateFormat date = new SimpleDateFormat("yyyy-MM-dd");
                                 DateFormat time = new SimpleDateFormat("hh:mm:ss");
                                 date_array.add(date.format(d));
@@ -270,54 +340,68 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
                                 email_operator.add(post.getEmail());
                                 amt_operator.add(post.getCost());
                                 vehicle_no.add(post.getVehicleno());
+                                Log.d("abx", post.getEmail());
                                 vehicle_type.add(post.getVehicleno());
                                 contractor_name.add(post.getContractorname());
                             }
+                            getdata();
+                        } else {
+                            if (post.getContractorname().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVehicleType().contentEquals(vehicle_type_name)) {
+                                globatime = post.getDate() + " " + post.gettime();
+                                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
+                                Date d = null; // You will need try/catch around this
+                                try {
+                                    d = formatter.parse(globatime);
+                                    globalmillis = d.getTime();
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                                Log.d("globaltime", String.valueOf(globalmillis));
+                                if (globalmillis > timefrom && globalmillis < timeto) {
+                                    DateFormat date = new SimpleDateFormat("yyyy-MM-dd");
+                                    DateFormat time = new SimpleDateFormat("hh:mm:ss");
+                                    date_array.add(date.format(d));
+                                    time_array.add(time.format(d));
+                                    email_operator.add(post.getEmail());
+                                    amt_operator.add(post.getCost());
+                                    vehicle_no.add(post.getVehicleno());
+                                    Log.d("abx", post.getEmail());
+                                    vehicle_type.add(post.getVehicleno());
+                                    contractor_name.add(post.getContractorname());
+                                }
+                                getdata();
+                            }
                         }
+
+
                     }
-                }
 
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                }
+                    }
 
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-                }
+                    }
 
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-                }
+                    }
 
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
 
-                }
-            });
-            getdata();
-            sendEmailWithAttachment(Constants.EMAIL_TO, "", "", filename);
-            return null;
+                    }
+                });
+            }
+        }
+        else{
+            Toast.makeText(getApplicationContext(), "Please enter the date", Toast.LENGTH_LONG);
         }
 
-        @Override
-        protected void onPreExecute(){
-
-        }
-
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-
-        }
     }
 
     public void getdata(){
@@ -408,6 +492,7 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
 
 
         for(int i=0;i<email_operator.size();i++){
+            Log.d(String.valueOf(i),email_operator.get(i));
             Row row3 = sheet1.createRow(k);
             c = row3.createCell(2);
             c.setCellValue(count);
@@ -469,7 +554,8 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
             } catch (Exception ex) {
             }
         }
-
+        pb3.setVisibility(View.GONE);
+        sendEmailWithAttachment(Constants.EMAIL_TO, "", "", filename);
     }
 
     public static boolean isExternalStorageReadOnly() {
@@ -514,7 +600,7 @@ public class SlotReport extends Activity implements View.OnClickListener, Adapte
     @Override
     public void onBackPressed()
     {
-        finish();   //finishes the current activity and doesnt save in stock
+        finish();
         Intent i = new Intent(SlotReport.this, ReportsActivity.class);
         startActivity(i);
     }

@@ -2,6 +2,7 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -116,8 +117,11 @@ public class TransporterAccounts extends Activity {
         }
     }
 
-
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent i = new Intent(TransporterAccounts.this, Admin.class);
+        startActivity(i);    }
 }
 
 

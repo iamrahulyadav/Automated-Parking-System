@@ -8,7 +8,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +33,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     private String amount;
     private String key;
     private String uniquekey;
+    int[][] tar_arr;
     int pos;
     private Firebase ref=new Firebase(Constants.FIREBASE_URL);
 
@@ -46,6 +50,12 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             Log.d("dataset", mDataset1.get(i).getName());
         }
     }
+
+    public MyRecyclerViewAdapter(int[][] arr,int i) {
+        tar_arr=arr;
+        value=i;
+    }
+
     @Override
     public MyRecyclerViewAdapter.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         View view;
@@ -54,6 +64,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         }
         else if(value==2){
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_transporter_accounts_view, viewGroup, false);
+        }
+        else if(value==3){
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.activity_custom_table_tariff, viewGroup, false);
         }
         else{
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.card_view_row_records, viewGroup, false);
@@ -146,6 +159,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         if(value==1||value==2){
             return mDataset1.size();
         }
+        else if(value==3){
+            return 10;
+        }
         else{
             return mDataset.size();
         }
@@ -171,6 +187,8 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         TextView date;
         TextView aps;
         TextView tv1,tv2,tv3,tv4,tv5,tv6,tv7,tv8;
+        GridView gridView;
+        CheckBox checkBox;
         public ViewHolder(View view) {
             super(view);
             if(value==1){
@@ -185,6 +203,10 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
                 tv6= (TextView) itemView.findViewById(R.id.textView6);
                 tv7= (TextView) itemView.findViewById(R.id.textView7);
                 tv8= (TextView) itemView.findViewById(R.id.textView8);
+            }
+            else if(value==3){
+                checkBox = (CheckBox) itemView.findViewById(R.id.checkbox);
+                gridView=(GridView)itemView.findViewById(R.id.grid);
             }
             else{
                 email = (TextView) itemView.findViewById(R.id.textView);

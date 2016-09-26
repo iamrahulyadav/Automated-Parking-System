@@ -4,15 +4,16 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <application
-        android:name="com.potenza_pvt_ltd.AAPS.ToDoApplication"
+        android:name=".ToDoApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.LoginActivity"
+            android:name=".LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,112 +22,125 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.SubmitActivity"
+            android:name=".SubmitActivity"
             android:label="@string/title_activity_truck_details" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.TypeofOperator"
+            android:name=".TypeofOperator"
             android:label="@string/title_activity_typeof_operator" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.ParkingSlot"
+            android:name=".ParkingSlot"
             android:label="@string/title_activity_parking_slot" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.Manager"
+            android:name=".Manager"
             android:label="@string/title_activity_manager" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.CardViewActivity"
+            android:name=".CardViewActivity"
             android:label="@string/title_activity_card_view" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.Admin"
+            android:name=".Admin"
             android:label="@string/title_activity_admin" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.CalculateFare"
+            android:name=".CalculateFare"
             android:label="@string/title_activity_calculate_fare" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.SignupActivity"
+            android:name=".SignupActivity"
             android:label="@string/title_activity_signup" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.ShiftOpen"
+            android:name=".ShiftOpen"
             android:label="@string/title_activity_shift_open" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.Collections"
+            android:name=".Collections"
             android:label="@string/title_activity_collections" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.ShiftClose"
+            android:name=".ShiftClose"
             android:label="@string/title_activity_shift_close" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.Masters"
+            android:name=".Masters"
             android:label="@string/title_activity_masters" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.CreateManager"
+            android:name=".CreateManager"
             android:label="@string/title_activity_create_manager" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.CustomAdapter"
+            android:name=".CustomAdapter"
             android:label="@string/title_activity_custom_adapter" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.CreateOperator"
+            android:name=".CreateOperator"
             android:label="@string/title_activity_create_operator" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.Vehicle_Type"
+            android:name=".Vehicle_Type"
             android:label="@string/title_activity_vehicle__type" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.PSActivity"
+            android:name=".PSActivity"
             android:label="@string/title_activity_ps" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.Transporter"
-            android:label="@string/title_activity_transporter" >
+            android:name=".Transporter"
+            android:label="@string/title_activity_transporter"
+            android:windowSoftInputMode="adjustPan">
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.TariffActivity"
+            android:name=".TariffActivity"
             android:label="@string/title_activity_tariff" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.ReportsActivity"
+            android:name=".ReportsActivity"
             android:label="@string/title_activity_reports" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.SummaryReports"
+            android:name=".SummaryReports"
             android:label="@string/title_activity_summary_reports" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.DeviceSetting"
+            android:name=".DeviceSetting"
             android:label="@string/title_activity_device_setting" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.InslipReports"
+            android:name=".InslipReports"
             android:label="@string/title_activity_inslip_reports" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.OutslipReports"
+            android:name=".OutslipReports"
             android:label="@string/title_activity_outslip_reports" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.SlotReport"
+            android:name=".SlotReport"
             android:label="@string/title_activity_slot_report" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.TransporterAccounts"
+            android:name=".TransporterAccounts"
             android:label="@string/title_activity_transporter_accounts" >
         </activity>
         <activity
-            android:name="com.potenza_pvt_ltd.AAPS.PrintActivity"
+            android:name=".PrintActivity"
             android:label="@string/title_activity_transporter_accounts" >
+        </activity>
+        <activity
+            android:name=".PSExitActivity"
+            android:label="@string/title_activity_receipt" >
+        </activity>
+        <activity
+            android:name=".ExitReceipt"
+            android:label="@string/title_activity_exit_receipt" >
+        </activity>
+        <activity
+            android:name=".PSEntryActivity"
+            android:label="@string/title_activity_psentry" >
         </activity>
     </application>
 

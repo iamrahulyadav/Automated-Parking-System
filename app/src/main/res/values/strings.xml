@@ -48,4 +48,7 @@
     <string name="title_activity_slot_report">SlotReport</string>
     <string name="title_activity_transporter_accounts">TransporterAccounts</string>
     <string name="title_msg_dailog_box">Message</string>
+    <string name="title_activity_receipt">ReceiptActivity</string>
+    <string name="title_activity_exit_receipt">ExitReceipt</string>
+    <string name="title_activity_psentry">PSEntryActivity</string>
 </resources>

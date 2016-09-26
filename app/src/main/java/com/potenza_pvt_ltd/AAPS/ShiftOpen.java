@@ -2,8 +2,10 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +14,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 import com.firebase.client.AuthData;
@@ -20,7 +24,6 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
-import com.potenza_pvt_ltd.AAPS.R;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,12 +37,17 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
     protected EditText passwordEditText;
     protected Button shiftopen;
     Firebase ref;
+    ProgressBar pb;
     String emailAddress;
     protected String aps;
     String postid,emailAddress_operator;
     private String typeofuser;
     SharedPreferences.Editor editor;
     String localTime;
+    private ArrayAdapter<String> dataAdapter;
+    List<String> slotnum = new ArrayList<String>();
+    Spinner spinner;
+    private LinearLayout linear_layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,30 +56,51 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
         ref= new Firebase(Constants.FIREBASE_URL);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         editor = preferences.edit();
+        pb=(ProgressBar)findViewById(R.id.progressBar);
+        linear_layout=(LinearLayout)findViewById(R.id.linear_layout);
         emailAddress_operator = preferences.getString("email", null);
-        typeofuser=preferences.getString("typeofuser",null);
+        typeofuser=preferences.getString("typeofuser", null);
         emailEditText = (EditText) findViewById(R.id.emailFieldso);
         passwordEditText = (EditText) findViewById(R.id.passwordFieldso);
         shiftopen = (Button) findViewById(R.id.shiftopenbutton);
-        Spinner spinner = (Spinner) findViewById(R.id.spinner1);
+        spinner = (Spinner) findViewById(R.id.spinner1);
         spinner.setOnItemSelectedListener(this);
-        List<Integer> slotnum = new ArrayList<Integer>();
-        slotnum.add(1);
-        slotnum.add(2);
-        slotnum.add(3);
-        slotnum.add(4);
-        slotnum.add(5);
-        slotnum.add(6);
-        slotnum.add(7);
-        slotnum.add(8);
-        // Creating adapter for spinner
-        ArrayAdapter<Integer> dataAdapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_spinner_item, slotnum);
+        Query queryRef = ref.child("users").child("Slot_Name");
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                slotnum.add(String.valueOf(dataSnapshot.getValue()));
+                dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, slotnum);
+                dataAdapter.notifyDataSetChanged();
+                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(dataAdapter);
+                pb.setVisibility(View.GONE);
+                linear_layout.setVisibility(View.VISIBLE);
+            }
 
-        // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-        // attaching data adapter to spinner
-        spinner.setAdapter(dataAdapter);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        //new getSpinnerData(ShiftOpen.this).execute();
+        dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, slotnum);
+        dataAdapter.notifyDataSetChanged();
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         localTime = sdf.format(calendar.getTime());
@@ -100,7 +129,6 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
                     ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
                         @Override
                         public void onAuthenticated(AuthData authData) {
-                            Log.d("firebase",ref.toString());
                             // Authenticated successfully with payload authData
                             Query queryRef = ref.child("users").orderByChild("email-address");
                             queryRef.addChildEventListener(new ChildEventListener() {
@@ -113,8 +141,10 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
                                             String emailvalue = post.getEmail().trim();
                                             if(emailvalue.contentEquals(emailAddress)) {
                                                 callme();
+                                                editor.putString("aps", aps);
                                                 Intent intent = new Intent(ShiftOpen.this, TypeofOperator.class);
                                                 intent.putExtra("UniqueID", postid);
+                                                intent.putExtra("aps",aps);
                                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                                 startActivity(intent);
@@ -150,7 +180,7 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
 
                         @Override
                         public void onAuthenticationError(FirebaseError firebaseError) {
-                            // Authenticated failed with error firebaseError
+                            // Authenticated failed with error fireball Error
                             AlertDialog.Builder builder = new AlertDialog.Builder(ShiftOpen.this);
                             builder.setMessage(firebaseError.getMessage())
                                     .setTitle(R.string.login_error_title)
@@ -171,13 +201,11 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
         map.put(typeofuser, "true");
         map.put("Shift Open Time", localTime);
         map.put("aps", aps);
-        Log.d("firebase",ref.toString());
         Firebase newpostref=ref.child("users").child("timing").push();
-        Log.d("firebase",newpostref.toString());
-        Log.d("value of map",map.toString());
         newpostref.setValue(map);
         postid=newpostref.getKey();
         editor.putString("PostID for timing", postid);
+        editor.putString("aps",aps);
         editor.apply();
     }
 
@@ -193,8 +221,39 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
     @Override
     public void onBackPressed()
     {
-        finish();   //finishes the current activity and doesnt save in stock
         Intent i = new Intent(ShiftOpen.this, LoginActivity.class);
         startActivity(i);
+    }
+
+    class getSpinnerData extends AsyncTask<Context,String,String> {
+        Activity mActivity;
+        public getSpinnerData (Activity activity)
+        {
+            super();
+            mActivity = activity;
+        }
+        @Override
+        protected String doInBackground(Context... params) {
+
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute(){
+
+        }
+
+
+        @Override
+        protected void onCancelled(String s) {
+            super.onCancelled(s);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            }
+
+
     }
 }

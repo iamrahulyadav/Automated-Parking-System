@@ -7,8 +7,6 @@ import android.view.View;
 
 public class Admin extends AppCompatActivity {
 
-    private String typeofuser;
-    String muserid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,5 +42,10 @@ public class Admin extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+
     }
 }

@@ -7,9 +7,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,31 +26,26 @@ import java.util.Map;
 
 public class CustomAdapter extends ArrayAdapter<String> {
     final String[] value= new String[2];
+
     /** Global declaration of variables. As there scope lies in whole class. */
     private Context context;
+    int [][] tar_arr;
     private ArrayList<String> email=new ArrayList<String>();
     private ArrayList<String> pwd= new ArrayList<String>();
     private ArrayList<String> uid= new ArrayList<String>();
     private int flag;
-    boolean b;
     int pos;
 
     /** Constructor Class */
-    public CustomAdapter(Application c, ArrayList strings, ArrayList values) {
-        super(c, R.layout.activity_custom_adapter ,values);
-        this.context = c.getApplicationContext();
-        this.email = strings;
-        this.pwd=values;
-    }
     public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList uid) {
-        super(c, R.layout.activity_custom_adapter ,values);
+        super(c, R.layout.activity_custom_adapter,values);
         this.context = c.getApplicationContext();
         this.email = strings;
         this.pwd=values;
         this.uid=uid;
     }
     public CustomAdapter(Application c, ArrayList strings, ArrayList values,ArrayList uid,int num) {
-        super(c, R.layout.activity_custom_adapter, values);
+        super(c, R.layout.activity_custom_adapter,values);
         this.context = c.getApplicationContext();
         this.email = strings;
         this.pwd=values;
@@ -56,27 +53,35 @@ public class CustomAdapter extends ArrayAdapter<String> {
         this.flag=num;
     }
 
-    public CustomAdapter(Application application, ArrayList vehicle_type, ArrayList code_value, int i) {
-        super(application, R.layout.activity_custom_adapter, vehicle_type);
-        this.context=application.getApplicationContext();
-        this.email=vehicle_type;
-        this.pwd=code_value;
-        this.flag=i;
+    public CustomAdapter(Application application, ArrayList<String> psname, ArrayList<String> num,int f) {
+        super(application, R.layout.activity_custom_adapter, psname);
+        this.email=psname;
+        this.pwd=num;
+        this.flag=f;
     }
 
     /** Implement getView method for customizing row of list view. */
     public View getView(final int position, View convertView, ViewGroup parent) {
+        Log.d("flag", String.valueOf(flag));
         View rowView;
-        if (flag == 3) {
+        if(flag==10){
+            rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.ps_list, parent, false);
+            TextView textView1 = (TextView) rowView.findViewById(R.id.textview1);
+            TextView textView2 = (TextView) rowView.findViewById(R.id.textview2);
+            if(email.isEmpty()==false && pwd.isEmpty()==false){
+                textView1.setText(email.get(position).toString());
+                textView2.setText(pwd.get(position).toString());
+            }
+        }
+        else if (flag == 3) {
             rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_custom_adapter1, parent, false);
             TextView textView1 = (TextView) rowView.findViewById(R.id.textview1);
             TextView textView2 = (TextView) rowView.findViewById(R.id.textview2);
-            TextView textView3 = (TextView) rowView.findViewById(R.id.textview3);
             final CheckBox checkBox = (CheckBox) rowView.findViewById(R.id.checkbox);
-            if (email.isEmpty() == false && pwd.isEmpty() == false && uid.isEmpty() == false) {
-                textView1.setText(uid.get(position).toString());
-                textView2.setText(email.get(position).toString());
-                textView3.setText(pwd.get(position).toString());
+            if (email.isEmpty() == false && pwd.isEmpty() == false) {
+                textView1.setText(email.get(position).toString());
+                Log.d("pos in customadpter", String.valueOf(position));
+                textView2.setText(pwd.get(position).toString());
             }
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -88,7 +93,8 @@ public class CustomAdapter extends ArrayAdapter<String> {
                     }
                 }
             });
-        } else {
+        }
+        else{
             rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_custom_adapter, parent, false);
             TextView textView1 = (TextView) rowView.findViewById(R.id.textview1);
             TextView textView2 = (TextView) rowView.findViewById(R.id.textview2);
@@ -180,9 +186,11 @@ public class CustomAdapter extends ArrayAdapter<String> {
         }
         return rowView;
     }
+
     public String[] getValue(){
         return value;
     }
+
     public int getPos(){
         return pos;
     }

@@ -19,6 +19,10 @@ public class TruckDetailsActivity {
     private String key;
     private String localtime;
     private String cost;
+    private String timedeparture;
+    private String aps;
+    private String pap;
+    private String vehicleType;
 
     public TruckDetailsActivity() {
 
@@ -116,6 +120,17 @@ public class TruckDetailsActivity {
     public String getCost() {
         return cost;
     }
+    @JsonProperty("Time of Departure")
+    public String gettimedeparture() {
+        return timedeparture;
+    }
+    @JsonProperty("Partial Amount Paid")
+    public String getPAP() {
+        return pap;
+    }
 
-
+    @JsonProperty("Vehicle Type")
+    public String getVehicleType() {
+        return vehicleType;
+    }
 }

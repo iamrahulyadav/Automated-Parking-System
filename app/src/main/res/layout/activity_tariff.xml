@@ -137,13 +137,26 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true" />
     </TableRow>
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/listView"
-        android:layout_weight=".3"
+  <!--  <android.support.v7.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:layout_below="@+id/table_row"
+        android:layout_above="@+id/button_list_delete" /> -->
+    <GridView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/grid"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:horizontalSpacing="5px"
+        android:numColumns="3"
+        android:columnWidth="50dip"
+        android:verticalSpacing="0dip"
+        android:gravity="center"
         android:layout_below="@+id/table_row"
         android:layout_above="@+id/button_list_delete" />
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

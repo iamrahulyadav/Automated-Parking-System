@@ -1,5 +1,6 @@
 package com.potenza_pvt_ltd.AAPS;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -37,7 +38,7 @@ public class DeviceSetting extends AppCompatActivity {
         footer2=editText7.getText().toString();
 
         Map<String, Object> value = new HashMap<String, Object>();
-        value.put("header1",header1);
+        value.put("header1", header1);
         value.put("header2", header2);
         value.put("header3", header3);
         value.put("header4", header4);
@@ -48,4 +49,11 @@ public class DeviceSetting extends AppCompatActivity {
         ref.child("users").child("Slip_Details").updateChildren(value);
 
     }
+    @Override
+    public void onBackPressed()
+    {
+            finish(); //finishes the current activity and doesnt save in stock
+            Intent i = new Intent(DeviceSetting.this, Admin.class);
+            startActivity(i);
+        }
 }

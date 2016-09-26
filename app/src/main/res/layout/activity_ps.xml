@@ -71,20 +71,9 @@
         <TextView
             android:layout_width="0sp"
             android:layout_height="wrap_content"
-            android:text="Code"
-            android:layout_weight=".3"
-            android:id="@+id/textView16"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginLeft="45dp"
-            android:layout_marginStart="45dp" />
-
-        <TextView
-            android:layout_width="0sp"
-            android:layout_height="wrap_content"
             android:text="Slot Name"
-            android:layout_weight=".3"
+            android:layout_weight=".5"
+            android:gravity="center"
             android:id="@+id/textView17"
             android:layout_centerHorizontal="true" />
 
@@ -95,7 +84,8 @@
             android:id="@+id/textView18"
             android:inputType="phone"
             android:ems="2"
-            android:layout_weight=".3"
+            android:gravity="center"
+            android:layout_weight=".5"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true" />
     </TableRow>

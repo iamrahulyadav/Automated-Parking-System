@@ -34,6 +34,7 @@ public class ShiftClose extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shift_close);
         postid=getIntent().getStringExtra("UniqueID");
+        Log.d("post1",postid);
         email_operator = (EditText) findViewById(R.id.emailField2);
         password_operator = (EditText) findViewById(R.id.passwordField2);
         email_manager = (EditText) findViewById(R.id.emailField3);
@@ -53,185 +54,162 @@ public class ShiftClose extends Activity {
                 if (email_o.isEmpty() || pass_o.isEmpty()) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
                     builder.setMessage(R.string.login_error_message)
-                            .setTitle(R.string.login_error_title)
+                            .setTitle("Warning!")
                             .setPositiveButton(android.R.string.ok, null);
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 } else {
                     emailAddress_o = email_o;
                     Log.d("Email", email_o);
-                    Log.d("Password",pass_o);
+                    Log.d("Password", pass_o);
 
                     //Login with an email_o/pass_o combination
                     ref.authWithPassword(email_o, pass_o, new Firebase.AuthResultHandler() {
                         @Override
                         public void onAuthenticated(AuthData authData) {
                             // Authenticated successfully with payload authData
-                            Query queryRef = ref.child("users").orderByChild("email-address");
+                            Query queryRef = ref.child("users").child("Operator").orderByChild("email-address").equalTo(emailAddress_o);
                             queryRef.addChildEventListener(new ChildEventListener() {
                                 @Override
                                 public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                                     Log.d("key123", snapshot.getKey());
-                                    if (snapshot.getKey().contentEquals("Operator")) {
-                                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                            DetailofUser post = snapshot1.getValue(DetailofUser.class);
-                                            String emailvalue = post.getEmail().trim();
-                                            if (emailvalue.contentEquals(emailAddress_o)) {
-                                                String email_m = email_manager.getText().toString();
-                                                String pass_m = password_manager.getText().toString();
+                                    String email_m = email_manager.getText().toString();
+                                    String pass_m = password_manager.getText().toString();
+                                    email_m = email_m.trim();
+                                    pass_m = pass_m.trim();
+                                    if (email_m.isEmpty() || pass_m.isEmpty()) {
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
+                                        builder.setMessage(R.string.login_error_message)
+                                                .setTitle("Warning!!")
+                                                .setPositiveButton(android.R.string.ok, null);
+                                        AlertDialog dialog = builder.create();
+                                        dialog.show();
+                                    } else {
+                                        emailAddress_m = email_m;
+                                        Log.d("Email", email_m);
+                                        Log.d("Password", pass_m);
 
-                                                email_m = email_m.trim();
-                                                pass_m = pass_m.trim();
+                                        //Login with an email_o/pass_o combination
+                                        ref.authWithPassword(email_m, pass_m, new Firebase.AuthResultHandler() {
+                                            @Override
+                                            public void onAuthenticated(AuthData authData) {
+                                                Log.d("abcd", "close time");
+                                                // Authenticated successfully with payload authData
+                                                Query queryRef = ref.child("users").child("Manager").orderByChild("email-address").equalTo(emailAddress_m);
+                                                queryRef.addChildEventListener(new ChildEventListener() {
+                                                    @Override
+                                                    public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                                                        Log.d("key123", snapshot.getKey());
+                                                        Calendar calendar = Calendar.getInstance();
+                                                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                                        final String localTime = sdf.format(calendar.getTime());
+                                                        Map<String, Object> graceNickname = new HashMap<>();
+                                                        graceNickname.put("Shift Close Time", localTime);
+                                                        ref.child("users").child("timing").child(postid).updateChildren(graceNickname);
+                                                        ref.unauth();
+                                                        email_operator.setText("");
+                                                        password_operator.setText("");
+                                                        email_manager.setText("");
+                                                        password_manager.setText("");
+                                                        Intent intent = new Intent(ShiftClose.this, LoginActivity.class);
+                                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                        startActivity(intent);
+                                                    }
 
-                                                if (email_m.isEmpty() || pass_m.isEmpty()) {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
-                                                    builder.setMessage(R.string.login_error_message)
-                                                            .setTitle(R.string.login_error_title)
-                                                            .setPositiveButton(android.R.string.ok, null);
-                                                    AlertDialog dialog = builder.create();
-                                                    dialog.show();
-                                                } else {
-                                                    emailAddress_m = email_m;
-                                                    Log.d("Email", email_m);
-                                                    Log.d("Password", pass_m);
+                                                    @Override
+                                                    public void onChildChanged
+                                                            (DataSnapshot dataSnapshot, String
+                                                                    s) {
 
-                                                    //Login with an email_o/pass_o combination
-                                                    ref.authWithPassword(email_m, pass_m, new Firebase.AuthResultHandler() {
-                                                        @Override
-                                                        public void onAuthenticated(AuthData authData) {
-                                                            Log.d("abcd", "close time");
-                                                            // Authenticated successfully with payload authData
-                                                            Query queryRef = ref.child("users").orderByChild("email-address");
-                                                            queryRef.addChildEventListener(new ChildEventListener() {
-                                                                @Override
-                                                                public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                                                                    Log.d("key123", snapshot.getKey());
-                                                                    if (snapshot.getKey().contentEquals("Manager")) {
-                                                                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                                                            DetailofUser post = snapshot1.getValue(DetailofUser.class);
-                                                                            String emailvalue = post.getEmail().trim();
-                                                                            if (emailvalue.contentEquals(emailAddress_m)) {
-                                                                                Calendar calendar = Calendar.getInstance();
-                                                                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                                                                final String localTime = sdf.format(calendar.getTime());
-                                                                                Map<String, Object> graceNickname = new HashMap<>();
-                                                                                graceNickname.put("Shift Close Time", localTime);
-                                                                                ref.child("users").child("timing").child(postid).updateChildren(graceNickname);
-                                                                                ref.unauth();
-                                                                                Intent intent = new Intent(ShiftClose.this, LoginActivity.class);
-                                                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                                                startActivity(intent);
-                                                                            }
-                                                                        }
-                                                                    } else {/*
-                                                                        AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
-                                                                        builder.setMessage("Please Login through your credentials")
-                                                                                .setTitle(R.string.login_error_title)
-                                                                                .setPositiveButton(android.R.string.ok, null);
-                                                                        AlertDialog dialog = builder.create();
-                                                                        dialog.show();
-                                                                        email_manager.setText("");
-                                                                        email_operator.setText("");*/
-                                                                    }
-                                                                }
+                                                    }
 
-                                                                @Override
-                                                                public void onChildChanged
-                                                                        (DataSnapshot dataSnapshot, String
-                                                                                s) {
+                                                    @Override
+                                                    public void onChildRemoved
+                                                            (DataSnapshot dataSnapshot) {
 
-                                                                }
+                                                    }
 
-                                                                @Override
-                                                                public void onChildRemoved
-                                                                        (DataSnapshot dataSnapshot) {
+                                                    @Override
+                                                    public void onChildMoved
+                                                            (DataSnapshot dataSnapshot, String
+                                                                    s) {
 
-                                                                }
+                                                    }
 
-                                                                @Override
-                                                                public void onChildMoved
-                                                                        (DataSnapshot dataSnapshot, String
-                                                                                s) {
+                                                    @Override
+                                                    public void onCancelled
+                                                            (FirebaseError firebaseError) {
 
-                                                                }
-
-                                                                @Override
-                                                                public void onCancelled
-                                                                        (FirebaseError firebaseError) {
-
-                                                                }
-                                                                // ....
-                                                            });
+                                                    }
+                                                    // ....
+                                                });
 
 
-                                                        }
-
-                                                        @Override
-                                                        public void onAuthenticationError(FirebaseError firebaseError) {
-                                                            // Authenticated failed with error firebaseError
-                                                            AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
-                                                            builder.setMessage(firebaseError.getMessage())
-                                                                    .setTitle(R.string.login_error_title)
-                                                                    .setPositiveButton(android.R.string.ok, null);
-                                                            AlertDialog dialog = builder.create();
-                                                            dialog.show();
-                                                        }
-                                                    });
-                                                }
                                             }
-                                        }
-                                    }else {
+
+                                            @Override
+                                            public void onAuthenticationError(FirebaseError firebaseError) {
+                                                // Authenticated failed with error firebaseError
                                                 AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
-                                                builder.setMessage("Please Login through your credentials")
+                                                builder.setMessage("Please Login Through your credentials")
                                                         .setTitle(R.string.login_error_title)
                                                         .setPositiveButton(android.R.string.ok, null);
                                                 AlertDialog dialog = builder.create();
                                                 dialog.show();
+                                                email_manager.setText("");
                                                 email_operator.setText("");
+                                                password_manager.setText("");
                                                 password_operator.setText("");
                                             }
-                                        }
+                                        });
+                                    }
+                                }
 
-                                        @Override
-                                        public void onChildChanged (DataSnapshot
-                                        dataSnapshot, String s){
-
-                                        }
-
-                                        @Override
-                                        public void onChildRemoved (DataSnapshot dataSnapshot){
-
-                                        }
-
-                                        @Override
-                                        public void onChildMoved (DataSnapshot dataSnapshot, String
-                                        s){
-
-                                        }
-
-                                        @Override
-                                        public void onCancelled (FirebaseError firebaseError){
-
-                                        }
-                                        // ....
-                                    });
-
+                                @Override
+                                public void onChildChanged(DataSnapshot
+                                                                   dataSnapshot, String s) {
 
                                 }
 
                                 @Override
-                                public void onAuthenticationError(FirebaseError firebaseError) {
-                                    // Authenticated failed with error firebaseError
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
-                                    builder.setMessage(firebaseError.getMessage())
-                                            .setTitle(R.string.login_error_title)
-                                            .setPositiveButton(android.R.string.ok, null);
-                                    AlertDialog dialog = builder.create();
-                                    dialog.show();
+                                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
                                 }
+
+                                @Override
+                                public void onChildMoved(DataSnapshot dataSnapshot, String
+                                        s) {
+
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+
+                                }
+                                // ....
                             });
+
+
+                        }
+
+                        @Override
+                        public void onAuthenticationError(FirebaseError firebaseError) {
+                            // Authenticated failed with error firebaseError
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
+                            builder.setMessage("Please Login Through your credentials!!!")
+                                    .setTitle(R.string.login_error_title)
+                                    .setPositiveButton(android.R.string.ok, null);
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                            email_manager.setText("");
+                            email_operator.setText("");
+                            password_manager.setText("");
+                            password_operator.setText("");
+                        }
+                    });
                 }
+
             }
         });
 
