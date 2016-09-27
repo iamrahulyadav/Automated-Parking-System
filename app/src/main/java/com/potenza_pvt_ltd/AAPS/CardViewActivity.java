@@ -19,6 +19,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 import com.firebase.client.ChildEventListener;
@@ -56,6 +58,8 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
     private String globatime;
     private long globalmillis;
     private long timefrom,timeto;
+    ProgressBar pb;
+    LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +74,8 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         d=(Button)findViewById(R.id.button5);
         toDateEtxt = (EditText) findViewById(R.id.etxt_todate);
         toDateEtxt.setInputType(InputType.TYPE_NULL);
+        pb=(ProgressBar)findViewById(R.id.progressBar);
+        linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
         setDateTimeField();
         sp1.setOnItemSelectedListener(this);
         List<String> categories = new ArrayList<>();
@@ -148,7 +154,49 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         Log.d("abc",sort);
         sort = sort.substring(7, sort.length());
         Log.d("abc", sort);
-        new FetchData(CardViewActivity.this).execute();
+        list.clear();
+        index = 0;
+        count = 0;
+        Query queryRef = ref.child("users").child("data").orderByChild(sort);
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                count = (int) snapshot.getChildrenCount();
+                if (count == 9) {
+                    Log.d("count", String.valueOf(count));
+                    Log.d("sas", snapshot.getKey());
+                    TruckDetailsActivity post = snapshot.getValue(TruckDetailsActivity.class);
+                    post.setKey(snapshot.getKey());
+                    Log.d("post", post.getKey());
+                    TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(), post.getEmail(), post.getContractorname(), post.getDrivername(), post.getDriverno(), post.getDate(), post.getAPS());
+                    list.add(index, obj);
+                    Log.d("list", String.valueOf(list.get(index)));
+                    index++;
+                }
+                Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
+                mAdapter.notifyDataSetChanged();
+                pb.setVisibility(View.GONE);
+                linearLayout.setVisibility(View.VISIBLE);
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
         Log.d("After", "FetchData");
         mAdapter = new MyRecyclerViewAdapter(list);
         /*if(typeofuser.contentEquals("Admin")) {
@@ -207,76 +255,6 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         }
     }
 
-    class FetchData extends AsyncTask<Context,String,String>{
-        Activity mActivity;
-    public FetchData (Activity activity)
-    {
-        super();
-        mActivity = activity;
-    }
-    @Override
-    protected String doInBackground(Context... params) {
-        list.clear();
-        index = 0;
-        count = 0;
-       Query queryRef = ref.child("users").child("data").orderByChild(sort);
-        queryRef.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                    count = (int) snapshot.getChildrenCount();
-                    if (count == 9) {
-                        Log.d("count", String.valueOf(count));
-                        Log.d("sas", snapshot.getKey());
-                        TruckDetailsActivity post = snapshot.getValue(TruckDetailsActivity.class);
-                        post.setKey(snapshot.getKey());
-                        Log.d("post", post.getKey());
-                        TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(), post.getEmail(), post.getContractorname(), post.getDrivername(), post.getDriverno(), post.getDate(), post.getAPS());
-                        list.add(index, obj);
-                        Log.d("list", String.valueOf(list.get(index)));
-                        index++;
-                    }
-                Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
-                mAdapter.notifyDataSetChanged();
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-            }
-        });
-        return null;
-    }
-
-    @Override
-    protected void onPreExecute(){
-        Log.d("Value of sort before:",sort);
-    }
-
-
-    @Override
-    protected void onCancelled(String s) {
-        super.onCancelled(s);
-    }
-
-    @Override
-    protected void onPostExecute(String s) {
-        super.onPostExecute(s);
-    }
-}
-
     public void delete(View v){
         Query queryRef = ref.child("users").child("data");
         queryRef.addChildEventListener(new ChildEventListener() {
@@ -321,6 +299,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
             }
         });
     }
+
     @Override
     public void onBackPressed()
     {

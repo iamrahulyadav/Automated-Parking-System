@@ -17,7 +17,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.client.ChildEventListener;
@@ -30,7 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Transporter extends ListActivity {
+public class Transporter extends ListActivity implements AdapterView.OnItemClickListener {
 
     protected EditText et1,et2,et3,et4,et5,et6,et7;
     Firebase ref;
@@ -44,6 +46,8 @@ public class Transporter extends ListActivity {
     ArrayList key=new ArrayList<>();
     ArrayList<TransporterDetails> dataset;
     String uid=null;
+    ProgressBar pb;
+    LinearLayout linearLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,9 +60,58 @@ public class Transporter extends ListActivity {
         et5=(EditText)findViewById(R.id.editText12);
         et6=(EditText)findViewById(R.id.editText13);
         et7=(EditText)findViewById(R.id.editText14);
+        pb=(ProgressBar)findViewById(R.id.progressBar);
+        linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
         l=getListView();
-         new FetchData(Transporter.this).execute();
+        index = 0;
+        count = 0;
+        Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("sms_no");
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                Log.d("child", snapshot.getKey());
+                TransporterDetails post = snapshot.getValue(TransporterDetails.class);
+                post.setKey(snapshot.getKey());
+                Log.d("post", post.getKey());
+                TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(), post.getVehicle_no());
+                list.add(index, obj);
+                name.add(index, post.getName());
+                key.add(index, post.getKey());
+                Log.d("list", String.valueOf(list.get(index)));
+                index++;
+                adapter = new ArrayAdapter<String>(getBaseContext(),R.layout.listview,name);
 
+                l.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+                pb.setVisibility(View.GONE);
+                linearLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                list.clear();
+                name.clear();
+                key.clear();
+                fetchdata();
+                adapter.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+            }
+        });
+        l.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        l.setMultiChoiceModeListener(new ModeCallback());
+        l.setOnItemClickListener(this);
     }
     public void save(View v){
         if(uid==null) {
@@ -177,92 +230,18 @@ public class Transporter extends ListActivity {
     et7.setText("");
     }
 
-
-    class FetchData extends AsyncTask<Context,String,String> implements AdapterView.OnItemClickListener {
-        Activity mActivity;
-        public FetchData (Activity activity)
-        {
-            super();
-            mActivity = activity;
-        }
-        @Override
-        protected String doInBackground(Context... params) {
-            index = 0;
-            count = 0;
-            Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("sms_no");
-            queryRef.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                    Log.d("child", snapshot.getKey());
-                    TransporterDetails post = snapshot.getValue(TransporterDetails.class);
-                    post.setKey(snapshot.getKey());
-                    Log.d("post", post.getKey());
-                    TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(), post.getVehicle_no());
-                    list.add(index, obj);
-                    name.add(index, post.getName());
-                    key.add(index, post.getKey());
-                    Log.d("list", String.valueOf(list.get(index)));
-                    index++;
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                    list.clear();
-                    name.clear();
-                    key.clear();
-                    fetchdata();
-                    adapter.notifyDataSetChanged();
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                }
-            });
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute(){
-        }
-
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            adapter = new ArrayAdapter<String>(getBaseContext(),R.layout.listview,name);
-            l.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-            l.setMultiChoiceModeListener(new ModeCallback());
-            l.setOnItemClickListener(this);
-            l.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
-        }
-
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            dataset=list;
-            et1.setText(dataset.get(position).getName());
-            et2.setText(dataset.get(position).getAddress());
-            et3.setText(dataset.get(position).getSms_no());
-            et4.setText(dataset.get(position).getContact_person());
-            et5.setText(dataset.get(position).getMobile_no());
-            et6.setText(dataset.get(position).getNo_of_vhcl());
-            uid=dataset.get(position).getKey();
-        }
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        dataset=list;
+        et1.setText(dataset.get(position).getName());
+        et2.setText(dataset.get(position).getAddress());
+        et3.setText(dataset.get(position).getSms_no());
+        et4.setText(dataset.get(position).getContact_person());
+        et5.setText(dataset.get(position).getMobile_no());
+        et6.setText(dataset.get(position).getNo_of_vhcl());
+        uid=dataset.get(position).getKey();
     }
+
 
     private void fetchdata() {
         index = 0;

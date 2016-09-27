@@ -5,8 +5,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.potenza_pvt_ltd.AAPS.Vehicle_Type">
-
-
+    <ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <LinearLayout android:orientation="vertical"
+        android:visibility="gone"
+        android:id="@+id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -72,30 +83,37 @@
     </TableRow>
     <ListView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="345dp"
         android:id="@+id/listView"
-        android:layout_weight=".3"
         android:layout_below="@+id/table_row"
         />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Delete"
-        android:id="@+id/button_list_delete"
-        android:onClick="delete"
-        android:layout_below="@+id/editText7"
-        android:layout_alignRight="@+id/editText7"
-        android:layout_alignEnd="@+id/editText7" />
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save"
-        android:id="@+id/button_list_save"
-        android:onClick="save"
-        android:layout_below="@+id/editText7"
-        android:layout_alignLeft="@+id/editText7"
-        android:layout_alignStart="@+id/editText7" />
 
+    <RelativeLayout android:orientation="horizontal"
+        android:visibility="visible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="1"
+        android:layout_alignParentBottom="true"
+        >
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Delete"
+    android:id="@+id/button_list_delete"
+    android:onClick="delete"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentEnd="true" />
+<Button
+    style="?android:attr/buttonStyleSmall"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Save"
+    android:id="@+id/button_list_save"
+    android:onClick="save"
+    android:layout_alignParentTop="true"
+    android:layout_centerHorizontal="true" />
+    </RelativeLayout>
+    </LinearLayout>
 </RelativeLayout>

@@ -225,35 +225,4 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
         startActivity(i);
     }
 
-    class getSpinnerData extends AsyncTask<Context,String,String> {
-        Activity mActivity;
-        public getSpinnerData (Activity activity)
-        {
-            super();
-            mActivity = activity;
-        }
-        @Override
-        protected String doInBackground(Context... params) {
-
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute(){
-
-        }
-
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            }
-
-
-    }
 }

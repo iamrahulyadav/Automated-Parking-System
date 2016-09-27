@@ -18,6 +18,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,13 +73,15 @@ public class PSEntryActivity extends AppCompatActivity {
     int readBufferPosition;
     volatile boolean stopWorker;
     private TextView myLabel;
+    ProgressBar pb;
+    LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_psentry);
         aps=getIntent().getStringExtra("aps");
-        aps=aps.substring(0,14);
+        aps=aps.substring(0, 14);
         et_search=(EditText)findViewById(R.id.editText_search);
         search=(ImageButton)findViewById(R.id.imageButton);
         tv1=(TextView)findViewById(R.id.textView48);
@@ -86,6 +90,8 @@ public class PSEntryActivity extends AppCompatActivity {
         myLabel = (TextView) findViewById(R.id.label);
         Button closeButton = (Button) findViewById(R.id.close);
         mRef = new Firebase(Constants.FIREBASE_URL);
+        pb=(ProgressBar)findViewById(R.id.progressBar);
+        linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
         Query query=mRef.child("users").child("Slip_Details");
         query.addValueEventListener(new ValueEventListener() {
             @Override
@@ -110,8 +116,50 @@ public class PSEntryActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 vhlno = et_search.getText().toString();
-                new getArr(PSEntryActivity.this).execute();
-            }
+                Log.d("vehicle", vhlno);
+                // Attach an listener to read the data at our posts reference
+                Query queryRef1 = mRef.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
+                queryRef1.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                        userkey = snapshot.getKey();
+                        TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
+                        tv1.setText(truck.getContractorname());
+                        localTime = truck.gettime();
+                        vehicle_type = truck.getVehicleType();
+                        vhclno = truck.getVehicleno();
+                        transporter = truck.getContractorname();
+                        email_operator = truck.getEmail();
+                        drvrno = truck.getDriverno();
+                        pb.setVisibility(View.GONE);
+                        linearLayout.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(PSEntryActivity.this);
+                        builder.setMessage(firebaseError.getMessage())
+                                .setTitle(R.string.login_error_title)
+                                .setPositiveButton(android.R.string.ok, null);
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });            }
         });
         b.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -150,77 +198,7 @@ public class PSEntryActivity extends AppCompatActivity {
             }
         });
     }
-    class getArr extends AsyncTask<Context,String,String> {
-        Activity mActivity;
-        public getArr (Activity activity)
-        {
-            super();
-            mActivity = activity;
-        }
-        @Override
-        protected String doInBackground(Context... params) {
-            Log.d("vehicle", vhlno);
-            // Attach an listener to read the data at our posts reference
-            Query queryRef1 = mRef.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
-            queryRef1.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                    userkey = snapshot.getKey();
-                    TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
-                    tv1.setText(truck.getContractorname());
-                    localTime=truck.gettime();
-                    vehicle_type=truck.getVehicleType();
-                    vhclno=truck.getVehicleno();
-                    transporter=truck.getContractorname();
-                    email_operator=truck.getEmail();
-                    drvrno=truck.getDriverno();
-                }
 
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(PSEntryActivity.this);
-                    builder.setMessage(firebaseError.getMessage())
-                            .setTitle(R.string.login_error_title)
-                            .setPositiveButton(android.R.string.ok, null);
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
-            });
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute(){
-        }
-
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-
-        }
-
-    }
 
     void closeBT() throws IOException {
         try {
@@ -351,7 +329,6 @@ public class PSEntryActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    // tries to open a connection to the bluetooth printer device
     void openBT() throws IOException {
         try {
 
@@ -368,10 +345,7 @@ public class PSEntryActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    /*
- * after opening a connection to bluetooth printer device,
- * we have to listen and check if a data were sent to be printed.
- */
+
     void beginListenForData() {
         try {
             final Handler handler = new Handler();

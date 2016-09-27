@@ -11,7 +11,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 
 import com.firebase.client.ChildEventListener;
@@ -35,6 +37,8 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
     private ArrayList  vehicle_type, tariff;
     final ArrayList<String> code = new ArrayList<String>();
     ArrayAdapter<String> dataAdapter;
+    ProgressBar pb;
+    LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +51,48 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
         tariff = new ArrayList();
         listView = (ListView) findViewById(R.id.listView);
         listView.setOnItemClickListener(this);
-        new getListViewData(Vehicle_Type.this).execute();
+        pb=(ProgressBar)findViewById(R.id.progressBar);
+        linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
+        Query queryRef = ref.child("users").child("Vehicle_Type");
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d("value of", String.valueOf(dataSnapshot.getKey()));
+                VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
+                Log.d("vt", post.getVehicle_type());
+                Log.d("fixed", post.getInslip_tariff());
+                vehicle_type.add(post.getVehicle_type());
+                tariff.add(post.getInslip_tariff());
+                customAdapter = new CustomAdapter(getApplication(), vehicle_type, tariff, 3);
+                listView.setAdapter(customAdapter);
+                customAdapter.notifyDataSetChanged();
+                pb.setVisibility(View.GONE);
+                linearLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                int pos = customAdapter.getPos();
+                vehicle_type.remove(pos);
+                tariff.remove(pos);
+                customAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
 
     }
 
@@ -57,75 +102,6 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
 
     }
 
-    class getListViewData extends AsyncTask<Context, String, String> {
-        Activity mActivity;
-
-        public getListViewData(Activity activity) {
-            super();
-            mActivity = activity;
-        }
-
-        @Override
-        protected String doInBackground(Context... params) {
-            Query queryRef = ref.child("users").child("Vehicle_Type");
-            queryRef.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    Log.d("value of", String.valueOf(dataSnapshot.getKey()));
-                    VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
-                    Log.d("vt", post.getVehicle_type());
-                    Log.d("fixed", post.getInslip_tariff());
-                    vehicle_type.add(post.getVehicle_type());
-                    tariff.add(post.getInslip_tariff());
-                    customAdapter = new CustomAdapter(getApplication(), vehicle_type, tariff, 3);
-                    listView.setAdapter(customAdapter);
-                    customAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    int pos = customAdapter.getPos();
-                    vehicle_type.remove(pos);
-                    tariff.remove(pos);
-                    customAdapter.notifyDataSetChanged();
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-
-                }
-            });
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-
-        }
-
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-        }
-
-
-    }
 
     public void save(View v) {
         final String vehicle = et1.getText().toString();
@@ -176,12 +152,6 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
         });
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        customAdapter.notifyDataSetChanged();
-    }
 
     @Override
     public void onBackPressed() {

@@ -20,6 +20,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,6 +89,8 @@ public class ExitReceipt extends AppCompatActivity {
     private String mon_pass;
     private String transporter_key;
     private String amt;
+    private ProgressBar pb1,pb;
+    LinearLayout linearLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +103,9 @@ public class ExitReceipt extends AppCompatActivity {
         b=(Button)findViewById(R.id.button8);
         Button openButton = (Button) findViewById(R.id.open);
         myLabel = (TextView) findViewById(R.id.label);
+        pb=(ProgressBar)findViewById(R.id.progressBar);
+        pb1=(ProgressBar)findViewById(R.id.progressBar1);
+        linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
         Button closeButton = (Button) findViewById(R.id.close);
         mRef = new Firebase(Constants.FIREBASE_URL);
         Query query=mRef.child("users").child("Slip_Details");
@@ -125,7 +132,96 @@ public class ExitReceipt extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 vhlno = et_search.getText().toString();
-                new getArr(ExitReceipt.this).execute();
+                Log.d("vehicle", vhlno);
+                // Attach an listener to read the data at our posts reference
+                Query queryRef1 = mRef.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
+                queryRef1.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                        userkey = snapshot.getKey();
+                        Log.d("userkey",userkey);
+                        TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
+                        partial= Integer.parseInt(truck.getPAP());
+                        localtime = truck.gettime();
+                        localTime=truck.gettime();
+                        vehicle_type=truck.getVehicleType();
+                        vhclno=truck.getVehicleno();
+                        transporter=truck.getContractorname();
+                        email_operator=truck.getEmail();
+                        drvrno=truck.getDriverno();
+                        aps=truck.getAPS();
+                        truck_type = truck.getVehicleType();
+                        Log.d("asda", truck_type);
+                        pb.setVisibility(View.GONE);
+                        if (pb1.getVisibility() == View.GONE) {
+                            linearLayout.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
+                        builder.setMessage(firebaseError.getMessage())
+                                .setTitle(R.string.login_error_title)
+                                .setPositiveButton(android.R.string.ok, null);
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });
+                Query queryRef = mRef.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(truck_type);
+                queryRef.addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                        TariffDetails truck = snapshot.getValue(TariffDetails.class);
+                        arr = truck.getarr();
+                        Log.d("arr", Arrays.deepToString(arr));
+                        calculate(localtime);
+                        pb1.setVisibility(View.GONE);
+                        if (pb.getVisibility() == View.GONE) {
+                            linearLayout.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(FirebaseError firebaseError) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
+                        builder.setMessage(firebaseError.getMessage())
+                                .setTitle(R.string.login_error_title)
+                                .setPositiveButton(android.R.string.ok, null);
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                });
             }
         });
         b.setOnClickListener(new View.OnClickListener() {
@@ -213,118 +309,6 @@ public class ExitReceipt extends AppCompatActivity {
                 }
             }
         });
-    }
-    class getArr extends AsyncTask<Context,String,String> {
-        Activity mActivity;
-        public getArr (Activity activity)
-        {
-            super();
-            mActivity = activity;
-        }
-        @Override
-        protected String doInBackground(Context... params) {
-            Log.d("vehicle", vhlno);
-            // Attach an listener to read the data at our posts reference
-            Query queryRef1 = mRef.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
-            queryRef1.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                    userkey = snapshot.getKey();
-                    Log.d("userkey",userkey);
-                    TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
-                    partial= Integer.parseInt(truck.getPAP());
-                    localtime = truck.gettime();
-                    localTime=truck.gettime();
-                    vehicle_type=truck.getVehicleType();
-                    vhclno=truck.getVehicleno();
-                    transporter=truck.getContractorname();
-                    email_operator=truck.getEmail();
-                    drvrno=truck.getDriverno();
-                    aps=truck.getAPS();
-                    truck_type = truck.getVehicleType();
-                    Log.d("asda", truck_type);
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
-                    builder.setMessage(firebaseError.getMessage())
-                            .setTitle(R.string.login_error_title)
-                            .setPositiveButton(android.R.string.ok, null);
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
-            });
-            Query queryRef = mRef.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(truck_type);
-            queryRef.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                    TariffDetails truck = snapshot.getValue(TariffDetails.class);
-                    arr=truck.getarr();
-                    Log.d("arr", Arrays.deepToString(arr));
-                    calculate(localtime);
-
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
-                    builder.setMessage(firebaseError.getMessage())
-                            .setTitle(R.string.login_error_title)
-                            .setPositiveButton(android.R.string.ok, null);
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
-            });
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute(){
-        }
-
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-
-        }
-
     }
 
     private void calculate(String localtime) {
