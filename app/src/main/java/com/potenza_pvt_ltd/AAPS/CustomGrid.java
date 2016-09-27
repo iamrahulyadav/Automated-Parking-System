@@ -122,13 +122,20 @@ public class CustomGrid extends BaseAdapter {
                                 final Firebase ref = new Firebase(Constants.FIREBASE_URL);
                                 tar_arr[xpos][ypos]= Integer.parseInt(input.getText().toString());
                                 Log.d("Array", Arrays.deepToString(tar_arr));
-                                Query query=ref.child("Tariff_Details").orderByChild("vehicle_type").equalTo(type);
+                                Log.d("Type", type);
+                                Query query=ref.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(type);
                                 query.addChildEventListener(new ChildEventListener() {
                                     @Override
                                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                                        TariffDetails tariffDetails=dataSnapshot.getValue(TariffDetails.class);
                                         Map<String, Object> value = new HashMap<String, Object>();
                                         value.put("arr",tar_arr);
-                                        ref.child("users").child("Tariff_Details").child(dataSnapshot.getKey()).updateChildren(value);
+                                        value.put("inc_dur_hrs",tariffDetails.getInc_dur_hrs());
+                                        value.put("inslip_tariff",tariffDetails.getTariff());
+                                        value.put("vehicle_type",tariffDetails.getVehicle_type());
+                                        value.put("total_slab_hrs",tariffDetails.getTotal_slab_hrs());
+                                        value.put("no_of_slab_hrs", tariffDetails.getNo_of_slab_hrs());
+                                        ref.child("users").child("Tariff_Details").child(dataSnapshot.getKey()).setValue(value);
                                     }
 
                                     @Override

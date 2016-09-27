@@ -5,8 +5,28 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.potenza_pvt_ltd.AAPS.TariffActivity">
-
-
+    <ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_alignTop="@+id/progressBar1"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar1"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+    <LinearLayout android:orientation="vertical"
+        android:visibility="gone"
+        android:id="@+id/linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -148,7 +168,7 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/grid"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="144dp"
         android:horizontalSpacing="5px"
         android:numColumns="3"
         android:columnWidth="50dip"
@@ -156,7 +176,12 @@
         android:gravity="center"
         android:layout_below="@+id/table_row"
         android:layout_above="@+id/button_list_delete" />
-
+        <RelativeLayout android:orientation="horizontal"
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="0dp"
+            android:weightSum="1">
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -175,4 +200,6 @@
         android:onClick="save"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
+        </RelativeLayout>
+    </LinearLayout>
 </RelativeLayout>

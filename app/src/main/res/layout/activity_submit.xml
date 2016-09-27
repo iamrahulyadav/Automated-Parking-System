@@ -28,7 +28,8 @@
         android:id="@+id/progressBar2"
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:visibility="gone"/>
     <LinearLayout android:orientation="vertical"
         android:visibility="gone"
         android:id="@+id/linear_layout"

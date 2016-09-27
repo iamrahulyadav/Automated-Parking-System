@@ -12,6 +12,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -20,6 +22,8 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+
+import org.apache.poi.sl.usermodel.Line;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +39,8 @@ public class TariffActivity extends Activity implements AdapterView.OnItemClickL
     final ArrayList<String> flag= new ArrayList<String>();
     private String flag_code;
     ArrayAdapter<String> dataAdapter;
+    ProgressBar pb,pb1;
+    LinearLayout linear_layout;
     final ArrayList<String> code = new ArrayList<String>();
     int [][] tar_arr;
     final ArrayList<Integer> arr= new ArrayList<Integer>();
@@ -49,11 +55,49 @@ public class TariffActivity extends Activity implements AdapterView.OnItemClickL
         et2=(EditText)findViewById(R.id.editText16);
         et3=(EditText)findViewById(R.id.editText17);
         et4=(EditText)findViewById(R.id.editText18);
+        pb=(ProgressBar)findViewById(R.id.progressBar);
+        pb1=(ProgressBar)findViewById(R.id.progressBar1);
+        linear_layout=(LinearLayout)findViewById(R.id.linear_layout);
         spinner=(Spinner)findViewById(R.id.spinner10);
         spinner.setOnItemSelectedListener(this);
-        new getSpinnerData(TariffActivity.this).execute();
+        Query queryRef = ref.child("users").child("Vehicle_Type");
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d("value of", String.valueOf(dataSnapshot.getKey()));
+                VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
+                code.add(post.getVehicle_type());
+                flag.add(post.getCode());
+                dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, code);
+                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(dataAdapter);
+                dataAdapter.notifyDataSetChanged();
+                pb.setVisibility(View.GONE);
+                linear_layout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
         gridView=(GridView)findViewById(R.id.grid);
-        adapter = new CustomGrid(getApplicationContext(), tar_arr,flag_code);
+        adapter = new CustomGrid(getApplicationContext(), tar_arr,code_value_1);
         gridView.setAdapter(adapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -71,7 +115,84 @@ public class TariffActivity extends Activity implements AdapterView.OnItemClickL
         code_value_1=parent.getItemAtPosition(position).toString();
         Log.d("code_value_1", code_value_1);
         flag_code=flag.get(position);
-        new getListviewdata(TariffActivity.this).execute();
+        pb1.setVisibility(View.VISIBLE);
+        linear_layout.setVisibility(View.GONE);
+        Log.d("Listview in tariff", "taridd");
+        if(code_value_1.isEmpty()==false) {
+            Log.d("adsasd", code_value_1);
+            final int[] f = {0};
+            Query queryRef1 = ref.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(code_value_1);
+            queryRef1.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Log.d("value of get data", dataSnapshot.getKey());
+                    TariffDetails post = dataSnapshot.getValue(TariffDetails.class);
+                    tar_arr = post.getarr();
+                    for (int i = 0; i < tar_arr.length; i++) {
+                        for (int j = 0; j < 3; j++) {
+                            Log.d("ARR", String.valueOf(tar_arr[i][j]));
+                            arr.add(tar_arr[i][j]);
+                        }
+                    }
+                    if(tar_arr!=null){
+                        adapter = new CustomGrid(getApplicationContext(), tar_arr,code_value_1);
+                        gridView.setAdapter(adapter);
+                        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view,
+                                                    int position, long id) {
+                                Toast.makeText(parent.getContext(), "You Clicked at " + position, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                        adapter.notifyDataSetChanged();
+                    }
+                    f[0] =1;
+                    pb1.setVisibility(View.GONE);
+                    linear_layout.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    Log.d("value of get data", dataSnapshot.getKey());
+                    TariffDetails post = dataSnapshot.getValue(TariffDetails.class);
+                    tar_arr = post.getarr();
+                    for (int i = 0; i < tar_arr.length; i++) {
+                        for (int j = 0; j < 3; j++) {
+                            Log.d("ARR", String.valueOf(tar_arr[i][j]));
+                            arr.add(tar_arr[i][j]);
+                        }
+                    }
+                    if(tar_arr!=null){
+                        adapter = new CustomGrid(getApplicationContext(), tar_arr,code_value_1);
+                        gridView.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    tar_arr = null;
+                    adapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
+
+                }
+            });
+            if(f[0]==0) {
+                pb1.setVisibility(View.GONE);
+                linear_layout.setVisibility(View.VISIBLE);
+                gridView.setAdapter(null);
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -115,7 +236,7 @@ public class TariffActivity extends Activity implements AdapterView.OnItemClickL
         et4.setText("");
     }
     public void delete(View v){
-        Query queryRef = ref.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(flag_code);
+        Query queryRef = ref.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(code_value_1);
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
@@ -157,159 +278,9 @@ public class TariffActivity extends Activity implements AdapterView.OnItemClickL
     @Override
     public void onBackPressed()
     {
+        finish();
         Intent i = new Intent(TariffActivity.this, Masters.class);
         startActivity(i);
-    }
-
-    class getSpinnerData extends AsyncTask<Context,String,String> {
-        Activity mActivity;
-        public getSpinnerData (Activity activity)
-        {
-            super();
-            mActivity = activity;
-        }
-        @Override
-        protected String doInBackground(Context... params) {
-            Query queryRef = ref.child("users").child("Vehicle_Type");
-            queryRef.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    Log.d("value of", String.valueOf(dataSnapshot.getKey()));
-                    VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
-                    code.add(post.getVehicle_type());
-                    flag.add(post.getCode());
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-
-                }
-            });
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute(){
-
-        }
-
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, code);
-            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner.setAdapter(dataAdapter);
-            dataAdapter.notifyDataSetChanged();
-
-        }
-
-
-    }
-
-    class getListviewdata extends AsyncTask<Context,String,String> {
-        Activity mActivity;
-        public getListviewdata (Activity activity)
-        {
-            super();
-            mActivity = activity;
-        }
-        @Override
-        protected String doInBackground(Context... params) {
-            Log.d("Listview in tariff","taridd");
-            if(code_value_1.isEmpty()==false) {
-                Log.d("adsasd", code_value_1);
-                Query queryRef1 = ref.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(code_value_1);
-                queryRef1.addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        Log.d("value of get data", dataSnapshot.getKey());
-                        TariffDetails post = dataSnapshot.getValue(TariffDetails.class);
-                        tar_arr = post.getarr();
-                        for (int i = 0; i < tar_arr.length; i++) {
-                            for (int j = 0; j < 3; j++) {
-                                Log.d("ARR", String.valueOf(tar_arr[i][j]));
-                                arr.add(tar_arr[i][j]);
-                            }
-                        }
-                        adapter = new CustomGrid(getApplicationContext(), tar_arr,flag_code);
-                        adapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                        tar_arr = null;
-                        adapter.notifyDataSetChanged();
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-
-                    }
-                });
-            }
-            adapter.notifyDataSetChanged();
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute(){
-        }
-
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            if(tar_arr!=null){
-                adapter = new CustomGrid(getApplicationContext(), tar_arr,flag_code);
-                gridView.setAdapter(adapter);
-                gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view,
-                                            int position, long id) {
-                        Toast.makeText(parent.getContext(), "You Clicked at " + position, Toast.LENGTH_SHORT).show();
-                    }
-                });
-                adapter.notifyDataSetChanged();
-            }
-        }
-
     }
 }
 
