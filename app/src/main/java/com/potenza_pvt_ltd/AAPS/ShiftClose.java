@@ -101,7 +101,7 @@ public class ShiftClose extends Activity {
                                                     public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                                                         Log.d("key123", snapshot.getKey());
                                                         Calendar calendar = Calendar.getInstance();
-                                                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
                                                         final String localTime = sdf.format(calendar.getTime());
                                                         Map<String, Object> graceNickname = new HashMap<>();
                                                         graceNickname.put("Shift Close Time", localTime);

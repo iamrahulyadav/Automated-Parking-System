@@ -23,6 +23,7 @@ public class TruckDetailsActivity {
     private String aps;
     private String pap;
     private String vehicleType;
+    private String time_cash_handover;
 
     public TruckDetailsActivity() {
 
@@ -132,5 +133,9 @@ public class TruckDetailsActivity {
     @JsonProperty("Vehicle Type")
     public String getVehicleType() {
         return vehicleType;
+    }
+    @JsonProperty("Cash Handover")
+    public String getTime_cash_handover() {
+        return time_cash_handover;
     }
 }

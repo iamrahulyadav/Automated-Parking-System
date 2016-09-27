@@ -69,7 +69,7 @@ public class CalculateFare extends Activity {
 
         Date date1=null,date2 = null;
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         String current = dateFormat.format(calendar.getTime());
         try {
             date1 = dateFormat.parse(localtime);

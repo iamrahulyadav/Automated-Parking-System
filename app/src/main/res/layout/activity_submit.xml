@@ -21,6 +21,14 @@
         android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+    <ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar2"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
     <LinearLayout android:orientation="vertical"
         android:visibility="gone"
         android:id="@+id/linear_layout"

@@ -23,11 +23,18 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.w3c.dom.Text;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,10 +51,19 @@ public class Collections extends Activity {
     private Button cash_handover;
     ProgressBar pb;
     private LinearLayout linear_layout;
+    private String localTime;
+    private String finaltime;
+    private SimpleDateFormat sdf1;
+    Date date = null;
+    Date dat = null;
+    private long millis;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        date=new Date();
+        dat=new Date();
         setContentView(R.layout.activity_collections);
         text = (TextView) findViewById(R.id.tot_amt_cal);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -57,23 +73,56 @@ public class Collections extends Activity {
         cash_handover=(Button)findViewById(R.id.cashhandover);
         pb=(ProgressBar)findViewById(R.id.progressBar);
         linear_layout=(LinearLayout)findViewById(R.id.linear_layout);
-        Query queryRef = ref.child("users").child("data").orderByChild("email").equalTo(email);
-        queryRef.addChildEventListener(new ChildEventListener() {
+        final Calendar c = Calendar.getInstance();
+        int yy = c.get(Calendar.YEAR);
+        int mm = c.get(Calendar.MONTH);
+        int dd = c.get(Calendar.DAY_OF_MONTH);
+        formattedDate = String.valueOf(new StringBuilder().append(dd).append("/").append(mm + 1).append("/").append(yy));
+        sdf1 = new SimpleDateFormat("dd/MM/yyyy");
+        Date date1=null;
+        try {
+            date1 = sdf1.parse(formattedDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar calendar = Calendar.getInstance();
+        final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss aa");
+        localTime = sdf.format(calendar.getTime());
+        Query qr=ref.child("users").child("cash-handover").orderByChild("Date");
+        final Date finalDate = date1;
+        finaltime=formattedDate+" "+localTime;
+        final int[] count = {0};
+        qr.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("count child", String.valueOf(dataSnapshot.getChildrenCount()));
+                for(DataSnapshot ds:dataSnapshot.getChildren()) {
+                    count[0]++;
+                    if(count[0] ==dataSnapshot.getChildrenCount()) {
+                        Log.d("key-collections", ds.getKey());
+                        TruckDetailsActivity truckDetailsActivity = ds.getValue(TruckDetailsActivity.class);
+                        String dat_time = truckDetailsActivity.getDate() + " " + truckDetailsActivity.getTime_cash_handover();
+                        DateTimeZone timeZone = DateTimeZone.forID("Asia/Kolkata"); // Or, DateTimeZone.UTC
+                        DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy hh:mm:ss a");
+                        DateTime dateTime = formatter.withZone(timeZone).parseDateTime(dat_time);
+                        millis = dateTime.getMillis();
+                        Log.d("millis", String.valueOf(millis));
+                        pb.setVisibility(View.GONE);
+                        linear_layout.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        qr.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
-                final Calendar c = Calendar.getInstance();
-                int yy = c.get(Calendar.YEAR);
-                int mm = c.get(Calendar.MONTH);
-                int dd = c.get(Calendar.DAY_OF_MONTH);
-                formattedDate = String.valueOf(new StringBuilder().append(dd).append("/").append(mm + 1).append("/").append(yy));
-                Log.d("post", post.getDate());
-                if (post.getDate().contentEquals(formattedDate)) {
-                    cost += Integer.parseInt(post.getCost());
-                }
-                text.setText(String.valueOf(cost));
-                pb.setVisibility(View.GONE);
-                linear_layout.setVisibility(View.VISIBLE);
+
+
             }
 
             @Override
@@ -96,8 +145,7 @@ public class Collections extends Activity {
 
             }
         });
-        text.setText(String.valueOf(cost));
-        //new getCost(Collections.this).execute();
+        getData();
         cash_handover.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,34 +160,6 @@ public class Collections extends Activity {
         startActivity(i);
     }
 
-    class getCost extends AsyncTask<Context, String, String> {
-        Activity mActivity;
-        public getCost(Activity activity) {
-            super();
-            mActivity = activity;
-        }
-
-        @Override
-        protected String doInBackground(Context... params) {
-
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onCancelled(String s) {
-            super.onCancelled(s);
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-
-        }
-    }
 
     public void newActivity() {
         String email = emailid.getText().toString();
@@ -235,8 +255,58 @@ public class Collections extends Activity {
         map.put("email", email);
         map.put("Amount Collected", cost);
         map.put("Date", formattedDate);
+        map.put("Cash Handover", localTime);
         Firebase newpostref=ref.child("users").child("cash-handover").push();
         newpostref.setValue(map);
     }
 
+    public void getData() {
+        pb.setVisibility(View.VISIBLE);
+        linear_layout.setVisibility(View.GONE);
+        Query queryRef = ref.child("users").child("data").orderByChild("email").equalTo(email);
+        queryRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
+                String dat_time1 = post.getDate() + " " + post.gettime();
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a");
+                Date dat1 = null;
+                try {
+                    dat1 = sdf.parse(dat_time1);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                Log.d("time of cash handover", String.valueOf(millis));
+                Log.d("time of data", String.valueOf(dat1.getTime()));
+                if (dat1.getTime()> millis) {
+                    cost += Integer.parseInt(post.getCost());
+                }
+                text.setText(String.valueOf(cost));
+                pb.setVisibility(View.GONE);
+                linear_layout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+        text.setText(String.valueOf(cost));
+
+    }
 }

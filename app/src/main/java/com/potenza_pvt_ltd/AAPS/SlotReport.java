@@ -292,7 +292,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
     public void export(View view){
         if(toDateEtxt.getText().toString()!=null&& fromDateEtxt.getText().toString()!=null) {
             pb3.setVisibility(View.VISIBLE);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             if(datefrom!=null && dateto!=null) {
                 String timeofarrival = datefrom + " 00:00:01";
                 Date date = null; // You will need try/catch around this
@@ -323,7 +323,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
                         Log.d("transporter", transporter);
                         if (transporter.contentEquals("All") && vehicle_type_name.contentEquals("All") && email.contentEquals("All")) {
                             globatime = post.getDate() + " " + post.gettime();
-                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
+                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
                             Date d = null; // You will need try/catch around this
                             try {
                                 d = formatter.parse(globatime);
@@ -348,7 +348,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
                         } else {
                             if (post.getContractorname().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVehicleType().contentEquals(vehicle_type_name)) {
                                 globatime = post.getDate() + " " + post.gettime();
-                                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
+                                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
                                 Date d = null; // You will need try/catch around this
                                 try {
                                     d = formatter.parse(globatime);

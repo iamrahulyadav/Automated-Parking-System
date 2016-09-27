@@ -286,7 +286,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
                 TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
                 //post.setKey(dataSnapshot.getKey());
                 globatime=post.gettime();
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); // I assume d-M, you may refer to M-d for month-day instead.
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a"); // I assume d-M, you may refer to M-d for month-day instead.
                 Date d = null; // You will need try/catch around this
                 try {
                     d = formatter.parse(globatime);

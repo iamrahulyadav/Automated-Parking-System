@@ -277,7 +277,7 @@ public class PSExitActivity extends AppCompatActivity {
 
         Date date1=null,date2 = null;
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
         String current = dateFormat.format(calendar.getTime());
         try {
             date1 = dateFormat.parse(localtime);

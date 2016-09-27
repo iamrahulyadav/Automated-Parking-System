@@ -128,6 +128,7 @@
             android:layout_alignEnd="@+id/spinner7"
             android:layout_alignLeft="@+id/spinner7"
             android:layout_alignStart="@+id/spinner7" />
+        <!--
         <TableRow
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -157,7 +158,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/listView2" />
-
+        -->
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

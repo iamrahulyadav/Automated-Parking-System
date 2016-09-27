@@ -83,6 +83,10 @@ public class ExitReceipt extends AppCompatActivity {
     int readBufferPosition;
     volatile boolean stopWorker;
     private TextView myLabel;
+    private String localTime1;
+    private String mon_pass;
+    private String transporter_key;
+    private String amt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,9 +134,49 @@ public class ExitReceipt extends AppCompatActivity {
                 Log.d("Cost", String.valueOf(cost));
                 if(cost!=0){
                     try {
+                        if(vehicle_type.contentEquals("Trailer with Monthly Pass")){
+                            //Search for transporter Name using a new Query and then update the Amt with that userkey
+                            final Query queryRef1 = mRef.child("users").child("Transporter_Details").orderByChild("Name").equalTo(transporter);
+                            queryRef1.addChildEventListener(new ChildEventListener() {
+                                @Override
+                                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                                    transporter_key = String.valueOf(dataSnapshot.getKey());
+                                    TransporterDetails transporterDetails=dataSnapshot.getValue(TransporterDetails.class);
+                                    amt=transporterDetails.getAmt();
+                                    int amount=Integer.parseInt(amt)-cost;
+                                    Map<String, Object> map = new HashMap<String, Object>();
+                                    map.put("Amt", String.valueOf(amount));
+                                    mRef.child("users").child("Transporter_Details").child(transporter_key).updateChildren(map);
+                                }
+
+                                @Override
+                                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                                }
+
+                                @Override
+                                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                                }
+
+                                @Override
+                                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                                }
+
+                                @Override
+                                public void onCancelled(FirebaseError firebaseError) {
+
+                                }
+                            });
+                        }
+                        Calendar calendar = Calendar.getInstance();
+                        final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss aa");
+                        localTime1 = sdf.format(calendar.getTime());
                         Map<String, Object> map = new HashMap<String, Object>();
-                        map.put("Cost",String.valueOf(cost));
-                        Log.d("user",userkey);
+                        map.put("Cost", String.valueOf(cost));
+                        map.put("Time of Departure", localTime1);
+                        Log.d("user", userkey);
                         mRef.child("users").child("data").child(userkey).updateChildren(map);
                         AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
                         builder.setMessage("The data has been updated.")
@@ -234,6 +278,7 @@ public class ExitReceipt extends AppCompatActivity {
                     arr=truck.getarr();
                     Log.d("arr", Arrays.deepToString(arr));
                     calculate(localtime);
+
                 }
 
                 @Override

@@ -71,7 +71,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
     private long timefrom,timeto;
     private String filename;
     private String time_d;
-    ListView listview;
+    //ListView listview;
     int p1=0,p2=0,p3=0,p4=0,p5=0,p6=0,p7=0,p8=0;
     private CustomAdapter customAdapter;
     private ArrayList<String> psname=new ArrayList<>();
@@ -237,7 +237,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
 
             }
         });
-        Query queryRef4 = ref.child("users").child("data").orderByChild("Time of Departure").equalTo("");
+        /*Query queryRef4 = ref.child("users").child("data").orderByChild("Time of Departure").equalTo("");
         queryRef4.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -296,7 +296,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
             public void onCancelled(FirebaseError firebaseError) {
 
             }
-        });
+        });*/
     }
 
     private void findViewsById() {
@@ -314,7 +314,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
         pb2=(ProgressBar)findViewById(R.id.progressBar2);
         pb3=(ProgressBar)findViewById(R.id.progressBar3);
         linear_layout=(LinearLayout)findViewById(R.id.linear_layout);
-        listview=(ListView)findViewById(R.id.listView2);
+        //listview=(ListView)findViewById(R.id.listView2);
     }
 
     private void setDateTimeField() {
@@ -498,7 +498,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
     public void export(View view){
         if(datefrom.isEmpty()==false&& dateto.isEmpty()==false) {
             pb3.setVisibility(View.VISIBLE);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             String timeofarrival = datefrom+" 00:00:01";
             Date date = null; // You will need try/catch around this
             try {
@@ -525,7 +525,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
                     TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
                     if (transporter.contentEquals("All") && vehicle_type_name.contentEquals("All") && email.contentEquals("All")) {
                         globatime = post.getDate() + " " + post.gettime();
-                        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
+                        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
                         Date date = null; // You will need try/catch around this
                         try {
                             date = formatter.parse(globatime);
@@ -543,7 +543,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
                     } else {
                         if (post.getContractorname().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVehicleType().contentEquals(vehicle_type_name)) {
                             globatime = post.getDate() + " " + post.gettime();
-                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
+                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
                             Date date = null; // You will need try/catch around this
                             try {
                                 date = formatter.parse(globatime);

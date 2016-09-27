@@ -236,7 +236,7 @@ public class PSEntryActivity extends AppCompatActivity {
 
     void sendData() throws IOException {
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
         String current = dateFormat.format(calendar.getTime());
         try {
             // the text typed by the user

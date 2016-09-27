@@ -13,8 +13,10 @@ public class DetailofUser {
         private String key;
         private String code;
         private String pwd;
+    private String time_cash_handover;
+    private String date;
 
-        public DetailofUser() {
+    public DetailofUser() {
 
             /*Blank default constructor essential for Firebase*/
         }
@@ -43,4 +45,10 @@ public class DetailofUser {
     public void setPwd(String key){
         this.pwd=key;
     }
+
+    @JsonProperty("Date")
+    public String getDate() {
+        return date;
+    }
+
 }
