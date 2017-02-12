@@ -220,7 +220,7 @@ public class CalculateFare extends Activity {
         Log.d("cost", String.valueOf(cost));
         tv1.setText(String.valueOf(cost));
         Map<String, Object> graceNickname = new HashMap<>();
-        graceNickname.put("Cost", String.valueOf(cost));
+        graceNickname.put("cost", String.valueOf(cost));
         reference.child("users").child("data").child(useridold).updateChildren(graceNickname);
         if(pb.getVisibility()==View.GONE && pb1.getVisibility()==View.GONE){
             linearLayout.setVisibility(View.VISIBLE);

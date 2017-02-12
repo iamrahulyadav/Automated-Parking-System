@@ -410,7 +410,7 @@ public class SummaryReports extends Activity implements View.OnClickListener ,Ad
                     TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
                     if (transporter.contentEquals("All") && vehicle_type_name.contentEquals("All") && email.contentEquals("All")) {
                         globatime = post.getDate() + " " + post.getToa();
-                        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa", Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
+                        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a", Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
                         Date date = null; // You will need try/catch around this
                         try {
                             date = formatter.parse(globatime);
@@ -427,7 +427,7 @@ public class SummaryReports extends Activity implements View.OnClickListener ,Ad
                     } else {
                         if (post.getTransporter().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVtype().contentEquals(vehicle_type_name)) {
                             globatime = post.getDate() + " " + post.getToa();
-                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa",Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
+                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a",Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
                             Date date = null; // You will need try/catch around this
                             try {
                                 date = formatter.parse(globatime);

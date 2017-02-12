@@ -154,7 +154,7 @@ public class ShiftClose extends Activity {
                                                                 if (!task.isSuccessful()) {
                                                                     Log.w("Sign in Faialed", "signInWithEmail:failed", task.getException());
                                                                     AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
-                                                                    builder.setMessage("Please Login Through your credentials")
+                                                                    builder.setMessage("EmailID or Password Incorrect")
                                                                             .setTitle(R.string.login_error_title)
                                                                             .setPositiveButton(android.R.string.ok, null);
                                                                     AlertDialog dialog = builder.create();
@@ -197,7 +197,7 @@ public class ShiftClose extends Activity {
                                     if (!task.isSuccessful()) {
                                         Log.w("Sign in Faialed", "signInWithEmail:failed", task.getException());
                                         AlertDialog.Builder builder = new AlertDialog.Builder(ShiftClose.this);
-                                        builder.setMessage("Please Login Through your credentials!!!")
+                                        builder.setMessage("EmailID or Password Incorrect")
                                                 .setTitle(R.string.login_error_title)
                                                 .setPositiveButton(android.R.string.ok, null);
                                         AlertDialog dialog = builder.create();

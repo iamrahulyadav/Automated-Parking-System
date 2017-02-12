@@ -106,7 +106,7 @@ public class Collections extends Activity {
             e.printStackTrace();
         }
         Calendar calendar = Calendar.getInstance();
-        final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss aa");
+        final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");
         localTime = sdf.format(calendar.getTime());
         Query qr=reference.child("users").child("cash-handover").orderByChild("Date");
         final Date finalDate = date1;
@@ -206,7 +206,7 @@ public class Collections extends Activity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                                     // Authenticated successfully with payload authData
-                                    Query queryRef = reference.child("users").orderByChild("email-address");
+                                    Query queryRef = reference.child("users").orderByChild("emailaddress");
                                     queryRef.addChildEventListener(new ChildEventListener() {
                                         @Override
                                         public void onChildAdded(DataSnapshot snapshot, String previousChild) {
@@ -258,7 +258,7 @@ public class Collections extends Activity {
                             if (!task.isSuccessful()) {
                                 Log.w("Sign in Faialed", "signInWithEmail:failed", task.getException());
                                 AlertDialog.Builder builder = new AlertDialog.Builder(Collections.this);
-                                builder.setMessage((CharSequence) task.getException())
+                                builder.setMessage("EmailID or Password Incorrect")
                                         .setTitle(R.string.login_error_title)
                                         .setPositiveButton(android.R.string.ok, null);
                                 AlertDialog dialog = builder.create();

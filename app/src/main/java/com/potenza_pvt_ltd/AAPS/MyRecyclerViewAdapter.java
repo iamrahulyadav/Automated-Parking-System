@@ -119,7 +119,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
                                     pos=position;
                                     DatabaseReference alanRef = reference.child("users").child("Transporter_Details").child(key);
                                     Map<String, Object> nickname = new HashMap<String, Object>();
-                                    nickname.put("Amt", amount);
+                                    nickname.put("amt", amount);
                                     alanRef.updateChildren(nickname);
                                     Toast.makeText(view.getContext(), input.getText(), Toast.LENGTH_SHORT).show();
 
