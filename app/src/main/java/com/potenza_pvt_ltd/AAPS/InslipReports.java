@@ -2,12 +2,11 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -21,14 +20,20 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
-
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -45,6 +50,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 
 public class InslipReports extends Activity implements View.OnClickListener {
@@ -54,7 +60,6 @@ public class InslipReports extends Activity implements View.OnClickListener {
     private DatePickerDialog toDatePickerDialog;
     private String datefrom,dateto;
     private SimpleDateFormat dateFormatter;
-    Firebase ref;
     final ArrayList<String> date_array = new ArrayList<String>();
     final ArrayList<String> time_array = new ArrayList<String>();
     final ArrayList<String> vehicle_no = new ArrayList<String>();
@@ -70,39 +75,47 @@ public class InslipReports extends Activity implements View.OnClickListener {
     ArrayList<String> values = new ArrayList<String>();
     private ArrayList<String> name=new ArrayList<>();
     private Button button;
-    static int count=1;
-
     private String globatime;
     private long globalmillis;
     private long timefrom,timeto;
     private String filename;
     private String email,vehicle_type_name,transporter;
 
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
+    FirebaseStorage storage;
+    StorageReference storageRef;
+    private int child_count;
+    private int flag;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inslip_reports);
-        dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        ref=new Firebase(Constants.FIREBASE_URL);
+        dateFormatter = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReferenceFromUrl("gs://testing-project-15.appspot.com");
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
         findViewsById();
         values.add("All");
         name.add("All");
         code.add("All");
         setDateTimeField();
-        Query queryRef = ref.child("users").child("Operator");
+        Query queryRef = reference.child("users").child("Operator");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("value of", String.valueOf(dataSnapshot.getKey()));
                 DetailofUser post = dataSnapshot.getValue(DetailofUser.class);
-                Log.d("email", post.getEmail());
-                Log.d("pass", post.getPwd());
-                values.add(post.getEmail());
+                Log.d("email", post.getEmailaddress());
+                Log.d("pass", post.getPass());
+                values.add(post.getEmailaddress());
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, values);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinner2.setAdapter(dataAdapter);
                 pb.setVisibility(View.GONE);
-                if(pb1.getVisibility()==View.VISIBLE && pb2.getVisibility()==View.VISIBLE) {
+                if (pb1.getVisibility() == View.VISIBLE && pb2.getVisibility() == View.VISIBLE) {
                     linear_layout.setVisibility(View.VISIBLE);
                 }
 
@@ -125,11 +138,11 @@ public class InslipReports extends Activity implements View.OnClickListener {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
-        Query queryRef1 = ref.child("users").child("Vehicle_Type");
+        Query queryRef1 = reference.child("users").child("Vehicle_Type");
         queryRef1.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -162,11 +175,11 @@ public class InslipReports extends Activity implements View.OnClickListener {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
-        Query queryRef3 = ref.child("users").child("Transporter_Details");
+        Query queryRef3 = reference.child("users").child("Transporter_Details");
         queryRef3.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -198,7 +211,7 @@ public class InslipReports extends Activity implements View.OnClickListener {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -296,7 +309,7 @@ public class InslipReports extends Activity implements View.OnClickListener {
     public void export(View view){
         if(fromDateEtxt!=null &&toDateEtxt!=null) {
             pb3.setVisibility(View.VISIBLE);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss",Locale.ENGLISH);
             String timeofarrival = datefrom+" 00:00:01";
             Date date = null; // You will need try/catch around this
             try {
@@ -315,16 +328,28 @@ public class InslipReports extends Activity implements View.OnClickListener {
             timeto=date1.getTime();
             Log.d("timefrom", String.valueOf(timefrom));
             Log.d("timeto", String.valueOf(timeto));
-            Query queryRef = ref.child("users").child("data");
+            Query queryRef = reference.child("users").child("data");
+            queryRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    child_count= (int) dataSnapshot.getChildrenCount();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            flag=0;
             queryRef.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                     Log.d("asda", String.valueOf(dataSnapshot.getChildrenCount()));
                     TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
                     if (transporter.contentEquals("All") && vehicle_type_name.contentEquals("All") && email.contentEquals("All")) {
-                        if (post.gettime() != null) {
-                            globatime = post.getDate() + " " + post.gettime();
-                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
+                        if (post.getToa() != null) {
+                            globatime = post.getDate() + " " + post.getToa();
+                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa", Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
                             Date d = null; // You will need try/catch around this
                             try {
                                 d = formatter.parse(globatime);
@@ -334,23 +359,22 @@ public class InslipReports extends Activity implements View.OnClickListener {
                             }
                             Log.d("globaltime", String.valueOf(globalmillis));
                             if (globalmillis > timefrom && globalmillis < timeto) {
-                                DateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-                                DateFormat time = new SimpleDateFormat("hh:mm:ss");
-                                date_array.add(date.format(d));
+                                DateFormat date_d = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
+                                DateFormat time = new SimpleDateFormat("hh:mm:ss",Locale.ENGLISH);
+                                date_array.add(date_d.format(d));
                                 time_array.add(time.format(d));
                                 email_operator.add(post.getEmail());
                                 amt_operator.add(post.getCost());
-                                vehicle_no.add(post.getVehicleno());
-                                vehicle_type.add(post.getVehicleno());
-                                contractor_name.add(post.getContractorname());
+                                vehicle_no.add(post.getVno());
+                                vehicle_type.add(post.getVtype());
+                                contractor_name.add(post.getTransporter());
                             }
                         }
-                        getdata();
                     } else {
-                        if (post.getContractorname().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVehicleType().contentEquals(vehicle_type_name)) {
-                            if (post.gettime() != null) {
-                                globatime = post.getDate() + " " + post.gettime();
-                                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
+                        if (post.getTransporter().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVtype().contentEquals(vehicle_type_name)) {
+                            if (post.getToa() != null) {
+                                globatime = post.getDate() + " " + post.getToa();
+                                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa",Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
                                 Date d = null; // You will need try/catch around this
                                 try {
                                     d = formatter.parse(globatime);
@@ -360,23 +384,24 @@ public class InslipReports extends Activity implements View.OnClickListener {
                                 }
                                 Log.d("globaltime", String.valueOf(globalmillis));
                                 if (globalmillis > timefrom && globalmillis < timeto) {
-                                    DateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-                                    DateFormat time = new SimpleDateFormat("hh:mm:ss");
-                                    date_array.add(date.format(d));
+                                    DateFormat date_d = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
+                                    DateFormat time = new SimpleDateFormat("hh:mm:ss",Locale.ENGLISH);
+                                    date_array.add(date_d.format(d));
                                     time_array.add(time.format(d));
                                     email_operator.add(post.getEmail());
                                     amt_operator.add(post.getCost());
-                                    vehicle_no.add(post.getVehicleno());
+                                    vehicle_no.add(post.getVno());
                                     Log.d("abx", post.getEmail());
-                                    vehicle_type.add(post.getVehicleno());
-                                    contractor_name.add(post.getContractorname());
+                                    vehicle_type.add(post.getVtype());
+                                    contractor_name.add(post.getTransporter());
                                 }
                             }
                         }
-                        getdata();
-
                     }
-
+                    flag++;
+                    if(flag==child_count) {
+                        getdata();
+                    }
                 }
 
                 @Override
@@ -395,7 +420,7 @@ public class InslipReports extends Activity implements View.OnClickListener {
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                public void onCancelled(DatabaseError firebaseError) {
 
                 }
             });
@@ -490,7 +515,8 @@ public class InslipReports extends Activity implements View.OnClickListener {
         c = row2.createCell(9);
         c.setCellValue("Amount");
         c.setCellStyle(cs);
-
+        int count=1;
+        Log.d("Coutn", String.valueOf(count));
         for(int i=0;i<email_operator.size();i++){
             Row row3 = sheet1.createRow(k);
             c = row3.createCell(2);
@@ -528,7 +554,6 @@ public class InslipReports extends Activity implements View.OnClickListener {
             k++;
 
         }
-
         sheet1.setColumnWidth(2, (15* 500));
         sheet1.setColumnWidth(3, (30* 500));
         sheet1.setColumnWidth(4, (30* 500));
@@ -536,9 +561,12 @@ public class InslipReports extends Activity implements View.OnClickListener {
         sheet1.setColumnWidth(6, (30* 500));
         sheet1.setColumnWidth(7, (30* 500));
         sheet1.setColumnWidth(8, (30* 500));
-        sheet1.setColumnWidth(9, (30* 500));
+        sheet1.setColumnWidth(9, (30 * 500));
         // Create a path where we will place our List of objects on external storage
-        File file = new File(this.getExternalFilesDir(null), "Inslip-Reports.xls");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss",Locale.ENGLISH);
+        String format = simpleDateFormat.format(new Date());
+        File file = new File(this.getExternalFilesDir(null), "Inslip-Reports-"+format+".xls");
+        Log.d("address", String.valueOf(Uri.fromFile(file)));
         FileOutputStream os = null;
 
         try {
@@ -557,6 +585,28 @@ public class InslipReports extends Activity implements View.OnClickListener {
             } catch (Exception ex) {
             }
         }
+        StorageReference mountainsRef = storageRef.child("Inslip-Reports/" + format + ".xls");
+        mountainsRef.putFile(Uri.fromFile(file))
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        //if the upload is successfull
+                        //hiding the progress dialog
+
+                        //and displaying a success toast
+                        Toast.makeText(getApplicationContext(), "File Uploaded ", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        //if the upload is not successfull
+                        //hiding the progress dialog
+
+                        //and displaying error message
+                        Toast.makeText(getApplicationContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
         pb3.setVisibility(View.GONE);
         sendEmailWithAttachment(Constants.EMAIL_TO, "", "", filename);
     }
@@ -576,8 +626,8 @@ public class InslipReports extends Activity implements View.OnClickListener {
         }
         return false;
     }
-    public void sendEmailWithAttachment(String to, String subject, String message, String fileAndLocation)
-    {
+    public void sendEmailWithAttachment(String to, String subject, String message, String fileAndLocation){
+
         Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
         emailIntent.setType("application/excel");
         emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{to});

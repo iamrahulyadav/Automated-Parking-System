@@ -5,15 +5,13 @@ import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -25,20 +23,18 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.firebase.client.ChildEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.potenza_pvt_ltd.AAPS.function.PocketPos;
-import com.potenza_pvt_ltd.AAPS.util.DataConstants;
-import com.potenza_pvt_ltd.AAPS.util.DateUtil;
 import com.potenza_pvt_ltd.AAPS.util.FontDefine;
 import com.potenza_pvt_ltd.AAPS.util.Printer;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
-import com.potenza_pvt_ltd.AAPS.util.StringUtil;
-import com.potenza_pvt_ltd.AAPS.util.Util;
-
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,8 +43,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -59,7 +55,11 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
     protected EditText vehicleno;
     protected TextView date;
     protected Button submitButton;
-    private Firebase mRef;
+    private FirebaseAuth mAuth;
+    private FirebaseAuth mRef;
+    DatabaseReference reference;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseAuth.AuthStateListener mRefListener;
     String transpoter_name,vehicle_type;
     private String typeofuser;
     private String email_operator;
@@ -88,7 +88,6 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
     ArrayAdapter<String> dataAdapter,dataAdapter1;
     Spinner spinner,spinner_transporter;
     private ArrayList<String> code=new ArrayList<>();
-    private Firebase ref=new Firebase(Constants.FIREBASE_URL);
     private ArrayList<String> name=new ArrayList<>();
     private String aps;
     ProgressBar pb,pb1,pb2;
@@ -109,8 +108,23 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
         linear_layout=(LinearLayout)findViewById(R.id.linear_layout);
         myLabel = (TextView) findViewById(R.id.label);
         Button closeButton = (Button) findViewById(R.id.close);
-        final Firebase ref=new Firebase(Constants.FIREBASE_URL);
-        Query query=ref.child("users").child("Slip_Details");
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("User", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d("User", "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
+        Query query=reference.child("users").child("Slip_Details");
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -126,7 +140,7 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
                 System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
@@ -159,7 +173,7 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
         submitButton= (Button) findViewById(R.id.button_submit);
         spinner = (Spinner) findViewById(R.id.spinner2);
         spinner.setOnItemSelectedListener(this);
-        Query queryRef = ref.child("users").child("Vehicle_Type");
+        Query queryRef = reference.child("users").child("Vehicle_Type");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -192,7 +206,7 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -201,13 +215,14 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
         dataAdapter.notifyDataSetChanged();
         spinner_transporter = (Spinner) findViewById(R.id.spinner3);
         spinner_transporter.setOnItemSelectedListener(this);
-        final Query queryRef1 = ref.child("users").child("Transporter_Details");
+        final Query queryRef1 = reference.child("users").child("Transporter_Details").orderByChild("name");
         queryRef1.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("value of", String.valueOf(dataSnapshot.getKey()));
                 TransporterDetails post = dataSnapshot.getValue(TransporterDetails.class);
                 name.add(post.getName());
+                Collections.sort(name, String.CASE_INSENSITIVE_ORDER);
                 dataAdapter1 = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, name);
                 dataAdapter1.notifyDataSetChanged();
                 dataAdapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -234,7 +249,7 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -251,10 +266,23 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
         localTime = sdf.format(calendar.getTime());
         Log.d("localtime",localTime);
         // Check Authentication
-        mRef = new Firebase(Constants.FIREBASE_URL);
-        if (mRef.getAuth() == null) {
-            loadLoginView();
-        }
+        mRef = FirebaseAuth.getInstance();
+        mRefListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("User", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d("User", "onAuthStateChanged:signed_out");
+                    loadLoginView();
+                }
+                // ...
+            }
+        };
+
         submitButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -265,7 +293,7 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                 drvrno = driverno.getText().toString();
                 vhclno = vehicleno.getText().toString();
                 final_date = date.getText().toString();
-                Query queryRef3 = ref.child("users").child("Transporter_Details").orderByChild("Name").equalTo(transporter);
+                Query queryRef3 = reference.child("users").child("Transporter_Details").orderByChild("name").equalTo(transporter);
                 queryRef3.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -278,19 +306,19 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                             if(nos[i].contentEquals(vhclno)){
                                 flag=1;
                                 Map<String, Object> graceNickname = new HashMap<>();
-                                graceNickname.put("Transporter", transporter);
-                                graceNickname.put("Driver Number", drvrno);
-                                graceNickname.put("Vehicle Number", vhclno);
-                                graceNickname.put("Vehicle Type", vehicle_type);
-                                graceNickname.put("Time of Arrival",localTime);
+                                graceNickname.put("transporter", transporter);
+                                graceNickname.put("dno", drvrno);
+                                graceNickname.put("vno", vhclno);
+                                graceNickname.put("vtype", vehicle_type);
+                                graceNickname.put("toa",localTime);
                                 graceNickname.put("email", email_operator);
-                                graceNickname.put("Date",final_date);
+                                graceNickname.put("date",final_date);
                                 graceNickname.put(typeofuser, "true");
-                                graceNickname.put("Time of Departure","");
+                                graceNickname.put("tod","");
                                 graceNickname.put("aps","");
-                                graceNickname.put("Partial Amount Paid",0);
-                                graceNickname.put("Cost","0");
-                                Firebase newpostref = mRef.child("users").child("data").push();
+                                graceNickname.put("pap",0);
+                                graceNickname.put("cost","0");
+                                DatabaseReference newpostref = reference.child("users").child("data").push();
                                 newpostref.setValue(graceNickname);
                                 editor.putString("UserID for data", newpostref.getKey());
                                 AlertDialog.Builder builder = new AlertDialog.Builder(SubmitActivity.this);
@@ -308,14 +336,38 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                                 }
                             }
                         }
-                        if(flag!=1) {
+                        if(transporter.contentEquals("N/A")) {
+                            Map<String, Object> graceNickname = new HashMap<>();
+                            graceNickname.put("transporter", "N/A");
+                            graceNickname.put("dno", drvrno);
+                            graceNickname.put("vno", vhclno);
+                            graceNickname.put("vtype", vehicle_type);
+                            graceNickname.put("toa", localTime);
+                            graceNickname.put("email", email_operator);
+                            graceNickname.put("date", final_date);
+                            graceNickname.put(typeofuser, "true");
+                            graceNickname.put("tod", "");
+                            graceNickname.put("aps", "");
+                            graceNickname.put("pap", 0);
+                            graceNickname.put("cost", "0");
+                            DatabaseReference newpostref = reference.child("users").child("data").push();
+                            newpostref.setValue(graceNickname);
+                            editor.putString("UserID for data", newpostref.getKey());
                             AlertDialog.Builder builder = new AlertDialog.Builder(SubmitActivity.this);
-                            builder.setMessage("The Car is not registered with the Transporter")
-                                    .setTitle(R.string.login_error_title)
+                            builder.setMessage("You have successfully uploaded the details!")
+                                    .setTitle(R.string.submit_title)
                                     .setPositiveButton(android.R.string.ok, null);
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
+                            AlertDialog dialog1 = builder.create();
+                            dialog1.show();
+                            driverno.setText("");
+                            vehicleno.setText("");
+                            try {
+                                sendData();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
+
                         pb2.setVisibility(View.GONE);
                         linear_layout.setVisibility(View.VISIBLE);
                     }
@@ -336,7 +388,7 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError firebaseError) {
+                    public void onCancelled(DatabaseError firebaseError) {
 
                     }
                 });

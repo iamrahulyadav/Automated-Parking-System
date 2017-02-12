@@ -1,10 +1,13 @@
 package com.potenza_pvt_ltd.AAPS;
 
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.firebase.database.IgnoreExtraProperties;
 
 /**
  * Created by Kushagr on 15-Jul-16.
  */
+@IgnoreExtraProperties
 public class TransporterDetails {
 
     private String name;
@@ -42,7 +45,6 @@ public class TransporterDetails {
         vehicle_no=index5;
         this.amt=index6;
     }
-
     @JsonProperty("Key")
     public String getKey(){
         return key;
@@ -51,19 +53,19 @@ public class TransporterDetails {
         this.key=key;
     }
     //Getters and setters
-    @JsonProperty("Name")
+    @JsonProperty("name")
     public String getName() {
         return name;
     }
-    @JsonProperty("Name")
+    @JsonProperty("name")
     public void setName(String name) {
         this.name = name;
     }
-    @JsonProperty("Address")
+    @JsonProperty("address")
     public String getAddress() {
         return address;
     }
-    @JsonProperty("Address")
+    @JsonProperty("address")
     public void setAddress(String address) {
         this.address = address;
     }
@@ -99,21 +101,22 @@ public class TransporterDetails {
     public void setNo_of_vhcl(String no_of_vhcl) {
         this.no_of_vhcl= no_of_vhcl;
     }
-    
-    @JsonProperty("vehicle_no")
-    public void setVehicle_no(String T) {
-        this.vehicle_no = T;
-    }
     @JsonProperty("vehicle_no")
     public String getVehicle_no() {
         return vehicle_no;
     }
-    @JsonProperty("Amt")
-    public void setAmt(String T) {
-        this.amt= T;
+    @JsonProperty("vehicle_no")
+    public void setVehicle_no(String T) {
+        this.vehicle_no = T;
     }
-    @JsonProperty("Amt")
+
+    @JsonProperty("amt")
     public String getAmt() {
         return amt;
     }
+    @JsonProperty("amt")
+    public void setAmt(String T) {
+        this.amt= T;
+    }
+
 }

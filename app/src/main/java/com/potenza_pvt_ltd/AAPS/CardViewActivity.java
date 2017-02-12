@@ -1,14 +1,12 @@
 package com.potenza_pvt_ltd.AAPS;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -23,12 +21,15 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.github.brnunes.swipeablerecyclerview.SwipeableRecyclerViewTouchListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,7 +44,9 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
     private LinearLayoutManager mLayoutManager;
     int count = 0;
     int index=0;
-    Firebase ref= new Firebase(Constants.FIREBASE_URL);
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     final ArrayList list = new ArrayList<TruckDetailsActivity>();
     String typeofuser;
     Spinner sp1;
@@ -77,6 +80,22 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         pb=(ProgressBar)findViewById(R.id.progressBar);
         linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
         setDateTimeField();
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("User", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d("User", "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
         sp1.setOnItemSelectedListener(this);
         List<String> categories = new ArrayList<>();
         categories.add("Sort by Date");
@@ -106,7 +125,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ref.unauth();
+                FirebaseAuth.getInstance().signOut();
             }
         });
         Log.d("Before", "FetchData");
@@ -145,7 +164,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
     }
 
     private void deletedata(String key, int position) {
-        ref.child("users").child("data").child(key).setValue(null);
+        reference.child("users").child("data").child(key).setValue(null);
     }
 
     @Override
@@ -153,92 +172,40 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
         sort=parent.getSelectedItem().toString();
         Log.d("abc",sort);
         sort = sort.substring(7, sort.length());
+        pb.setVisibility(View.VISIBLE);
+        linearLayout.setVisibility(View.GONE);
         Log.d("abc", sort);
         list.clear();
         index = 0;
         count = 0;
-        Query queryRef = ref.child("users").child("data").orderByChild(sort);
-        queryRef.addChildEventListener(new ChildEventListener() {
+        Query queryRef = reference.child("users").child("data").orderByChild(sort);
+        queryRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                count = (int) snapshot.getChildrenCount();
-                if (count == 9) {
-                    Log.d("count", String.valueOf(count));
-                    Log.d("sas", snapshot.getKey());
-                    TruckDetailsActivity post = snapshot.getValue(TruckDetailsActivity.class);
-                    post.setKey(snapshot.getKey());
-                    Log.d("post", post.getKey());
-                    TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(), post.getEmail(), post.getContractorname(), post.getDrivername(), post.getDriverno(), post.getDate(), post.getAPS());
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+                    Log.d("problem", String.valueOf(ds.getValue()));
+                    Log.d("post", ds.getKey());
+                    TruckDetailsActivity post = ds.getValue(TruckDetailsActivity.class);
+                    post.setKey(ds.getKey());
+                    TruckDetailsActivity obj = new TruckDetailsActivity(post.getKey(), post.getEmail(), post.getTransporter(), post.getDno(), post.getDate(), post.getAps(),post.getCost(),post.getVtype(),post.getVno(),post.getToa(),post.getTod());
                     list.add(index, obj);
                     Log.d("list", String.valueOf(list.get(index)));
                     index++;
                 }
-                Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
+                mAdapter = new MyRecyclerViewAdapter(list);
                 mAdapter.notifyDataSetChanged();
+                Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
+                mRecyclerView.setAdapter(mAdapter);
                 pb.setVisibility(View.GONE);
                 linearLayout.setVisibility(View.VISIBLE);
-
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            public void onCancelled(DatabaseError firebaseError) {
 
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
             }
         });
         Log.d("After", "FetchData");
-        mAdapter = new MyRecyclerViewAdapter(list);
-        /*if(typeofuser.contentEquals("Admin")) {
-            SwipeableRecyclerViewTouchListener swipeTouchListener =
-                    new SwipeableRecyclerViewTouchListener(mRecyclerView,
-                            new SwipeableRecyclerViewTouchListener.SwipeListener() {
-                                @Override
-                                public boolean canSwipeLeft(int position) {
-                                    return false;
-                                }
-
-                                @Override
-                                public boolean canSwipeRight(int position) {
-                                    return true;
-                                }
-
-                                @Override
-                                public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
-                                    for (int position : reverseSortedPositions) {
-
-                                        mAdapter.notifyItemRemoved(position);
-                                    }
-                                    mAdapter.notifyDataSetChanged();
-                                }
-
-                                @Override
-                                public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
-                                    for (int position : reverseSortedPositions) {
-                                        Log.d("Hello", "right");
-                                        String key =mAdapter.deleteItem(position);
-                                        deletedata(key,position);
-                                        mAdapter.notifyItemRemoved(position);
-                                    }
-                                    mAdapter.notifyDataSetChanged();
-                                }
-                            });
-
-            mRecyclerView.addOnItemTouchListener(swipeTouchListener);
-        }
-        */
-        mRecyclerView.setAdapter(mAdapter);
-
     }
 
     @Override
@@ -256,14 +223,14 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
     }
 
     public void delete(View v){
-        Query queryRef = ref.child("users").child("data");
+        Query queryRef = reference.child("users").child("data");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("asda", String.valueOf(dataSnapshot.getChildrenCount()));
                 TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
                 //post.setKey(dataSnapshot.getKey());
-                globatime=post.gettime();
+                globatime=post.getToa();
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a"); // I assume d-M, you may refer to M-d for month-day instead.
                 Date d = null; // You will need try/catch around this
                 try {
@@ -274,7 +241,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
                 globalmillis= d.getTime();
                 Log.d("globaltime", String.valueOf(globalmillis));
                 if(globalmillis>timefrom && globalmillis<timeto){
-                    ref.child("users").child("data").child(dataSnapshot.getKey()).setValue(null);
+                    reference.child("users").child("data").child(dataSnapshot.getKey()).setValue(null);
                 }
             }
 
@@ -294,7 +261,7 @@ public class CardViewActivity extends AppCompatActivity implements AdapterView.O
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });

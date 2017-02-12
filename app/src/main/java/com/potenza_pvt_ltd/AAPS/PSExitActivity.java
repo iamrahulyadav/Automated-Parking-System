@@ -1,17 +1,15 @@
 package com.potenza_pvt_ltd.AAPS;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -23,12 +21,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.potenza_pvt_ltd.AAPS.function.PocketPos;
 import com.potenza_pvt_ltd.AAPS.util.FontDefine;
 import com.potenza_pvt_ltd.AAPS.util.Printer;
@@ -43,16 +44,22 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 public class PSExitActivity extends AppCompatActivity {
+    List<ArrayList<String>> tararr;
+    int [][] tar_arr;
+    private String[][] tar_arr1;
     EditText et_search,editText;
     ImageButton search;
     Button b;
     String postid;
-    Firebase mRef;
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     String userkey;
     TruckDetailsActivity truck;
     private int[][] arr;
@@ -100,8 +107,23 @@ public class PSExitActivity extends AppCompatActivity {
         pb1=(ProgressBar)findViewById(R.id.progressBar1);
         linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
         Button closeButton = (Button) findViewById(R.id.close);
-        mRef = new Firebase(Constants.FIREBASE_URL);
-        Query query=mRef.child("users").child("Slip_Details");
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("User", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d("User", "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
+        Query query=reference.child("users").child("Slip_Details");
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -117,7 +139,7 @@ public class PSExitActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
                 System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
@@ -144,26 +166,29 @@ public class PSExitActivity extends AppCompatActivity {
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pb.setVisibility(View.VISIBLE);
+                pb1.setVisibility(View.VISIBLE);
+                linearLayout.setVisibility(View.GONE);
                 vhlno = et_search.getText().toString();
                 Log.d("vehicle", vhlno);
                 // Attach an listener to read the data at our posts reference
-                Query queryRef1 = mRef.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
+                Query queryRef1 = reference.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
                 queryRef1.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                         userkey = snapshot.getKey();
                         TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
-                        Log.d("PAP", truck.getPAP());
-                        partial = Integer.parseInt(truck.getPAP());
-                        localtime = truck.gettime();
-                        truck_type = truck.getVehicleType();
-                        localTime = truck.gettime();
-                        vehicle_type = truck.getVehicleType();
-                        vhclno = truck.getVehicleno();
-                        transporter = truck.getContractorname();
+                        Log.d("PAP", String.valueOf(truck.getPap()));
+                        partial = truck.getPap();
+                        localtime = truck.getToa();
+                        truck_type = truck.getVtype();
+                        localTime = truck.getToa();
+                        vehicle_type = truck.getVtype();
+                        vhclno = truck.getVno();
+                        transporter = truck.getTransporter();
                         email_operator = truck.getEmail();
-                        drvrno = truck.getDriverno();
-                        aps = truck.getAPS();
+                        drvrno = truck.getDno();
+                        aps = truck.getAps();
                         Log.d("asda", truck_type);
                         pb.setVisibility(View.GONE);
                         if (pb1.getVisibility() == View.GONE) {
@@ -187,7 +212,7 @@ public class PSExitActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError firebaseError) {
+                    public void onCancelled(DatabaseError firebaseError) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(PSExitActivity.this);
                         builder.setMessage(firebaseError.getMessage())
                                 .setTitle(R.string.login_error_title)
@@ -196,12 +221,26 @@ public class PSExitActivity extends AppCompatActivity {
                         dialog.show();
                     }
                 });
-                Query queryRef = mRef.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(truck_type);
+                Query queryRef = reference.child("users").child("Tariff_Details").orderByChild("vtype").equalTo(truck_type);
                 queryRef.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                         TariffDetails truck = snapshot.getValue(TariffDetails.class);
-                        arr = truck.getarr();
+                        tararr=truck.getArr();
+                        Log.d("tararr",tararr.toString());
+                        tar_arr1= new String[tararr.size()][];
+                        for (int i = 0; i < tararr.size(); i++) {
+                            ArrayList<String> row = tararr.get(i);
+                            tar_arr1[i] = row.toArray(new String[row.size()]);
+                            Log.d("tararr1", String.valueOf(tar_arr1.length));
+                        }
+                        arr=new int[tar_arr1.length][3];
+                        for(int i=0;i<tar_arr1.length;i++){
+                            for(int j=0;j<3;j++){
+                                Log.d("i,j", String.valueOf(Integer.parseInt(tar_arr1[i][j])));
+                                arr[i][j]=Integer.parseInt(tar_arr1[i][j]);
+                            }
+                        }
                         Log.d("arr", Arrays.deepToString(arr));
                         pb1.setVisibility(View.GONE);
                         if( pb.getVisibility()==View.GONE) {
@@ -226,7 +265,7 @@ public class PSExitActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError firebaseError) {
+                    public void onCancelled(DatabaseError firebaseError) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(PSExitActivity.this);
                         builder.setMessage(firebaseError.getMessage())
                                 .setTitle(R.string.login_error_title)
@@ -244,12 +283,11 @@ public class PSExitActivity extends AppCompatActivity {
                     partial=Integer.parseInt(editText.getText().toString());
                 }
                 else {
-                    partial = Integer.parseInt(truck.getPAP()) + Integer.parseInt(editText.getText().toString());
+                    partial = truck.getPap() + Integer.parseInt(editText.getText().toString());
                 }
                 Map<String, Object> graceNickname = new HashMap<>();
                 graceNickname.put("Partial Amount Paid",String.valueOf(partial));
-                Firebase ref=new Firebase(Constants.FIREBASE_URL);
-                ref.child("users").child("data").child(userkey).updateChildren(graceNickname);
+                reference.child("users").child("data").child(userkey).updateChildren(graceNickname);
                 try {
                     sendData(partial);
                 } catch (IOException e) {
@@ -286,11 +324,9 @@ public class PSExitActivity extends AppCompatActivity {
         }
         Log.d("cost", String.valueOf(cost));
         tv1.setText(String.valueOf(cost));
-        /*
         Map<String, Object> graceNickname = new HashMap<>();
-        graceNickname.put("Cost", cost);
-        mRef.child("users").child("data").child(userkey).updateChildren(graceNickname);
-        */
+        graceNickname.put("cost", cost);
+        reference.child("users").child("data").child(userkey).updateChildren(graceNickname);
     }
     void closeBT() throws IOException {
         try {

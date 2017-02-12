@@ -1,9 +1,7 @@
 package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,21 +10,24 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.potenza_pvt_ltd.AAPS.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class TransporterAccounts extends Activity {
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
     private MyRecyclerViewAdapter mAdapter;
-    Firebase ref=new Firebase(Constants.FIREBASE_URL);
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
     final ArrayList list = new ArrayList<TruckDetailsActivity>();
     int count = 0;
     int index=0;
@@ -45,13 +46,15 @@ public class TransporterAccounts extends Activity {
         mRecyclerView.setLayoutManager(mLayoutManager);
         pb=(ProgressBar)findViewById(R.id.progressBar);
         linear_layout=(LinearLayout)findViewById(R.id.linear_layout);
-        Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("sms_no");
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
+
+        Query queryRef = reference.child("users").child("Transporter_Details").orderByChild("Name");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                 index = 0;
                 count = 0;
-                Log.d("child", snapshot.getKey());
                 TransporterDetails post = snapshot.getValue(TransporterDetails.class);
                 post.setKey(snapshot.getKey());
                 Log.d("post", post.getKey());
@@ -59,6 +62,11 @@ public class TransporterAccounts extends Activity {
                 list.add(index, obj);
                 Log.d("list", String.valueOf(list.get(index)));
                 index++;
+                Collections.sort(list, new Comparator<TransporterDetails>() {
+                    public int compare(TransporterDetails v1, TransporterDetails v2) {
+                        return v1.getName().compareTo(v2.getName());
+                    }
+                });
                 mAdapter = new MyRecyclerViewAdapter(list, 2);
                 Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
                 mAdapter.notifyDataSetChanged();
@@ -80,6 +88,11 @@ public class TransporterAccounts extends Activity {
                 list.add(pos, obj);
                 Log.d("list", String.valueOf(list.get(pos)));
                 index++;
+                Collections.sort(list, new Comparator<TransporterDetails>() {
+                    public int compare(TransporterDetails v1, TransporterDetails v2) {
+                        return v1.getName().compareTo(v2.getName());
+                    }
+                });
                 mAdapter = new MyRecyclerViewAdapter(list, 2);
                 Log.d("count of list", String.valueOf(mAdapter.getItemCount()));
                 mAdapter.notifyDataSetChanged();
@@ -95,7 +108,7 @@ public class TransporterAccounts extends Activity {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
             }
         });
     }

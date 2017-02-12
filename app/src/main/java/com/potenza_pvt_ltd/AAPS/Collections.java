@@ -2,34 +2,36 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.firebase.client.AuthData;
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.w3c.dom.Text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,7 +43,9 @@ import java.util.Map;
 
 public class Collections extends Activity {
 
-    Firebase ref = new Firebase(Constants.FIREBASE_URL);
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private int cost = 0;
     TextView text;
     EditText emailid, pass;
@@ -73,6 +77,22 @@ public class Collections extends Activity {
         cash_handover=(Button)findViewById(R.id.cashhandover);
         pb=(ProgressBar)findViewById(R.id.progressBar);
         linear_layout=(LinearLayout)findViewById(R.id.linear_layout);
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("User", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d("User", "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
         final Calendar c = Calendar.getInstance();
         int yy = c.get(Calendar.YEAR);
         int mm = c.get(Calendar.MONTH);
@@ -88,7 +108,7 @@ public class Collections extends Activity {
         Calendar calendar = Calendar.getInstance();
         final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss aa");
         localTime = sdf.format(calendar.getTime());
-        Query qr=ref.child("users").child("cash-handover").orderByChild("Date");
+        Query qr=reference.child("users").child("cash-handover").orderByChild("Date");
         final Date finalDate = date1;
         finaltime=formattedDate+" "+localTime;
         final int[] count = {0};
@@ -101,7 +121,7 @@ public class Collections extends Activity {
                     if(count[0] ==dataSnapshot.getChildrenCount()) {
                         Log.d("key-collections", ds.getKey());
                         TruckDetailsActivity truckDetailsActivity = ds.getValue(TruckDetailsActivity.class);
-                        String dat_time = truckDetailsActivity.getDate() + " " + truckDetailsActivity.getTime_cash_handover();
+                        String dat_time = truckDetailsActivity.getDate() + " " + truckDetailsActivity.getToa();
                         DateTimeZone timeZone = DateTimeZone.forID("Asia/Kolkata"); // Or, DateTimeZone.UTC
                         DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy hh:mm:ss a");
                         DateTime dateTime = formatter.withZone(timeZone).parseDateTime(dat_time);
@@ -114,7 +134,7 @@ public class Collections extends Activity {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -141,7 +161,7 @@ public class Collections extends Activity {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -181,73 +201,74 @@ public class Collections extends Activity {
             Log.d("Password", password);
 
             //Login with an email/password combination
-            ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
-                @Override
-                public void onAuthenticated(AuthData authData) {
-                    // Authenticated successfully with payload authData
-                    Query queryRef = ref.child("users").orderByChild("email-address");
-                    queryRef.addChildEventListener(new ChildEventListener() {
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(Collections.this, new OnCompleteListener<AuthResult>() {
                         @Override
-                        public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                            Log.d("key123", snapshot.getKey());
-                            if (snapshot.getKey().contentEquals("Manager")) {
-                                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                    DetailofUser post = snapshot1.getValue(DetailofUser.class);
-                                    String emailvalue = post.getEmail().trim();
-                                    if (emailvalue.contentEquals(emailAddress)) {
-                                        callme();
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(Collections.this);
-                                        builder.setMessage("The money has been handed over to the manager.")
-                                                .setTitle("Successful")
-                                                .setPositiveButton(android.R.string.ok, null);
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
-                                        emailid.setText("");
-                                        pass.setText("");
-                                        text.setText(String.valueOf(0));
-                                        //Intent intent = new Intent(Collections.this, TypeofOperator.class);
-                                        //startActivity(intent);
-                                    }
-                                }
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                                    // Authenticated successfully with payload authData
+                                    Query queryRef = reference.child("users").orderByChild("email-address");
+                                    queryRef.addChildEventListener(new ChildEventListener() {
+                                        @Override
+                                        public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                                            Log.d("key123", snapshot.getKey());
+                                            if (snapshot.getKey().contentEquals("Manager")) {
+                                                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                                    DetailofUser post = snapshot1.getValue(DetailofUser.class);
+                                                    String emailvalue = post.getEmailaddress().trim();
+                                                    if (emailvalue.contentEquals(emailAddress)) {
+                                                        callme();
+                                                        AlertDialog.Builder builder = new AlertDialog.Builder(Collections.this);
+                                                        builder.setMessage("The money has been handed over to the manager.")
+                                                                .setTitle("Successful")
+                                                                .setPositiveButton(android.R.string.ok, null);
+                                                        AlertDialog dialog = builder.create();
+                                                        dialog.show();
+                                                        emailid.setText("");
+                                                        pass.setText("");
+                                                        text.setText(String.valueOf(0));
+                                                        //Intent intent = new Intent(Collections.this, TypeofOperator.class);
+                                                        //startActivity(intent);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                                        }
+
+                                        @Override
+                                        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                                        }
+
+                                        @Override
+                                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError firebaseError) {
+
+                                        }
+                                        // ....
+                                    });
+
+                            if (!task.isSuccessful()) {
+                                Log.w("Sign in Faialed", "signInWithEmail:failed", task.getException());
+                                AlertDialog.Builder builder = new AlertDialog.Builder(Collections.this);
+                                builder.setMessage((CharSequence) task.getException())
+                                        .setTitle(R.string.login_error_title)
+                                        .setPositiveButton(android.R.string.ok, null);
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
                             }
-                        }
-
-                        @Override
-                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                        }
-
-                        @Override
-                        public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                        }
-
-                        @Override
-                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                        }
-
-                        @Override
-                        public void onCancelled(FirebaseError firebaseError) {
-
-                        }
-                        // ....
-                    });
 
 
-                }
 
-                @Override
-                public void onAuthenticationError(FirebaseError firebaseError) {
-                    // Authenticated failed with error fireball Error
-                    AlertDialog.Builder builder = new AlertDialog.Builder(Collections.this);
-                    builder.setMessage(firebaseError.getMessage())
-                            .setTitle(R.string.login_error_title)
-                            .setPositiveButton(android.R.string.ok, null);
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
-            });
+                                }
+                            });
         }
     }
     private void callme() {
@@ -256,19 +277,19 @@ public class Collections extends Activity {
         map.put("Amount Collected", cost);
         map.put("Date", formattedDate);
         map.put("Cash Handover", localTime);
-        Firebase newpostref=ref.child("users").child("cash-handover").push();
+        DatabaseReference newpostref=reference.child("users").child("cash-handover").push();
         newpostref.setValue(map);
     }
 
     public void getData() {
         pb.setVisibility(View.VISIBLE);
         linear_layout.setVisibility(View.GONE);
-        Query queryRef = ref.child("users").child("data").orderByChild("email").equalTo(email);
+        Query queryRef = reference.child("users").child("data").orderByChild("email").equalTo(email);
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
-                String dat_time1 = post.getDate() + " " + post.gettime();
+                String dat_time1 = post.getDate() + " " + post.getToa();
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a");
                 Date dat1 = null;
                 try {
@@ -302,7 +323,7 @@ public class Collections extends Activity {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });

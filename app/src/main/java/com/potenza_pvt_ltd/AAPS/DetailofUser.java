@@ -1,20 +1,16 @@
 package com.potenza_pvt_ltd.AAPS;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 /**
  * Created by Kushagr_Jolly on 7/10/2016.
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class DetailofUser {
-    @JsonIgnoreProperties
-        //name and address string
-        private String email;
+    //name and address string
+        private String emailaddress;
         private String key;
-        private String code;
         private String pwd;
-    private String time_cash_handover;
-    private String date;
 
     public DetailofUser() {
 
@@ -23,32 +19,29 @@ public class DetailofUser {
         public DetailofUser(String a){
 
         }
-
-        @JsonProperty("Key")
+    @JsonProperty("Key")
         public String getKey(){
             return key;
         }
         public void setKey(String key){
             this.key=key;
         }
-    @JsonProperty("email-address")
-    public String getEmail(){
-        return email;
+    @JsonProperty("emailaddress")
+    public String getEmailaddress(){
+        return emailaddress;
     }
-    public void setEmail(String key){
-        this.email=key;
+    @JsonProperty("emailaddress")
+    public void setEmailaddress(String key){
+        this.emailaddress =key;
     }
     @JsonProperty("pass")
-    public String getPwd(){
+    public String getPass(){
         return pwd;
     }
-    public void setPwd(String key){
+    @JsonProperty("pass")
+    public void setPass(String key){
         this.pwd=key;
     }
 
-    @JsonProperty("Date")
-    public String getDate() {
-        return date;
-    }
 
 }

@@ -1,8 +1,8 @@
 package com.potenza_pvt_ltd.AAPS;
 
 import android.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -13,14 +13,15 @@ import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.MutableData;
-import com.firebase.client.Query;
-import com.firebase.client.Transaction;
-import com.potenza_pvt_ltd.AAPS.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.Transaction;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -37,7 +38,8 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
     protected Button submitButton;
     protected EditText search;
     protected ImageButton imageButton;
-    private Firebase mRef;
+    FirebaseAuth mAuth;
+    DatabaseReference reference;
     private String mUserId;
     protected String aps;
     private String useridold;
@@ -51,7 +53,8 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
         mUserId=getIntent().getStringExtra("UniqueID");
         Log.d("xyz", mUserId);
         // Check Authentication
-        mRef = new Firebase(Constants.FIREBASE_URL);
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
         Button logout=(Button)findViewById(R.id.button_logout);
         // Spinner click listener
@@ -98,18 +101,18 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
                 Log.d("vehicle", vhlno);
 
                 // Attach an listener to read the data at our posts reference
-                Query queryRef = mRef.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
+                Query queryRef = reference.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
                 queryRef.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                         useridold = snapshot.getKey();
                         TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
-                        contractorname.setText(truck.getContractorname());
-                        drivername.setText(truck.getDrivername());
-                        driverno.setText(truck.getDriverno());
-                        vehicleno.setText(truck.getVehicleno());
+                        contractorname.setText(truck.getTransporter());
+                        drivername.setText("ICD");
+                        driverno.setText(truck.getDno());
+                        vehicleno.setText(truck.getVno());
                         date.setText(truck.getDate());
-                        localtime = truck.gettime();
+                        localtime = truck.getToa();
                         Log.d("asda", localtime);
                     }
 
@@ -129,7 +132,7 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError firebaseError) {
+                    public void onCancelled(DatabaseError firebaseError) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(ParkingSlot.this);
                         builder.setMessage(firebaseError.getMessage())
                                 .setTitle(R.string.login_error_title)
@@ -146,7 +149,7 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
             public void onClick(View v) {
                 Map<String, Object> graceNickname = new HashMap<>();
                 graceNickname.put("aps", aps);
-                mRef.child("users").child("data").child(useridold).updateChildren(graceNickname);
+                reference.child("users").child("data").child(useridold).updateChildren(graceNickname);
                 AlertDialog.Builder builder = new AlertDialog.Builder(ParkingSlot.this);
                 builder.setMessage("You have successfully Updated the details!")
                         .setTitle(R.string.submit_title)
@@ -159,16 +162,17 @@ public class ParkingSlot extends AppCompatActivity implements AdapterView.OnItem
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mRef.unauth();
+                FirebaseAuth.getInstance().signOut();
+
             }
         });
 
-        mRef.child("users").child("data").child(mUserId).runTransaction(new Transaction.Handler() {
+        reference.child("users").child("data").child(mUserId).runTransaction(new Transaction.Handler() {
             public Transaction.Result doTransaction(MutableData mutableData) {
                 mutableData.setValue(null); // This removes the node.
                 return Transaction.success(mutableData);
             }
-            public void onComplete(FirebaseError error, boolean b, DataSnapshot data) {
+            public void onComplete(DatabaseError error, boolean b, DataSnapshot data) {
 
             }
         });

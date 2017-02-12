@@ -1,10 +1,11 @@
 package com.potenza_pvt_ltd.AAPS;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.firebase.database.IgnoreExtraProperties;
 
 /**
  * Created by Kushagr on 15-Jul-16.
  */
+@IgnoreExtraProperties
 public class ParkingSlotDetails {
 
     private String key;
@@ -16,14 +17,12 @@ public class ParkingSlotDetails {
 
     }
 
-    @JsonProperty("Key")
     public String getKey(){
         return key;
     }
     public void setKey(String key){
         this.key=key;
     }
-    @JsonProperty("slot_name")
     public String getSlot_name(){
         return slot_name;
     }
@@ -31,7 +30,6 @@ public class ParkingSlotDetails {
         this.slot_name=key;
     }
 
-    @JsonProperty("code")
     public String getCode(){
         return code;
     }
@@ -39,7 +37,6 @@ public class ParkingSlotDetails {
         this.code=key;
     }
 
-    @JsonProperty("slot_number")
     public String getSlot_number(){
         return slot_number;
     }

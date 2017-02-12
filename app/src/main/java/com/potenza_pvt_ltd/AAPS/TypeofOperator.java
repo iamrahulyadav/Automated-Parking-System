@@ -2,20 +2,18 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.firebase.client.Firebase;
 
 public class TypeofOperator extends AppCompatActivity {
 
     private Button receiptbutton,collectionbutton,shiftclose_button;
     protected Button calculateButton;
-    Firebase mRef;
     int printcode=0;
     String aps;
 
@@ -78,7 +76,6 @@ public class TypeofOperator extends AppCompatActivity {
 
             }
         });
-        mRef=new Firebase(Constants.FIREBASE_URL);
         collectionbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

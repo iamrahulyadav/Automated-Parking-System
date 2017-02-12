@@ -1,11 +1,8 @@
 package com.potenza_pvt_ltd.AAPS;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -20,13 +17,14 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +33,8 @@ import java.util.Map;
 public class Transporter extends ListActivity implements AdapterView.OnItemClickListener {
 
     protected EditText et1,et2,et3,et4,et5,et6,et7;
-    Firebase ref;
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
     final ArrayList<TransporterDetails> list = new ArrayList<TransporterDetails>();
     int count = 0;
     int index=0;
@@ -52,7 +51,9 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transporter);
-        ref= new Firebase(Constants.FIREBASE_URL);
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
+        Log.d("In activity","transporter.java");
         et1=(EditText)findViewById(R.id.editText8);
         et2=(EditText)findViewById(R.id.editText9);
         et3=(EditText)findViewById(R.id.editText10);
@@ -65,22 +66,30 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
         l=getListView();
         index = 0;
         count = 0;
-        Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("sms_no");
+        Query queryRef = reference.child("users").child("Transporter_Details");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                Log.d("child", snapshot.getKey());
                 TransporterDetails post = snapshot.getValue(TransporterDetails.class);
+                Log.d("In activity",snapshot.getKey());
+
                 post.setKey(snapshot.getKey());
-                Log.d("post", post.getKey());
+                Log.d("1", post.getKey());
+                Log.d("4", post.getSms_no());
+                Log.d("5", post.getContact_person());
+                Log.d("6", post.getMobile_no());
+                Log.d("7", post.getNo_of_vhcl());
+                Log.d("8", post.getVehicle_no());
+                Log.d("2", post.getName());
+                Log.d("3", post.getAddress());
                 TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(), post.getVehicle_no());
+                Log.d("In activity","bug3");
+
                 list.add(index, obj);
                 name.add(index, post.getName());
                 key.add(index, post.getKey());
-                Log.d("list", String.valueOf(list.get(index)));
                 index++;
                 adapter = new ArrayAdapter<String>(getBaseContext(),R.layout.listview,name);
-
                 l.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
                 pb.setVisibility(View.GONE);
@@ -89,16 +98,16 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                list.clear();
-                name.clear();
-                key.clear();
-                fetchdata();
+                adapter.clear();
                 adapter.notifyDataSetChanged();
-
+                fetchdata();
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                adapter.clear();
+                adapter.notifyDataSetChanged();
+                fetchdata();
             }
 
             @Override
@@ -106,7 +115,7 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
             }
         });
         l.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
@@ -132,14 +141,14 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
             }
             else {
                 Map<String, Object> value = new HashMap<String, Object>();
-                value.put("Name", name);
-                value.put("Address", address);
+                value.put("name", name);
+                value.put("address", address);
                 value.put("sms_no", sms);
                 value.put("contact_person", contact);
                 value.put("mobile_no", mobile);
                 value.put("no_of_vhcl", no_of_vhcl);
                 value.put("vehicle_no", vehicle_no);
-                ref.child("users").child("Transporter_Details").push().setValue(value);
+                reference.child("users").child("Transporter_Details").push().setValue(value);
             }
         }
         else{
@@ -150,13 +159,13 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
             final String mobile = et5.getText().toString();
             final String no_of_vhcl = et6.getText().toString();
             Map<String, Object> value = new HashMap<String, Object>();
-            value.put("Name", name);
-            value.put("Address", address);
+            value.put("name", name);
+            value.put("address", address);
             value.put("sms_no", sms);
             value.put("contact_person", contact);
             value.put("mobile_no", mobile);
             value.put("no_of_vhcl", no_of_vhcl);
-            ref.child("users").child("Transporter_Details").child(uid).updateChildren(value);
+            reference.child("users").child("Transporter_Details").child(uid).updateChildren(value);
 
         }
         et1.setText("");
@@ -190,11 +199,10 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
             }
         }
         else {
-            Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("sms_no").equalTo(sms);
+            Query queryRef = reference.child("users").child("Transporter_Details").orderByChild("sms_no").equalTo(sms);
             queryRef.addChildEventListener(new ChildEventListener() {
                 @Override
                 public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                    Log.d("child", snapshot.getKey());
                     TransporterDetails post = snapshot.getValue(TransporterDetails.class);
 
                     String vhl_no;
@@ -206,7 +214,7 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
                     }
                     Map<String, Object> value = new HashMap<String, Object>();
                     value.put("vehicle_no", vhl_no);
-                    ref.child("users").child("Transporter_Details").child(snapshot.getKey()).updateChildren(value);
+                    reference.child("users").child("Transporter_Details").child(snapshot.getKey()).updateChildren(value);
 
                 }
 
@@ -223,7 +231,7 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
                 }
 
                 @Override
-                public void onCancelled(FirebaseError firebaseError) {
+                public void onCancelled(DatabaseError firebaseError) {
                 }
             });
         }
@@ -244,36 +252,38 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
 
 
     private void fetchdata() {
+        list.clear();
+        name.clear();
+        key.clear();
         index = 0;
         count = 0;
-        Query queryRef = ref.child("users").child("Transporter_Details").orderByChild("sms_no");
+        Query queryRef = reference.child("users").child("Transporter_Details").orderByChild("sms_no");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                Log.d("child", snapshot.getKey());
                 TransporterDetails post = snapshot.getValue(TransporterDetails.class);
                 post.setKey(snapshot.getKey());
-                Log.d("post", post.getKey());
                 TransporterDetails obj = new TransporterDetails(post.getKey(), post.getName(), post.getAddress(), post.getSms_no(), post.getContact_person(), post.getMobile_no(), post.getNo_of_vhcl(), post.getVehicle_no());
                 list.add(index, obj);
                 name.add(index, post.getName());
                 key.add(index, post.getKey());
-                Log.d("list", String.valueOf(list.get(index)));
                 index++;
+                adapter = new ArrayAdapter<String>(getBaseContext(),R.layout.listview,name);
                 adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                list.clear();
-                name.clear();
-                key.clear();
-                fetchdata();
+                adapter.clear();
                 adapter.notifyDataSetChanged();
+                fetchdata();
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                adapter.clear();
+                adapter.notifyDataSetChanged();
+                fetchdata();
             }
 
             @Override
@@ -281,7 +291,7 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
             }
         });
 
@@ -318,18 +328,12 @@ public class Transporter extends ListActivity implements AdapterView.OnItemClick
                     final SparseBooleanArray checked=l.getCheckedItemPositions();
                     for (int i = 0; i < l.getAdapter().getCount(); i++) {
                         if (checked.get(i)) {
-                            // Do something
-                            Log.d("key", String.valueOf(key.get(i)));
-                            ref.child("users").child("Transporter_Details").child(String.valueOf(key.get(i))).removeValue();
+                            reference.child("users").child("Transporter_Details").child(String.valueOf(key.get(i))).removeValue();
                         }
                     }
-                    Toast.makeText(Transporter.this, "Deleted" + getListView().getCheckedItemCount() +
-                            " items", Toast.LENGTH_SHORT).show();
                     mode.finish();
                     break;
                 default:
-                    Toast.makeText(Transporter.this, "Clicked " + item.getTitle(),
-                            Toast.LENGTH_SHORT).show();
                     break;
             }
             return true;

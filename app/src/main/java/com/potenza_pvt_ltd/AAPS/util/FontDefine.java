@@ -7,7 +7,7 @@ public class FontDefine {
 	 * ��������������������12��
 	 */
 	
-	public static final byte FONT_24PX = (byte)0x12;  //24����������
+	public static final byte FONT_24PX = (byte)0x09;  //24����������
 	public static final byte FONT_32PX = (byte)0x00;
 	public static final byte FONT_24PX_UNDERLINE = (byte)0x81;
 	public static final byte FONT_32PX_UNDERLINE = (byte)0x80;

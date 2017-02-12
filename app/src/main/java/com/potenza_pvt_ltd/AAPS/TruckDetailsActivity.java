@@ -1,5 +1,6 @@
 package com.potenza_pvt_ltd.AAPS;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,134 +9,152 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TruckDetailsActivity {
-        //name and address string
-        private String contractorname;
-        private String drivername;
-        private String driverno;
-        private String vehicleno;
-        private String date;
-        private String APS;
-        private String email;
-    private String key;
-    private String localtime;
-    private String cost;
-    private String timedeparture;
+    //name and address string
+    private String transporter;
+    private String dno;
+    private String vno;
+    private String date;
     private String aps;
-    private String pap;
-    private String vehicleType;
-    private String time_cash_handover;
+    private String email;
+    private String key;
+    private String toa;
+    private String cost;
+    private String tod;
+    public int pap;
+    private String vtype;
+    private String operator;
 
     public TruckDetailsActivity() {
-
-            /*Blank default constructor essential for Firebase*/
-        }
-    public TruckDetailsActivity(String a){
-
+        /*Blank default constructor essential for Firebase*/
     }
 
-    public TruckDetailsActivity(String k,String s, String index, String index1, String index2, String index3, String index4) {
+    public TruckDetailsActivity(String a){
+    }
+
+    public TruckDetailsActivity(String k, String s, String index, String index1, String index2, String index3) {
         this.key=k;
         email=s;
-        contractorname=index;
-        drivername=index1;
-        driverno=index2;
-        date=index3;
-        APS=index4;
+        transporter =index;
+        dno =index1;
+        date =index2;
+        aps =index3;
     }
 
-    @JsonProperty("Key")
-    public String getKey(){
-        return key;
-    }
-    public void setKey(String key){
-        this.key=key;
-    }
-    //Getters and setters
-    @JsonProperty("Transporter")
-        public String getContractorname() {
-            return contractorname;
-        }
-    @JsonProperty("Transporter")
-        public void setContractorname(String contractorname) {
-            this.contractorname = contractorname;
-        }
-    @JsonProperty("Driver Name")
-        public String getDrivername() {
-            return drivername;
-        }
-    @JsonProperty("Driver Name")
-        public void setDrivername(String drivername) {
-            this.drivername = drivername;
-        }
-    @JsonProperty("Driver Number")
-        public String getDriverno() {
-            return driverno;
-        }
-    @JsonProperty("Driver Number")
-        public void setDriverno(String driverno) {
-            this.driverno = driverno;
-        }
-    @JsonProperty("Vehicle Number")
-        public String getVehicleno() {
-            return vehicleno;
-        }
-    @JsonProperty("Vehicle Number")
-        public void setVehicleno(String vehicleno) {
-            this.vehicleno = vehicleno;
-        }
-    @JsonProperty("Date")
-        public String getDate() {
-            return date;
-        }
-    @JsonProperty("Date")
-        public void setDate(String date) {
-            this.date = date;
-        }
-    @JsonProperty("aps")
-        public String getAPS() {
-        return APS;
-    }
-    @JsonProperty("aps")
-        public void setAPS(String APS) {
-        this.APS= APS;
+    public TruckDetailsActivity(String k1, String k2, String k3, String k4, String k5, String k6, String k7, String k8, String k9, String k10, String k11) {
+        this.key=k1;
+        email=k2;
+        transporter =k3;
+        dno =k4;
+        date =k5;
+        aps =k6;
+        cost =k7;
+        vtype =k8;
+        vno =k9;
+        toa =k10;
+        tod =k11;
     }
 
-    @JsonProperty("email")
+    public String getTransporter() {
+        return transporter;
+    }
+    public void setTransporter(String transporter) {
+        this.transporter = transporter;
+    }
+
+    public String getDno() {
+        return dno;
+    }
+
+    public void setDno(String dno) {
+        this.dno = dno;
+    }
+    @JsonProperty("vno")
+    public String getVno() {
+        return vno;
+    }
+    @JsonProperty("vno")
+    public void setVno(String vno) {
+        this.vno = vno;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getAps() {
+        return aps;
+    }
+
+    public void setAps(String aps) {
+        this.aps = aps;
+    }
+
     public String getEmail() {
         return email;
     }
 
-    @JsonProperty("Time of Arrival")
-    public void settime(String T) {
-        this.localtime = T;
+    public void setEmail(String email) {
+        this.email = email;
     }
-    @JsonProperty("Time of Arrival")
-    public String gettime() {
-        return localtime;
+
+    public String getKey() {
+        return key;
     }
-    @JsonProperty("Cost")
-    public void setCost(String T) {
-        this.cost = T;
+
+    public void setKey(String key) {
+        this.key = key;
     }
-    @JsonProperty("Cost")
+
+    public String getToa() {
+        return toa;
+    }
+
+    public void setToa(String toa) {
+        this.toa = toa;
+    }
+
     public String getCost() {
         return cost;
     }
-    @JsonProperty("Time of Departure")
-    public String gettimedeparture() {
-        return timedeparture;
+
+    public void setCost(String cost) {
+        this.cost = cost;
     }
-    @JsonProperty("Partial Amount Paid")
-    public String getPAP() {
+
+    public String getTod() {
+        return tod;
+    }
+
+    public void setTod(String tod) {
+        this.tod = tod;
+    }
+
+    public int getPap() {
         return pap;
     }
 
-    @JsonProperty("Vehicle Type")
-    public String getVehicleType() {
-        return vehicleType;
+    public void setPap(int pap) {
+        this.pap = pap;
     }
-    @JsonProperty("Cash Handover")
-    public String getTime_cash_handover() {
-        return time_cash_handover;
+
+    public String getVtype() {
+        return vtype;
     }
+
+    public void setVtype(String vtype) {
+        this.vtype = vtype;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
 }

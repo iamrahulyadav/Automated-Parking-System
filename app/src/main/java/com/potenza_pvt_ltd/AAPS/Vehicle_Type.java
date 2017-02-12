@@ -2,9 +2,7 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,23 +12,23 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.potenza_pvt_ltd.AAPS.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Vehicle_Type extends Activity implements AdapterView.OnItemClickListener {
 
-    Firebase ref;
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
     private EditText et1, et3;
     private ListView listView;
     private CustomAdapter customAdapter;
@@ -44,7 +42,8 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vehicle__type);
-        ref = new Firebase(Constants.FIREBASE_URL);
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
         et1 = (EditText) findViewById(R.id.editText6);
         et3 = (EditText) findViewById(R.id.editText7);
         vehicle_type = new ArrayList();
@@ -52,22 +51,19 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
         listView = (ListView) findViewById(R.id.listView);
         listView.setOnItemClickListener(this);
         pb=(ProgressBar)findViewById(R.id.progressBar);
+        customAdapter = new CustomAdapter(getApplication(), vehicle_type, tariff);
         linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
-        Query queryRef = ref.child("users").child("Vehicle_Type");
+        listView.setAdapter(customAdapter);
+        Query queryRef = reference.child("users").child("Vehicle_Type");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d("value of", String.valueOf(dataSnapshot.getKey()));
                 VehicleTypeDetails post = dataSnapshot.getValue(VehicleTypeDetails.class);
-                Log.d("vt", post.getVehicle_type());
-                Log.d("fixed", post.getInslip_tariff());
                 vehicle_type.add(post.getVehicle_type());
-                tariff.add(post.getInslip_tariff());
-                customAdapter = new CustomAdapter(getApplication(), vehicle_type, tariff, 3);
-                listView.setAdapter(customAdapter);
-                customAdapter.notifyDataSetChanged();
+                tariff.add(post.getFixed_tariff());
                 pb.setVisibility(View.GONE);
                 linearLayout.setVisibility(View.VISIBLE);
+                customAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -89,7 +85,7 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -109,19 +105,21 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
         Map<String, Object> value = new HashMap<String, Object>();
         value.put("vehicle_type", vehicle);
         value.put("fixed_tariff", inslip);
-        ref.child("users").child("Vehicle_Type").push().setValue(value);
+        reference.child("users").child("Vehicle_Type").push().setValue(value);
         customAdapter.notifyDataSetChanged();
+
     }
 
 
     public void delete(View v) {
-        final String[] item = customAdapter.getValue();
-        Query queryRef = ref.child("users").child("Vehicle_Type").orderByChild("vehicle_type").equalTo(item[0]);
+        final String []item = customAdapter.getValue();
+        Query queryRef = reference.child("users").child("Vehicle_Type").orderByChild("vehicle_type").equalTo(item[0]);
+        Log.d("item",item[0]);
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                 Log.d("delte func", String.valueOf(item));
-                ref.child("users").child("Vehicle_Type").child(snapshot.getKey()).removeValue();
+                reference.child("users").child("Vehicle_Type").child(snapshot.getKey()).removeValue();
                 customAdapter.notifyDataSetChanged();
             }
 
@@ -141,7 +139,7 @@ public class Vehicle_Type extends Activity implements AdapterView.OnItemClickLis
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(Vehicle_Type.this);
                 builder.setMessage(firebaseError.getMessage())
                         .setTitle(R.string.login_error_title)

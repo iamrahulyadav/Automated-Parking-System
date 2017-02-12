@@ -1,20 +1,16 @@
 package com.potenza_pvt_ltd.AAPS;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -25,17 +21,18 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.potenza_pvt_ltd.AAPS.function.PocketPos;
 import com.potenza_pvt_ltd.AAPS.util.FontDefine;
 import com.potenza_pvt_ltd.AAPS.util.Printer;
-
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +44,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -54,9 +52,13 @@ import java.util.UUID;
 public class ExitReceipt extends AppCompatActivity {
     EditText et_search;
     ImageButton search;
+    List<ArrayList<String>> tararr;
+    private String[][] tar_arr1;
     Button b;
     String postid;
-    Firebase mRef;
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     String userkey;
     TruckDetailsActivity truck;
     private int[][] arr;
@@ -64,7 +66,7 @@ public class ExitReceipt extends AppCompatActivity {
     private String localtime;
     private String truck_type;
     private int hours;
-    private int cost;
+    private long cost;
     int partial=0;
     TextView tv1;
     private String header1,header2,header3,header4,header5,footer1,footer2;
@@ -89,8 +91,10 @@ public class ExitReceipt extends AppCompatActivity {
     private String mon_pass;
     private String transporter_key;
     private String amt;
-    private ProgressBar pb1,pb;
+    private ProgressBar pb1,pb,pb2;
     LinearLayout linearLayout;
+    private int flag=0;
+    private String departure_time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,10 +109,26 @@ public class ExitReceipt extends AppCompatActivity {
         myLabel = (TextView) findViewById(R.id.label);
         pb=(ProgressBar)findViewById(R.id.progressBar);
         pb1=(ProgressBar)findViewById(R.id.progressBar1);
+        pb2=(ProgressBar)findViewById(R.id.progressBar2);
         linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
         Button closeButton = (Button) findViewById(R.id.close);
-        mRef = new Firebase(Constants.FIREBASE_URL);
-        Query query=mRef.child("users").child("Slip_Details");
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("User", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d("User", "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
+        Query query=reference.child("users").child("Slip_Details");
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -124,38 +144,40 @@ public class ExitReceipt extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
                 System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pb.setVisibility(View.VISIBLE);
+                pb1.setVisibility(View.VISIBLE);
+                linearLayout.setVisibility(View.GONE);
                 vhlno = et_search.getText().toString();
                 Log.d("vehicle", vhlno);
                 // Attach an listener to read the data at our posts reference
-                Query queryRef1 = mRef.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
+                Query queryRef1 = reference.child("users").child("data").orderByChild("vno").equalTo(vhlno);
                 queryRef1.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                         userkey = snapshot.getKey();
                         Log.d("userkey",userkey);
                         TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
-                        partial= Integer.parseInt(truck.getPAP());
-                        localtime = truck.gettime();
-                        localTime=truck.gettime();
-                        vehicle_type=truck.getVehicleType();
-                        vhclno=truck.getVehicleno();
-                        transporter=truck.getContractorname();
+                        partial= truck.getPap();
+                        localtime = truck.getToa();
+                        localTime=truck.getToa();
+                        vehicle_type=truck.getVtype();
+                        departure_time=truck.getTod();
+                        vhclno=truck.getVno();
+                        transporter=truck.getTransporter();
                         email_operator=truck.getEmail();
-                        drvrno=truck.getDriverno();
-                        aps=truck.getAPS();
-                        truck_type = truck.getVehicleType();
-                        Log.d("asda", truck_type);
+                        drvrno=truck.getDno();
+                        aps=truck.getAps();
+                        truck_type = truck.getVtype();
+                        Log.d("trucktype", truck_type);
+                        array(truck_type);
                         pb.setVisibility(View.GONE);
-                        if (pb1.getVisibility() == View.GONE) {
-                            linearLayout.setVisibility(View.VISIBLE);
-                        }
                     }
 
                     @Override
@@ -174,7 +196,7 @@ public class ExitReceipt extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError firebaseError) {
+                    public void onCancelled(DatabaseError firebaseError) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
                         builder.setMessage(firebaseError.getMessage())
                                 .setTitle(R.string.login_error_title)
@@ -183,112 +205,95 @@ public class ExitReceipt extends AppCompatActivity {
                         dialog.show();
                     }
                 });
-                Query queryRef = mRef.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(truck_type);
-                queryRef.addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                        TariffDetails truck = snapshot.getValue(TariffDetails.class);
-                        arr = truck.getarr();
-                        Log.d("arr", Arrays.deepToString(arr));
-                        calculate(localtime);
-                        pb1.setVisibility(View.GONE);
-                        if (pb.getVisibility() == View.GONE) {
-                            linearLayout.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
-                        builder.setMessage(firebaseError.getMessage())
-                                .setTitle(R.string.login_error_title)
-                                .setPositiveButton(android.R.string.ok, null);
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                    }
-                });
+                if(userkey==null){
+                    pb.setVisibility(View.GONE);
+                    pb1.setVisibility(View.GONE);
+                    linearLayout.setVisibility(View.VISIBLE);
+                }
             }
         });
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("Cost", String.valueOf(cost));
-                if(cost!=0){
-                    try {
-                        if(vehicle_type.contentEquals("Trailer with Monthly Pass")){
-                            //Search for transporter Name using a new Query and then update the Amt with that userkey
-                            final Query queryRef1 = mRef.child("users").child("Transporter_Details").orderByChild("Name").equalTo(transporter);
-                            queryRef1.addChildEventListener(new ChildEventListener() {
-                                @Override
-                                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                                    transporter_key = String.valueOf(dataSnapshot.getKey());
-                                    TransporterDetails transporterDetails=dataSnapshot.getValue(TransporterDetails.class);
-                                    amt=transporterDetails.getAmt();
-                                    int amount=Integer.parseInt(amt)-cost;
-                                    Map<String, Object> map = new HashMap<String, Object>();
-                                    map.put("Amt", String.valueOf(amount));
-                                    mRef.child("users").child("Transporter_Details").child(transporter_key).updateChildren(map);
-                                }
+                if (departure_time.contentEquals("")) {
+                    pb2.setVisibility(View.VISIBLE);
+                    linearLayout.setVisibility(View.GONE);
+                    Log.d("Cost", String.valueOf(cost));
+                    if (cost != 0) {
+                        try {
+                            if (vehicle_type.contentEquals("Trailer with Monthly Pass")) {
+                                //Search for transporter Name using a new Query and then update the Amt with that userkey
+                                final Query queryRef1 = reference.child("users").child("Transporter_Details").orderByChild("name").equalTo(transporter);
+                                queryRef1.addChildEventListener(new ChildEventListener() {
+                                    @Override
+                                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                                        transporter_key = String.valueOf(dataSnapshot.getKey());
+                                        TransporterDetails transporterDetails = dataSnapshot.getValue(TransporterDetails.class);
+                                        amt = transporterDetails.getAmt();
+                                        int amount = (int) (Integer.parseInt(amt) - cost);
+                                        Map<String, Object> map = new HashMap<String, Object>();
+                                        map.put("Amt", String.valueOf(amount));
+                                        reference.child("users").child("Transporter_Details").child(transporter_key).updateChildren(map);
+                                        pb2.setVisibility(View.GONE);
+                                        linearLayout.setVisibility(View.VISIBLE);
+                                    }
 
-                                @Override
-                                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                                    @Override
+                                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                                }
+                                    }
 
-                                @Override
-                                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                                    @Override
+                                    public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-                                }
+                                    }
 
-                                @Override
-                                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                                    @Override
+                                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-                                }
+                                    }
 
-                                @Override
-                                public void onCancelled(FirebaseError firebaseError) {
+                                    @Override
+                                    public void onCancelled(DatabaseError firebaseError) {
 
-                                }
-                            });
+                                    }
+                                });
+                            } else {
+                                pb2.setVisibility(View.GONE);
+                                linearLayout.setVisibility(View.VISIBLE);
+                            }
+                            Calendar calendar = Calendar.getInstance();
+                            final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");
+                            localTime1 = sdf.format(calendar.getTime());
+                            Map<String, Object> map = new HashMap<String, Object>();
+                            map.put("cost", String.valueOf(cost));
+                            map.put("tod", localTime1);
+                            Log.d("user", userkey);
+                            reference.child("users").child("data").child(userkey).updateChildren(map);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
+                            builder.setMessage("The data has been updated.")
+                                    .setTitle("Message")
+                                    .setPositiveButton(android.R.string.ok, null);
+                            AlertDialog dialog = builder.create();
+                            dialog.show();
+                            sendData(String.valueOf(cost));
+                            et_search.setText("");
+                            tv1.setText("");
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                        Calendar calendar = Calendar.getInstance();
-                        final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss aa");
-                        localTime1 = sdf.format(calendar.getTime());
-                        Map<String, Object> map = new HashMap<String, Object>();
-                        map.put("Cost", String.valueOf(cost));
-                        map.put("Time of Departure", localTime1);
-                        Log.d("user", userkey);
-                        mRef.child("users").child("data").child(userkey).updateChildren(map);
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
-                        builder.setMessage("The data has been updated.")
-                                .setTitle("Message")
-                                .setPositiveButton(android.R.string.ok, null);
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                        sendData(String.valueOf(cost));
-                        et_search.setText("");
-                        tv1.setText("");
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
+                    builder.setMessage("The Vehicle is already left the Parking Lot.")
+                            .setTitle("Message")
+                            .setPositiveButton(android.R.string.ok, null);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 }
             }
         });
+
         // open bluetooth connection
         openButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -311,11 +316,68 @@ public class ExitReceipt extends AppCompatActivity {
         });
     }
 
-    private void calculate(String localtime) {
+    private void array(String type) {
+        Log.d("checkpoint","in array function");
+            Query queryRef = reference.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(type);
+            queryRef.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                    TariffDetails truck = snapshot.getValue(TariffDetails.class);
+                    tararr=truck.getArr();
+                    Log.d("tararr",tararr.toString());
+                    tar_arr1= new String[tararr.size()][];
+                    for (int i = 0; i < tararr.size(); i++) {
+                        ArrayList<String> row = tararr.get(i);
+                        tar_arr1[i] = row.toArray(new String[row.size()]);
+                        Log.d("tararr1", String.valueOf(tar_arr1.length));
+                    }
+                    arr=new int[tar_arr1.length][3];
+                    for(int i=0;i<tar_arr1.length;i++){
+                        for(int j=0;j<3;j++){
+                            Log.d("i,j", String.valueOf(Integer.parseInt(tar_arr1[i][j])));
+                            arr[i][j]=Integer.parseInt(tar_arr1[i][j]);
+                        }
+                    }
+                    Log.d("arr", Arrays.deepToString(arr));
+                    flag = 1;
+                    calculate(localtime);
+                    pb1.setVisibility(View.GONE);
+                }
 
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError firebaseError) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
+                    builder.setMessage(firebaseError.getMessage())
+                            .setTitle(R.string.login_error_title)
+                            .setPositiveButton(android.R.string.ok, null);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+            });
+            if (flag == 1) {
+                pb1.setVisibility(View.GONE);
+            }
+    }
+
+
+    private void calculate(String localtime) {
         Date date1=null,date2 = null;
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a");
         String current = dateFormat.format(calendar.getTime());
         try {
             date1 = dateFormat.parse(localtime);
@@ -340,8 +402,9 @@ public class ExitReceipt extends AppCompatActivity {
         Log.d("cost", String.valueOf(cost));
         cost=cost-partial;
         tv1.setText(String.valueOf(cost));
-
-
+        if(pb.getVisibility()==View.GONE && pb1.getVisibility()==View.GONE){
+            linearLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     void closeBT() throws IOException {
@@ -359,7 +422,7 @@ public class ExitReceipt extends AppCompatActivity {
     void sendData(String finalcost) throws IOException {
 
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
         String current = dateFormat.format(calendar.getTime());
         try {
             // the text typed by the user

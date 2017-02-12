@@ -1,11 +1,12 @@
 package com.potenza_pvt_ltd.AAPS;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -15,20 +16,25 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -43,8 +49,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
-public class SummaryReports extends AppCompatActivity implements View.OnClickListener ,AdapterView.OnItemClickListener {
+public class SummaryReports extends Activity implements View.OnClickListener ,AdapterView.OnItemClickListener{
     private EditText fromDateEtxt;
     private EditText toDateEtxt;
     ArrayList<Integer> arr;
@@ -57,7 +64,6 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
     final ArrayList<String> email_operator = new ArrayList<String>();
     final ArrayList<String> amt_operator = new ArrayList<String>();
     private Button button;
-    Firebase ref;
     private Spinner spinner;
     private Spinner spinner2,spinner3;
     final ArrayList<String> code = new ArrayList<String>();
@@ -65,24 +71,31 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
     private ArrayList<String> name=new ArrayList<>();
     ProgressBar pb,pb1,pb2,pb3;
     private LinearLayout linear_layout;
-    int count=1;
     private String globatime;
     private long globalmillis;
     private long timefrom,timeto;
     private String filename;
-    private String time_d;
-    //ListView listview;
     int p1=0,p2=0,p3=0,p4=0,p5=0,p6=0,p7=0,p8=0;
     private CustomAdapter customAdapter;
     private ArrayList<String> psname=new ArrayList<>();
     private String email,vehicle_type_name,transporter;
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
+    FirebaseStorage storage;
+    StorageReference storageRef;
+    private int child_count;
+    private int flag;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_summary_reports);
-        dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        ref=new Firebase(Constants.FIREBASE_URL);
+        dateFormatter = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReferenceFromUrl("gs://testing-project-15.appspot.com");
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
         findViewsById();
         setDateTimeField();
         for(int i=1;i<=8;i++) {
@@ -91,20 +104,20 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
         values.add("All");
         code.add("All");
         name.add("All");
-        Query queryRef = ref.child("users").child("Operator");
+        Query queryRef = reference.child("users").child("Operator");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("value of", String.valueOf(dataSnapshot.getKey()));
                 DetailofUser post = dataSnapshot.getValue(DetailofUser.class);
-                Log.d("email", post.getEmail());
-                Log.d("pass", post.getPwd());
-                values.add(post.getEmail());
+                Log.d("email", post.getEmailaddress());
+                Log.d("pass", post.getPass());
+                values.add(post.getEmailaddress());
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, values);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinner2.setAdapter(dataAdapter);
                 pb.setVisibility(View.GONE);
-                if(pb1.getVisibility()==View.VISIBLE && pb2.getVisibility()==View.VISIBLE) {
+                if(pb1.getVisibility()== View.VISIBLE && pb2.getVisibility()==View.VISIBLE) {
                     linear_layout.setVisibility(View.VISIBLE);
                 }
 
@@ -126,11 +139,11 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
-        Query queryRef1 = ref.child("users").child("Vehicle_Type");
+        Query queryRef1 = reference.child("users").child("Vehicle_Type");
         queryRef1.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -163,11 +176,11 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
-        Query queryRef3 = ref.child("users").child("Transporter_Details");
+        Query queryRef3 = reference.child("users").child("Transporter_Details");
         queryRef3.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -200,7 +213,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -237,27 +250,27 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
 
             }
         });
-        /*Query queryRef4 = ref.child("users").child("data").orderByChild("Time of Departure").equalTo("");
+        /*Query queryRef4 = reference.child("users").child("data").orderByChild("tod").equalTo("");
         queryRef4.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("data data", dataSnapshot.getKey());
                 TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
-                if (post.getAPS().contentEquals("Parking Slot 1")) {
+                if (post.getAps().contentEquals("Parking Slot 1")) {
                     p1++;
-                } else if (post.getAPS().contentEquals("Parking Slot 2")) {
+                } else if (post.getAps().contentEquals("Parking Slot 2")) {
                     p2++;
-                } else if (post.getAPS().contentEquals("Parking Slot 3")) {
+                } else if (post.getAps().contentEquals("Parking Slot 3")) {
                     p3++;
-                } else if (post.getAPS().contentEquals("Parking Slot 4")) {
+                } else if (post.getAps().contentEquals("Parking Slot 4")) {
                     p4++;
-                } else if (post.getAPS().contentEquals("Parking Slot 5")) {
+                } else if (post.getAps().contentEquals("Parking Slot 5")) {
                     p5++;
-                } else if (post.getAPS().contentEquals("Parking Slot 6")) {
+                } else if (post.getAps().contentEquals("Parking Slot 6")) {
                     p6++;
-                } else if (post.getAPS().contentEquals("Parking Slot 7")) {
+                } else if (post.getAps().contentEquals("Parking Slot 7")) {
                     p7++;
-                } else if (post.getAPS().contentEquals("Parking Slot 8")) {
+                } else if (post.getAps().contentEquals("Parking Slot 8")) {
                     p8++;
                 }
                 num = new ArrayList<>();
@@ -293,7 +306,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });*/
@@ -354,6 +367,115 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    public void export(View view){
+        if(datefrom.isEmpty()==false&& dateto.isEmpty()==false) {
+            pb3.setVisibility(View.VISIBLE);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss",Locale.ENGLISH);
+            String timeofarrival = datefrom+" 00:00:01";
+            Date date = null; // You will need try/catch around this
+            try {
+                date = sdf.parse(timeofarrival);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            timefrom=date.getTime();
+            String timetocal = dateto+" 23:59:59";
+            Date date1 = null; // You will need try/catch around this
+            try {
+                date1 = sdf.parse(timetocal);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            timeto=date1.getTime();
+            Log.d("timefrom", String.valueOf(timefrom));
+            Log.d("timeto", String.valueOf(timeto));
+            Query queryRef = reference.child("users").child("data");
+            queryRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    child_count = (int) dataSnapshot.getChildrenCount();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+            flag=0;
+
+            queryRef.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Log.d("asda", String.valueOf(dataSnapshot.getChildrenCount()));
+                    TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
+                    if (transporter.contentEquals("All") && vehicle_type_name.contentEquals("All") && email.contentEquals("All")) {
+                        globatime = post.getDate() + " " + post.getToa();
+                        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa", Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
+                        Date date = null; // You will need try/catch around this
+                        try {
+                            date = formatter.parse(globatime);
+                            globalmillis = date.getTime();
+
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        Log.d("globaltime", String.valueOf(globalmillis));
+                        if (globalmillis > timefrom && globalmillis < timeto) {
+                            email_operator.add(post.getEmail());
+                            amt_operator.add(post.getCost());
+                        }
+                    } else {
+                        if (post.getTransporter().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVtype().contentEquals(vehicle_type_name)) {
+                            globatime = post.getDate() + " " + post.getToa();
+                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa",Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
+                            Date date = null; // You will need try/catch around this
+                            try {
+                                date = formatter.parse(globatime);
+                                globalmillis = date.getTime();
+
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                            Log.d("globaltime", String.valueOf(globalmillis));
+                            if (globalmillis > timefrom && globalmillis < timeto) {
+                                email_operator.add(post.getEmail());
+                                amt_operator.add(post.getCost());
+                            }
+                        }
+                    }
+                    flag++;
+                    if(flag==child_count) {
+                        getdata();
+                    }
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError firebaseError) {
+
+                }
+            });
+        }
+        else{
+            Toast.makeText(getApplicationContext(),"Pease enter the date",Toast.LENGTH_LONG);
+        }
+
+    }
+
     public void getdata(){
         int k=9;
         // check if available and not read only
@@ -368,8 +490,6 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
 
         //Cell style for header row
         CellStyle cs = wb.createCellStyle();
-        cs.setFillForegroundColor(HSSFColor.LIME.index);
-        cs.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
 
         //New Sheet
         Sheet sheet1 = null;
@@ -425,6 +545,7 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
         c = row2.createCell(5);
         c.setCellValue("Amount");
         c.setCellStyle(cs);
+        int count=1;
         for(int i=0;i<email_operator.size();i++){
             Row row3 = sheet1.createRow(k);
 
@@ -444,13 +565,16 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
 
         }
 
-
-        sheet1.setColumnWidth(0, (15 * 500));
-        sheet1.setColumnWidth(1, (15 * 500));
-        sheet1.setColumnWidth(2, (15 * 500));
+        sheet1.setColumnWidth(3, (30 * 500));
+        sheet1.setColumnWidth(4, (30* 500));
+        sheet1.setColumnWidth(5, (30 * 500));
 
         // Create a path where we will place our List of objects on external storage
-        File file = new File(this.getExternalFilesDir(null), "Summary-Reports.xls");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss",Locale.ENGLISH);
+        String format = simpleDateFormat.format(new Date());
+        File file = new File(this.getExternalFilesDir(null), "Summary-Reports-"+format+".xls");
+        Log.d("address", String.valueOf(Uri.fromFile(file)));
+
         FileOutputStream os = null;
 
         try {
@@ -465,11 +589,34 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
             Log.w("FileUtils", "Failed to save file", e);
         } finally {
             try {
-                if (null != os)
+                if (null != os) {
                     os.close();
+                }
             } catch (Exception ex) {
             }
         }
+        StorageReference mountainsRef = storageRef.child("Summary-Reports/" + format + ".xls");
+        mountainsRef.putFile(Uri.fromFile(file))
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        //if the upload is successfull
+                        //hiding the progress dialog
+
+                        //and displaying a success toast
+                        Toast.makeText(getApplicationContext(), "File Uploaded ", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        //if the upload is not successfull
+                        //hiding the progress dialog
+
+                        //and displaying error message
+                        Toast.makeText(getApplicationContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
         pb3.setVisibility(View.GONE);
         sendEmailWithAttachment(Constants.EMAIL_TO, "", "", filename);
 
@@ -493,100 +640,6 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-    }
-
-    public void export(View view){
-        if(datefrom.isEmpty()==false&& dateto.isEmpty()==false) {
-            pb3.setVisibility(View.VISIBLE);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-            String timeofarrival = datefrom+" 00:00:01";
-            Date date = null; // You will need try/catch around this
-            try {
-                date = sdf.parse(timeofarrival);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            timefrom=date.getTime();
-            String timetocal = dateto+" 23:59:59";
-            Date date1 = null; // You will need try/catch around this
-            try {
-                date1 = sdf.parse(timetocal);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            timeto=date1.getTime();
-            Log.d("timefrom", String.valueOf(timefrom));
-            Log.d("timeto", String.valueOf(timeto));
-            Query queryRef = ref.child("users").child("data");
-            queryRef.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                    Log.d("asda", String.valueOf(dataSnapshot.getChildrenCount()));
-                    TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
-                    if (transporter.contentEquals("All") && vehicle_type_name.contentEquals("All") && email.contentEquals("All")) {
-                        globatime = post.getDate() + " " + post.gettime();
-                        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
-                        Date date = null; // You will need try/catch around this
-                        try {
-                            date = formatter.parse(globatime);
-                            globalmillis = date.getTime();
-
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        Log.d("globaltime", String.valueOf(globalmillis));
-                        if (globalmillis > timefrom && globalmillis < timeto) {
-                            email_operator.add(post.getEmail());
-                            amt_operator.add(post.getCost());
-                        }
-                        getdata();
-                    } else {
-                        if (post.getContractorname().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVehicleType().contentEquals(vehicle_type_name)) {
-                            globatime = post.getDate() + " " + post.gettime();
-                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
-                            Date date = null; // You will need try/catch around this
-                            try {
-                                date = formatter.parse(globatime);
-                                globalmillis = date.getTime();
-
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
-                            Log.d("globaltime", String.valueOf(globalmillis));
-                            if (globalmillis > timefrom && globalmillis < timeto) {
-                                email_operator.add(post.getEmail());
-                                amt_operator.add(post.getCost());
-                            }
-                        }
-                        getdata();
-                    }
-                }
-
-                @Override
-                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                }
-
-                @Override
-                public void onCancelled(FirebaseError firebaseError) {
-
-                }
-            });
-        }
-        else{
-            Toast.makeText(getApplicationContext(),"Pease enter the date",Toast.LENGTH_LONG);
-        }
-
     }
 
 
@@ -620,5 +673,4 @@ public class SummaryReports extends AppCompatActivity implements View.OnClickLis
         Intent i = new Intent(SummaryReports.this, ReportsActivity.class);
         startActivity(i);
     }
-
-}
+    }

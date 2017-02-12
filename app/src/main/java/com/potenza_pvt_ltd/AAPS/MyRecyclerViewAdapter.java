@@ -3,12 +3,10 @@ package com.potenza_pvt_ltd.AAPS;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -16,8 +14,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.client.Firebase;
-
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,12 +34,12 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     private String uniquekey;
     int[][] tar_arr;
     int pos;
-    private Firebase ref=new Firebase(Constants.FIREBASE_URL);
-
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
     public MyRecyclerViewAdapter(ArrayList<TruckDetailsActivity> myDataset) {
         mDataset = myDataset;
         for (int i=0;i<mDataset.size();i++) {
-            Log.d("dataset", mDataset.get(i).getContractorname());
+            Log.d("dataset", mDataset.get(i).getVno());
         }
     }
     public MyRecyclerViewAdapter(ArrayList<TransporterDetails> myDataset,int index) {
@@ -118,7 +117,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
                                     key = mDataset1.get(position).getKey();
                                     Log.d("pos", String.valueOf(key));
                                     pos=position;
-                                    Firebase alanRef = ref.child("users").child("Transporter_Details").child(key);
+                                    DatabaseReference alanRef = reference.child("users").child("Transporter_Details").child(key);
                                     Map<String, Object> nickname = new HashMap<String, Object>();
                                     nickname.put("Amt", amount);
                                     alanRef.updateChildren(nickname);
@@ -144,12 +143,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
         }
         else{
-            holder.email.setText(mDataset.get(position).getEmail());
-            holder.contractorname.setText(mDataset.get(position).getContractorname());
-            holder.drivername.setText(mDataset.get(position).getDrivername());
-            holder.drivernumber.setText(mDataset.get(position).getDriverno());
-            holder.date.setText(mDataset.get(position).getDate());
-            holder.aps.setText(mDataset.get(position).getAPS());
+            holder.email.setText(mDataset.get(position).getVno());
+            holder.contractorname.setText(mDataset.get(position).getTransporter());
+            holder.drivernumber.setText(mDataset.get(position).getDate());
+            holder.date.setText(mDataset.get(position).getToa());
+            holder.aps.setText(mDataset.get(position).getVtype());
         }
     }
 
@@ -182,7 +180,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public class ViewHolder extends RecyclerView.ViewHolder{
         TextView email;
         TextView contractorname;
-        TextView drivername;
         TextView drivernumber;
         TextView date;
         TextView aps;
@@ -211,7 +208,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             else{
                 email = (TextView) itemView.findViewById(R.id.textView);
                 contractorname = (TextView) itemView.findViewById(R.id.textView2);
-                drivername = (TextView) itemView.findViewById(R.id.textView3);
                 drivernumber = (TextView) itemView.findViewById(R.id.textView4);
                 date = (TextView) itemView.findViewById(R.id.textView5);
                 aps = (TextView) itemView.findViewById(R.id.textView6);

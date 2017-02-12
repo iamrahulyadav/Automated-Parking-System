@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1056205681559",
+    "firebase_url": "https://testing-project-15.firebaseio.com",
+    "project_id": "testing-project-15",
+    "storage_bucket": "testing-project-15.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1056205681559:android:160972a782a74cf0",
+        "android_client_info": {
+          "package_name": "com.potenza_pvt_ltd.AAPS"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1056205681559-dq5bd0gj08fui23k989n6t0ajtuhtb3i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMZU0F2i491rKPNI9dMBuwo0LXenY6lFM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,12 +2,11 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -18,12 +17,17 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 
-import com.firebase.client.AuthData;
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,7 +40,9 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
     protected EditText emailEditText;
     protected EditText passwordEditText;
     protected Button shiftopen;
-    Firebase ref;
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     ProgressBar pb;
     String emailAddress;
     protected String aps;
@@ -53,7 +59,22 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shift_open);
-        ref= new Firebase(Constants.FIREBASE_URL);
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("User", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d("User", "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         editor = preferences.edit();
         pb=(ProgressBar)findViewById(R.id.progressBar);
@@ -65,7 +86,7 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
         shiftopen = (Button) findViewById(R.id.shiftopenbutton);
         spinner = (Spinner) findViewById(R.id.spinner1);
         spinner.setOnItemSelectedListener(this);
-        Query queryRef = ref.child("users").child("Slot_Name");
+        Query queryRef = reference.child("users").child("Slot_Name");
         queryRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -94,7 +115,7 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -126,69 +147,66 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
                     Log.d("Password",password);
 
                     //Login with an email/password combination
-                    ref.authWithPassword(email, password, new Firebase.AuthResultHandler() {
-                        @Override
-                        public void onAuthenticated(AuthData authData) {
-                            // Authenticated successfully with payload authData
-                            Query queryRef = ref.child("users").orderByChild("email-address");
-                            queryRef.addChildEventListener(new ChildEventListener() {
+                    mAuth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(ShiftOpen.this, new OnCompleteListener<AuthResult>() {
                                 @Override
-                                public void onChildAdded(DataSnapshot snapshot, String previousChild) {
-                                    Log.d("key123",snapshot.getKey());
-                                    if(snapshot.getKey().contentEquals("Manager") ){
-                                        for (DataSnapshot snapshot1 : snapshot.getChildren()) {
-                                            DetailofUser post = snapshot1.getValue(DetailofUser.class);
-                                            String emailvalue = post.getEmail().trim();
-                                            if(emailvalue.contentEquals(emailAddress)) {
-                                                callme();
-                                                editor.putString("aps", aps);
-                                                Intent intent = new Intent(ShiftOpen.this, TypeofOperator.class);
-                                                intent.putExtra("UniqueID", postid);
-                                                intent.putExtra("aps",aps);
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                                startActivity(intent);
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    // Authenticated successfully with payload authData
+                                    Query queryRef = reference.child("users").orderByChild("email-address");
+                                    queryRef.addChildEventListener(new ChildEventListener() {
+                                        @Override
+                                        public void onChildAdded(DataSnapshot snapshot, String previousChild) {
+                                            Log.d("key123", snapshot.getKey());
+                                            if (snapshot.getKey().contentEquals("Manager")) {
+                                                for (DataSnapshot snapshot1 : snapshot.getChildren()) {
+                                                    DetailofUser post = snapshot1.getValue(DetailofUser.class);
+                                                    String emailvalue = post.getEmailaddress().trim();
+                                                    if (emailvalue.contentEquals(emailAddress)) {
+                                                        callme();
+                                                        editor.putString("aps", aps);
+                                                        Intent intent = new Intent(ShiftOpen.this, TypeofOperator.class);
+                                                        intent.putExtra("UniqueID", postid);
+                                                        intent.putExtra("aps", aps);
+                                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                        startActivity(intent);
+                                                    }
+                                                }
                                             }
                                         }
+
+                                        @Override
+                                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                                        }
+
+                                        @Override
+                                        public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                                        }
+
+                                        @Override
+                                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError firebaseError) {
+
+                                        }
+                                        // ....
+                                    });
+                                    if (!task.isSuccessful()) {
+                                        Log.w("Sign in Faialed", "signInWithEmail:failed", task.getException());
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(ShiftOpen.this);
+                                        builder.setMessage((CharSequence) task.getException())
+                                                .setTitle(R.string.login_error_title)
+                                                .setPositiveButton(android.R.string.ok, null);
+                                        AlertDialog dialog = builder.create();
+                                        dialog.show();
                                     }
                                 }
-
-                                @Override
-                                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                                }
-
-                                @Override
-                                public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                                }
-
-                                @Override
-                                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                                }
-
-                                @Override
-                                public void onCancelled(FirebaseError firebaseError) {
-
-                                }
-                                // ....
                             });
-
-
-                        }
-
-                        @Override
-                        public void onAuthenticationError(FirebaseError firebaseError) {
-                            // Authenticated failed with error fireball Error
-                            AlertDialog.Builder builder = new AlertDialog.Builder(ShiftOpen.this);
-                            builder.setMessage(firebaseError.getMessage())
-                                    .setTitle(R.string.login_error_title)
-                                    .setPositiveButton(android.R.string.ok, null);
-                            AlertDialog dialog = builder.create();
-                            dialog.show();
-                        }
-                    });
                 }
             }
         });
@@ -201,7 +219,7 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
         map.put(typeofuser, "true");
         map.put("Shift Open Time", localTime);
         map.put("aps", aps);
-        Firebase newpostref=ref.child("users").child("timing").push();
+        DatabaseReference newpostref=reference.child("users").child("timing").push();
         newpostref.setValue(map);
         postid=newpostref.getKey();
         editor.putString("PostID for timing", postid);

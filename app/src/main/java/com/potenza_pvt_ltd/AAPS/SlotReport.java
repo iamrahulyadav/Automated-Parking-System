@@ -2,12 +2,11 @@ package com.potenza_pvt_ltd.AAPS;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -21,12 +20,19 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.potenza_pvt_ltd.AAPS.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -45,45 +51,56 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class SlotReport extends Activity implements View.OnClickListener{
+
+public class SlotReport extends Activity implements View.OnClickListener {
     private EditText fromDateEtxt;
     private EditText toDateEtxt;
     private DatePickerDialog fromDatePickerDialog;
     private DatePickerDialog toDatePickerDialog;
-    private String datefrom,dateto;
+    private String datefrom, dateto;
     private SimpleDateFormat dateFormatter;
-    Firebase ref;
     final ArrayList<String> date_array = new ArrayList<String>();
     final ArrayList<String> time_array = new ArrayList<String>();
     final ArrayList<String> vehicle_no = new ArrayList<String>();
-    final ArrayList<String> vehicle_type = new ArrayList<String>();
+    final ArrayList<String> vtype = new ArrayList<String>();
     final ArrayList<String> email_operator = new ArrayList<String>();
     final ArrayList<String> amt_operator = new ArrayList<String>();
     final ArrayList<String> contractor_name = new ArrayList<String>();
     String transporter;
     List<String> categories = new ArrayList<>();
-    ProgressBar pb,pb1,pb2,pb3;
+    ProgressBar pb, pb1, pb2, pb3;
     private LinearLayout linear_layout;
     private Spinner spinner;
-    private Spinner spinner2,spinner3;
+    private Spinner spinner2, spinner3;
     final ArrayList<String> code = new ArrayList<String>();
     ArrayList<String> values = new ArrayList<String>();
-    private ArrayList<String> name=new ArrayList<>();
+    private ArrayList<String> name = new ArrayList<>();
     private Button button;
-    int count=1;
     private String globatime;
     private long globalmillis;
-    private long timefrom,timeto;
+    private long timefrom, timeto;
     private String filename;
-    private String email,vehicle_type_name;
+    private String email, vehicle_type_name;
+
+    private FirebaseAuth mAuth;
+    DatabaseReference ref;
+    FirebaseStorage storage;
+    StorageReference storageRef;
+    private int child_count;
+    private int flag;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_slot_report);
-        dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        ref=new Firebase(Constants.FIREBASE_URL);
+        dateFormatter = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReferenceFromUrl("gs://testing-project-15.appspot.com");
+        mAuth = FirebaseAuth.getInstance();
+        ref = FirebaseDatabase.getInstance().getReference();
         name.add("All");
         values.add("All");
         code.add("All");
@@ -95,9 +112,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d("value of", String.valueOf(dataSnapshot.getKey()));
                 DetailofUser post = dataSnapshot.getValue(DetailofUser.class);
-                Log.d("email", post.getEmail());
-                Log.d("pass", post.getPwd());
-                values.add(post.getEmail());
+                values.add(post.getEmailaddress());
                 ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, values);
                 dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinner2.setAdapter(dataAdapter);
@@ -124,7 +139,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -161,7 +176,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -198,7 +213,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
 
             }
         });
@@ -292,7 +307,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
     public void export(View view){
         if(toDateEtxt.getText().toString()!=null&& fromDateEtxt.getText().toString()!=null) {
             pb3.setVisibility(View.VISIBLE);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss",Locale.ENGLISH);
             if(datefrom!=null && dateto!=null) {
                 String timeofarrival = datefrom + " 00:00:01";
                 Date date = null; // You will need try/catch around this
@@ -313,17 +328,29 @@ public class SlotReport extends Activity implements View.OnClickListener{
                 Log.d("timefrom", String.valueOf(timefrom));
                 Log.d("timeto", String.valueOf(timeto));
                 Query queryRef = ref.child("users").child("data");
+                queryRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        child_count = (int) dataSnapshot.getChildrenCount();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                flag=0;
                 queryRef.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         Log.d("count", String.valueOf(dataSnapshot.getChildrenCount()));
                         Log.d("key", dataSnapshot.getKey());
                         TruckDetailsActivity post = dataSnapshot.getValue(TruckDetailsActivity.class);
-                        Log.d("Contractor name", post.getContractorname());
+                        Log.d("Contractor name", post.getTransporter());
                         Log.d("transporter", transporter);
                         if (transporter.contentEquals("All") && vehicle_type_name.contentEquals("All") && email.contentEquals("All")) {
-                            globatime = post.getDate() + " " + post.gettime();
-                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
+                            globatime = post.getDate() + " " + post.getToa();
+                            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa", Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
                             Date d = null; // You will need try/catch around this
                             try {
                                 d = formatter.parse(globatime);
@@ -333,22 +360,21 @@ public class SlotReport extends Activity implements View.OnClickListener{
                             }
                             Log.d("globaltime", String.valueOf(globalmillis) + " " + String.valueOf(globatime));
                             if (globalmillis > timefrom && globalmillis < timeto) {
-                                DateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-                                DateFormat time = new SimpleDateFormat("hh:mm:ss");
+                                DateFormat date = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
+                                DateFormat time = new SimpleDateFormat("hh:mm:ss",Locale.ENGLISH);
                                 date_array.add(date.format(d));
                                 time_array.add(time.format(d));
                                 email_operator.add(post.getEmail());
                                 amt_operator.add(post.getCost());
-                                vehicle_no.add(post.getVehicleno());
+                                vehicle_no.add(post.getVno());
                                 Log.d("abx", post.getEmail());
-                                vehicle_type.add(post.getVehicleno());
-                                contractor_name.add(post.getContractorname());
+                                vtype.add(post.getVtype());
+                                contractor_name.add(post.getTransporter());
                             }
-                            getdata();
                         } else {
-                            if (post.getContractorname().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVehicleType().contentEquals(vehicle_type_name)) {
-                                globatime = post.getDate() + " " + post.gettime();
-                                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa"); // I assume d-M, you may refer to M-d for month-day instead.
+                            if (post.getTransporter().contentEquals(transporter) && post.getEmail().contentEquals(email) && post.getVtype().contentEquals(vehicle_type_name)) {
+                                globatime = post.getDate() + " " + post.getToa();
+                                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa",Locale.ENGLISH); // I assume d-M, you may refer to M-d for month-day instead.
                                 Date d = null; // You will need try/catch around this
                                 try {
                                     d = formatter.parse(globatime);
@@ -358,21 +384,24 @@ public class SlotReport extends Activity implements View.OnClickListener{
                                 }
                                 Log.d("globaltime", String.valueOf(globalmillis));
                                 if (globalmillis > timefrom && globalmillis < timeto) {
-                                    DateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-                                    DateFormat time = new SimpleDateFormat("hh:mm:ss");
+                                    DateFormat date = new SimpleDateFormat("yyyy-MM-dd",Locale.ENGLISH);
+                                    DateFormat time = new SimpleDateFormat("hh:mm:ss",Locale.ENGLISH);
                                     date_array.add(date.format(d));
                                     time_array.add(time.format(d));
                                     email_operator.add(post.getEmail());
                                     amt_operator.add(post.getCost());
-                                    vehicle_no.add(post.getVehicleno());
+                                    vehicle_no.add(post.getVno());
                                     Log.d("abx", post.getEmail());
-                                    vehicle_type.add(post.getVehicleno());
-                                    contractor_name.add(post.getContractorname());
+                                    vtype.add(post.getVtype());
+                                    contractor_name.add(post.getTransporter());
                                 }
-                                getdata();
                             }
                         }
 
+                        flag++;
+                        if(flag==child_count) {
+                            getdata();
+                        }
 
                     }
 
@@ -392,7 +421,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError firebaseError) {
+                    public void onCancelled(DatabaseError firebaseError) {
 
                     }
                 });
@@ -489,8 +518,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
         c = row2.createCell(9);
         c.setCellValue("Amount");
         c.setCellStyle(cs);
-
-
+        int count=1;
         for(int i=0;i<email_operator.size();i++){
             Log.d(String.valueOf(i),email_operator.get(i));
             Row row3 = sheet1.createRow(k);
@@ -516,7 +544,7 @@ public class SlotReport extends Activity implements View.OnClickListener{
             c.setCellStyle(cs);
 
             c = row3.createCell(7);
-            c.setCellValue(vehicle_type.get(i));
+            c.setCellValue(vtype.get(i));
             c.setCellStyle(cs);
 
             c = row3.createCell(8);
@@ -532,10 +560,20 @@ public class SlotReport extends Activity implements View.OnClickListener{
 
         sheet1.setColumnWidth(0, (15 * 500));
         sheet1.setColumnWidth(1, (15 * 500));
-        sheet1.setColumnWidth(2, (15 * 500));
+        sheet1.setColumnWidth(2, (15* 500));
+        sheet1.setColumnWidth(3, (30* 500));
+        sheet1.setColumnWidth(4, (30* 500));
+        sheet1.setColumnWidth(5, (30* 500));
+        sheet1.setColumnWidth(6, (30* 500));
+        sheet1.setColumnWidth(7, (30* 500));
+        sheet1.setColumnWidth(8, (30* 500));
+        sheet1.setColumnWidth(9, (30 * 500));
 
         // Create a path where we will place our List of objects on external storage
-        File file = new File(this.getExternalFilesDir(null), "Slot-Reports.xls");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy-hh-mm-ss",Locale.ENGLISH);
+        String format = simpleDateFormat.format(new Date());
+        File file = new File(this.getExternalFilesDir(null), "Slot-Reports-"+format+".xls");
+        Log.d("address", String.valueOf(Uri.fromFile(file)));
         FileOutputStream os = null;
 
         try {
@@ -554,6 +592,29 @@ public class SlotReport extends Activity implements View.OnClickListener{
             } catch (Exception ex) {
             }
         }
+        StorageReference mountainsRef = storageRef.child("Slot-Reports/" + format + ".xls");
+        mountainsRef.putFile(Uri.fromFile(file))
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        //if the upload is successfull
+                        //hiding the progress dialog
+
+                        //and displaying a success toast
+                        Toast.makeText(getApplicationContext(), "File Uploaded ", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        //if the upload is not successfull
+                        //hiding the progress dialog
+
+                        //and displaying error message
+                        Toast.makeText(getApplicationContext(), exception.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+
         pb3.setVisibility(View.GONE);
         sendEmailWithAttachment(Constants.EMAIL_TO, "", "", filename);
     }
@@ -604,4 +665,4 @@ public class SlotReport extends Activity implements View.OnClickListener{
         Intent i = new Intent(SlotReport.this, ReportsActivity.class);
         startActivity(i);
     }
-}
+    }

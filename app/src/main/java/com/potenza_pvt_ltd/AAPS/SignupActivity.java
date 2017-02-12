@@ -3,13 +3,18 @@ package com.potenza_pvt_ltd.AAPS;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.potenza_pvt_ltd.AAPS.R;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +24,8 @@ public class SignupActivity extends Activity {
     Button b1;
     String email,pass;
     String typeofuser,userid;
-
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
     int i=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,27 +42,33 @@ public class SignupActivity extends Activity {
             public void onClick(View v) {
                 email=et1.getText().toString();
                 pass=et2.getText().toString();
-                final Firebase ref = new Firebase(Constants.FIREBASE_URL);
-                ref.createUser(email, pass, new Firebase.ValueResultHandler<Map<String, Object>>() {
-                    @Override
-                    public void onSuccess(Map<String, Object> result) {
-                        Map<String, Object> value = new HashMap<String, Object>();
-                        value.put("emailID", email);
-                        ref.child("users").child(typeofuser).child("emailID"+i).setValue(email);
-                        Log.d("Successfully", String.valueOf(result.get("uid")));
-                        i++;
+                mAuth = FirebaseAuth.getInstance();
+                reference = FirebaseDatabase.getInstance().getReference();
+                mAuth.createUserWithEmailAndPassword(email, pass)
+                        .addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                Log.d("createuser", "createUserWithEmail:onComplete:" + task.isSuccessful());
+                                Map<String, Object> value = new HashMap<String, Object>();
+                                value.put("emailID", email);
+                                reference.child("users").child(typeofuser).child("emailID" + i).setValue(email);
+                                i++;
+                                // If sign in fails, display a message to the user. If sign in succeeds
+                                // the auth state listener will be notified and logic to handle the
+                                // signed in user can be handled in the listener.
+                                if (!task.isSuccessful()) {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(SignupActivity.this);
+                                    builder.setMessage("asdas")
+                                            .setTitle(R.string.login_error_title)
+                                            .setPositiveButton(android.R.string.ok, null);
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
+                                }
+
+                                // ...
+                            }
+                        });
                     }
-                    @Override
-                    public void onError(FirebaseError firebaseError) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(SignupActivity.this);
-                        builder.setMessage(firebaseError.getMessage())
-                                .setTitle(R.string.login_error_title)
-                                .setPositiveButton(android.R.string.ok, null);
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
-                    }
-                });
-            }
         });
     }
 

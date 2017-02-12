@@ -1,7 +1,5 @@
 package com.potenza_pvt_ltd.AAPS.util;
 
-import android.util.Log;
-
 import com.potenza_pvt_ltd.AAPS.function.PocketPos;
 
 public class Printer {

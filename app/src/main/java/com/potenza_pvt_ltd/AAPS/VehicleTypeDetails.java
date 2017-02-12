@@ -12,7 +12,7 @@ public class VehicleTypeDetails {
     private String vehicle_type;
     private String key;
     private String code;
-    private String inslip_tariff;
+    private String fixed_tariff;
 
     public VehicleTypeDetails() {
 
@@ -36,7 +36,6 @@ public class VehicleTypeDetails {
     public void setVehicle_type(String key){
         this.vehicle_type=key;
     }
-
     @JsonProperty("code")
     public String getCode(){
         return code;
@@ -44,12 +43,11 @@ public class VehicleTypeDetails {
     public void setCode(String key){
         this.code=key;
     }
-
     @JsonProperty("fixed_tariff")
-    public String getInslip_tariff(){
-        return inslip_tariff;
+    public String getFixed_tariff(){
+        return fixed_tariff;
     }
-    public void setInslip_tariff(String key){
-        this.inslip_tariff=key;
+    public void setFixed_tariff(String key){
+        this.fixed_tariff =key;
     }
 }

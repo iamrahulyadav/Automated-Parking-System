@@ -1,17 +1,15 @@
 package com.potenza_pvt_ltd.AAPS;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -23,12 +21,15 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.potenza_pvt_ltd.AAPS.function.PocketPos;
 import com.potenza_pvt_ltd.AAPS.util.FontDefine;
 import com.potenza_pvt_ltd.AAPS.util.Printer;
@@ -36,12 +37,9 @@ import com.potenza_pvt_ltd.AAPS.util.Printer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +49,9 @@ public class PSEntryActivity extends AppCompatActivity {
     EditText et_search;
     ImageButton search;
     Button b;
-    Firebase mRef;
+    private FirebaseAuth mAuth;
+    DatabaseReference reference;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     String userkey;
     private String vhlno;
     TextView tv1;
@@ -89,10 +89,25 @@ public class PSEntryActivity extends AppCompatActivity {
         Button openButton = (Button) findViewById(R.id.open);
         myLabel = (TextView) findViewById(R.id.label);
         Button closeButton = (Button) findViewById(R.id.close);
-        mRef = new Firebase(Constants.FIREBASE_URL);
+        mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("User", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d("User", "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
         pb=(ProgressBar)findViewById(R.id.progressBar);
         linearLayout=(LinearLayout)findViewById(R.id.linear_layout);
-        Query query=mRef.child("users").child("Slip_Details");
+        Query query=reference.child("users").child("Slip_Details");
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -108,29 +123,31 @@ public class PSEntryActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
+            public void onCancelled(DatabaseError firebaseError) {
                 System.out.println("The read failed: " + firebaseError.getMessage());
             }
         });
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                pb.setVisibility(View.VISIBLE);
+                linearLayout.setVisibility(View.GONE);
                 vhlno = et_search.getText().toString();
                 Log.d("vehicle", vhlno);
                 // Attach an listener to read the data at our posts reference
-                Query queryRef1 = mRef.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
+                Query queryRef1 = reference.child("users").child("data").orderByChild("Vehicle Number").equalTo(vhlno);
                 queryRef1.addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot snapshot, String previousChild) {
                         userkey = snapshot.getKey();
                         TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
-                        tv1.setText(truck.getContractorname());
-                        localTime = truck.gettime();
-                        vehicle_type = truck.getVehicleType();
-                        vhclno = truck.getVehicleno();
-                        transporter = truck.getContractorname();
+                        tv1.setText(truck.getTransporter());
+                        localTime = truck.getToa();
+                        vehicle_type = truck.getVtype();
+                        vhclno = truck.getVno();
+                        transporter = truck.getTransporter();
                         email_operator = truck.getEmail();
-                        drvrno = truck.getDriverno();
+                        drvrno = truck.getDno();
                         pb.setVisibility(View.GONE);
                         linearLayout.setVisibility(View.VISIBLE);
                     }
@@ -151,13 +168,7 @@ public class PSEntryActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onCancelled(FirebaseError firebaseError) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(PSEntryActivity.this);
-                        builder.setMessage(firebaseError.getMessage())
-                                .setTitle(R.string.login_error_title)
-                                .setPositiveButton(android.R.string.ok, null);
-                        AlertDialog dialog = builder.create();
-                        dialog.show();
+                    public void onCancelled(DatabaseError firebaseError) {
                     }
                 });            }
         });
@@ -167,8 +178,8 @@ public class PSEntryActivity extends AppCompatActivity {
                 if(userkey!=null) {
                     Map<String, Object> graceNickname = new HashMap<>();
                     graceNickname.put("aps", aps);
-                    Firebase ref = new Firebase(Constants.FIREBASE_URL);
-                    ref.child("users").child("data").child(userkey).updateChildren(graceNickname);
+
+                    reference.child("users").child("data").child(userkey).updateChildren(graceNickname);
                     try {
                         sendData();
                     } catch (IOException e) {

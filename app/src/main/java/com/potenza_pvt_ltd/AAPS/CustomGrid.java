@@ -9,20 +9,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
-import com.potenza_pvt_ltd.AAPS.util.StringUtil;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -119,11 +116,14 @@ public class CustomGrid extends BaseAdapter {
                             public void onClick(DialogInterface dialog, int which) {
                                 // Write your uid here to execute after dialog
                                 pos = position;
-                                final Firebase ref = new Firebase(Constants.FIREBASE_URL);
+                                FirebaseAuth mAuth;
+                                final DatabaseReference reference;
+                                mAuth = FirebaseAuth.getInstance();
+                                reference = FirebaseDatabase.getInstance().getReference();
                                 tar_arr[xpos][ypos]= Integer.parseInt(input.getText().toString());
                                 Log.d("Array", Arrays.deepToString(tar_arr));
                                 Log.d("Type", type);
-                                Query query=ref.child("users").child("Tariff_Details").orderByChild("vehicle_type").equalTo(type);
+                                Query query=reference.child("users").child("Tariff_Details").orderByChild("vtype").equalTo(type);
                                 query.addChildEventListener(new ChildEventListener() {
                                     @Override
                                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -131,11 +131,11 @@ public class CustomGrid extends BaseAdapter {
                                         Map<String, Object> value = new HashMap<String, Object>();
                                         value.put("arr",tar_arr);
                                         value.put("inc_dur_hrs",tariffDetails.getInc_dur_hrs());
-                                        value.put("inslip_tariff",tariffDetails.getTariff());
-                                        value.put("vehicle_type",tariffDetails.getVehicle_type());
+                                        value.put("inslip_tariff",tariffDetails.getInslip_tariff());
+                                        value.put("vtype",tariffDetails.getVehicle_type());
                                         value.put("total_slab_hrs",tariffDetails.getTotal_slab_hrs());
                                         value.put("no_of_slab_hrs", tariffDetails.getNo_of_slab_hrs());
-                                        ref.child("users").child("Tariff_Details").child(dataSnapshot.getKey()).setValue(value);
+                                        reference.child("users").child("Tariff_Details").child(dataSnapshot.getKey()).setValue(value);
                                     }
 
                                     @Override
@@ -154,7 +154,7 @@ public class CustomGrid extends BaseAdapter {
                                     }
 
                                     @Override
-                                    public void onCancelled(FirebaseError firebaseError) {
+                                    public void onCancelled(DatabaseError firebaseError) {
 
                                     }
                                 });

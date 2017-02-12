@@ -7,8 +7,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 
-import com.potenza_pvt_ltd.AAPS.R;
-
 public class ReportsActivity extends Activity {
 
     private String typeofuser;
