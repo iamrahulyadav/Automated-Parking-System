@@ -165,7 +165,7 @@ public class ExitReceipt extends AppCompatActivity {
                         Log.d("userkey",userkey);
                         TruckDetailsActivity truck = snapshot.getValue(TruckDetailsActivity.class);
                         partial= truck.getPap();
-                        localtime = truck.getToa();
+                        localtime = truck.getDate()+" "+truck.getToa();
                         localTime=truck.getToa();
                         vehicle_type=truck.getVtype();
                         departure_time=truck.getTod();
@@ -215,24 +215,30 @@ public class ExitReceipt extends AppCompatActivity {
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (departure_time.contentEquals("")) {
+                if(!et_search.getText().toString().contentEquals("")){
+                    Log.d("dt_Exitreceipt",departure_time);
+                    Log.d("vehicle type",vehicle_type);
+                    if (departure_time.contentEquals("")) {
+                    Log.d("departure time",departure_time);
                     pb2.setVisibility(View.VISIBLE);
                     linearLayout.setVisibility(View.GONE);
                     Log.d("Cost", String.valueOf(cost));
                     if (cost != 0) {
                         try {
                             if (vehicle_type.contentEquals("Trailer with Monthly Pass")) {
+                                Log.d("transporter 1",transporter);
                                 //Search for transporter Name using a new Query and then update the Amt with that userkey
                                 final Query queryRef1 = reference.child("users").child("Transporter_Details").orderByChild("name").equalTo(transporter);
                                 queryRef1.addChildEventListener(new ChildEventListener() {
                                     @Override
                                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                                         transporter_key = String.valueOf(dataSnapshot.getKey());
+                                        Log.d("key_t",transporter_key);
                                         TransporterDetails transporterDetails = dataSnapshot.getValue(TransporterDetails.class);
                                         amt = transporterDetails.getAmt();
                                         int amount = (int) (Integer.parseInt(amt) - cost);
                                         Map<String, Object> map = new HashMap<String, Object>();
-                                        map.put("Amt", String.valueOf(amount));
+                                        map.put("amt", String.valueOf(amount));
                                         reference.child("users").child("Transporter_Details").child(transporter_key).updateChildren(map);
                                         pb2.setVisibility(View.GONE);
                                         linearLayout.setVisibility(View.VISIBLE);
@@ -265,6 +271,22 @@ public class ExitReceipt extends AppCompatActivity {
                             Calendar calendar = Calendar.getInstance();
                             final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");
                             localTime1 = sdf.format(calendar.getTime());
+                            if(localTime1.contains("p.m.")){
+                                Log.d("localtime",localTime1);
+                                localTime1=localTime1.replace("p.m.","PM");
+                            }
+                            else if(localTime1.contains("pm")){
+                                Log.d("localtime",localTime1);
+                                localTime1=localTime1.replace("pm","PM");
+                            }
+                            else if(localTime1.contains("am")){
+                                Log.d("localtime",localTime1);
+                                localTime1=localTime1.replace("am","AM");
+                            }
+                            else if(localTime1.contains("a.m.")){
+                                Log.d("localtime",localTime1);
+                                localTime1=localTime1.replace("a.m.","AM");
+                            }
                             Map<String, Object> map = new HashMap<String, Object>();
                             map.put("cost", String.valueOf(cost));
                             map.put("tod", localTime1);
@@ -286,6 +308,14 @@ public class ExitReceipt extends AppCompatActivity {
                 } else {
                     AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
                     builder.setMessage("The Vehicle is already left the Parking Lot.")
+                            .setTitle("Message")
+                            .setPositiveButton(android.R.string.ok, null);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+                }else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ExitReceipt.this);
+                    builder.setMessage("Enter the vehicle number")
                             .setTitle("Message")
                             .setPositiveButton(android.R.string.ok, null);
                     AlertDialog dialog = builder.create();
@@ -373,7 +403,6 @@ public class ExitReceipt extends AppCompatActivity {
             }
     }
 
-
     private void calculate(String localtime) {
         Date date1=null,date2 = null;
         Calendar calendar = Calendar.getInstance();
@@ -420,7 +449,6 @@ public class ExitReceipt extends AppCompatActivity {
     }
 
     void sendData(String finalcost) throws IOException {
-
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
         String current = dateFormat.format(calendar.getTime());
@@ -468,7 +496,7 @@ public class ExitReceipt extends AppCompatActivity {
 
             System.arraycopy(content1Byte, 0, totalByte, offset, content1Byte.length);
             offset += content1Byte.length;
-/*
+            /*
             System.arraycopy(refByte, 0, totalByte, offset, refByte.length);
             offset += refByte.length;
 
@@ -486,6 +514,7 @@ public class ExitReceipt extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     void findBT() {
 
         try {

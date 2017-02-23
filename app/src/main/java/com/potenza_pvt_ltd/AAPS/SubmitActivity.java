@@ -264,7 +264,22 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");
         localTime = sdf.format(calendar.getTime());
-        Log.d("localtime",localTime);
+        if(localTime.contains("p.m.")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("p.m.","PM");
+        }
+        else if(localTime.contains("pm")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("pm","PM");
+        }
+        else if(localTime.contains("am")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("am","AM");
+        }
+        else if(localTime.contains("a.m.")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("a.m.","AM");
+        }
         // Check Authentication
         mRef = FirebaseAuth.getInstance();
         mRefListener = new FirebaseAuth.AuthStateListener() {
@@ -293,31 +308,64 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                 drvrno = driverno.getText().toString();
                 vhclno = vehicleno.getText().toString();
                 final_date = date.getText().toString();
-                Query queryRef3 = reference.child("users").child("Transporter_Details").orderByChild("name").equalTo(transporter);
-                queryRef3.addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        int flag=0;
-                        Log.d("value of", String.valueOf(dataSnapshot.getKey()));
-                        TransporterDetails post = dataSnapshot.getValue(TransporterDetails.class);
-                        String vehicle_nos=post.getVehicle_no();
-                        String[] nos=vehicle_nos.split(",");
-                        for(int i=0;i<nos.length;i++) {
-                            if(nos[i].contentEquals(vhclno)){
-                                flag=1;
+                if (!drvrno.isEmpty() && !vhclno.isEmpty()) {
+                    Query queryRef3 = reference.child("users").child("Transporter_Details").orderByChild("name").equalTo(transporter);
+                    queryRef3.addChildEventListener(new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                            int flag = 0;
+                            Log.d("value of", String.valueOf(dataSnapshot.getKey()));
+                            TransporterDetails post = dataSnapshot.getValue(TransporterDetails.class);
+                            String vehicle_nos = post.getVehicle_no();
+                            String[] nos = vehicle_nos.split(",");
+                            for (int i = 0; i < nos.length; i++) {
+                                if (nos[i].contentEquals(vhclno)) {
+                                    flag = 1;
+                                    Map<String, Object> graceNickname = new HashMap<>();
+                                    graceNickname.put("transporter", transporter);
+                                    graceNickname.put("dno", drvrno);
+                                    graceNickname.put("vno", vhclno);
+                                    graceNickname.put("vtype", vehicle_type);
+                                    graceNickname.put("toa", localTime);
+                                    graceNickname.put("email", email_operator);
+                                    graceNickname.put("date", final_date);
+                                    graceNickname.put(typeofuser, "true");
+                                    graceNickname.put("tod", "");
+                                    graceNickname.put("aps", "");
+                                    graceNickname.put("pap", 0);
+                                    graceNickname.put("cost", "0");
+                                    DatabaseReference newpostref = reference.child("users").child("data").push();
+                                    newpostref.setValue(graceNickname);
+                                    editor.putString("UserID for data", newpostref.getKey());
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(SubmitActivity.this);
+                                    builder.setMessage("You have successfully uploaded the details!")
+                                            .setTitle(R.string.submit_title)
+                                            .setPositiveButton(android.R.string.ok, null);
+                                    AlertDialog dialog = builder.create();
+                                    dialog.show();
+                                    driverno.setText("");
+                                    vehicleno.setText("");
+                                    try {
+                                        sendData();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                            if (transporter.contentEquals("N/A")) {
                                 Map<String, Object> graceNickname = new HashMap<>();
-                                graceNickname.put("transporter", transporter);
+                                graceNickname.put("transporter", "N/A");
                                 graceNickname.put("dno", drvrno);
                                 graceNickname.put("vno", vhclno);
                                 graceNickname.put("vtype", vehicle_type);
-                                graceNickname.put("toa",localTime);
+                                graceNickname.put("toa", localTime);
                                 graceNickname.put("email", email_operator);
-                                graceNickname.put("date",final_date);
+                                graceNickname.put("date", final_date);
                                 graceNickname.put(typeofuser, "true");
-                                graceNickname.put("tod","");
-                                graceNickname.put("aps","");
-                                graceNickname.put("pap",0);
-                                graceNickname.put("cost","0");
+                                graceNickname.put("tod", "");
+                                graceNickname.put("aps", "");
+                                graceNickname.put("pap", 0);
+                                graceNickname.put("cost", "0");
                                 DatabaseReference newpostref = reference.child("users").child("data").push();
                                 newpostref.setValue(graceNickname);
                                 editor.putString("UserID for data", newpostref.getKey());
@@ -325,8 +373,8 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                                 builder.setMessage("You have successfully uploaded the details!")
                                         .setTitle(R.string.submit_title)
                                         .setPositiveButton(android.R.string.ok, null);
-                                AlertDialog dialog = builder.create();
-                                dialog.show();
+                                AlertDialog dialog1 = builder.create();
+                                dialog1.show();
                                 driverno.setText("");
                                 vehicleno.setText("");
                                 try {
@@ -335,63 +383,42 @@ public class SubmitActivity extends Activity implements AdapterView.OnItemSelect
                                     e.printStackTrace();
                                 }
                             }
-                        }
-                        if(transporter.contentEquals("N/A")) {
-                            Map<String, Object> graceNickname = new HashMap<>();
-                            graceNickname.put("transporter", "N/A");
-                            graceNickname.put("dno", drvrno);
-                            graceNickname.put("vno", vhclno);
-                            graceNickname.put("vtype", vehicle_type);
-                            graceNickname.put("toa", localTime);
-                            graceNickname.put("email", email_operator);
-                            graceNickname.put("date", final_date);
-                            graceNickname.put(typeofuser, "true");
-                            graceNickname.put("tod", "");
-                            graceNickname.put("aps", "");
-                            graceNickname.put("pap", 0);
-                            graceNickname.put("cost", "0");
-                            DatabaseReference newpostref = reference.child("users").child("data").push();
-                            newpostref.setValue(graceNickname);
-                            editor.putString("UserID for data", newpostref.getKey());
-                            AlertDialog.Builder builder = new AlertDialog.Builder(SubmitActivity.this);
-                            builder.setMessage("You have successfully uploaded the details!")
-                                    .setTitle(R.string.submit_title)
-                                    .setPositiveButton(android.R.string.ok, null);
-                            AlertDialog dialog1 = builder.create();
-                            dialog1.show();
-                            driverno.setText("");
-                            vehicleno.setText("");
-                            try {
-                                sendData();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+
+                            pb2.setVisibility(View.GONE);
+                            linear_layout.setVisibility(View.VISIBLE);
                         }
 
-                        pb2.setVisibility(View.GONE);
-                        linear_layout.setVisibility(View.VISIBLE);
-                    }
+                        @Override
+                        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        }
 
-                    }
+                        @Override
+                        public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        }
 
-                    }
+                        @Override
+                        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                        }
 
-                    }
+                        @Override
+                        public void onCancelled(DatabaseError firebaseError) {
 
-                    @Override
-                    public void onCancelled(DatabaseError firebaseError) {
-
-                    }
-                });
+                        }
+                    });
+                }
+                else{
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SubmitActivity.this);
+                    builder.setMessage("Enter the details")
+                            .setTitle("Message")
+                            .setPositiveButton(android.R.string.ok, null);
+                    AlertDialog dialog1 = builder.create();
+                    dialog1.show();
+                    pb2.setVisibility(View.GONE);
+                    linear_layout.setVisibility(View.VISIBLE);
+                }
             }
         });
     }

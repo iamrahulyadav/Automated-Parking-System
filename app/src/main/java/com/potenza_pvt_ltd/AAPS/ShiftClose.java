@@ -109,7 +109,23 @@ public class ShiftClose extends Activity {
                                                                         Log.d("key123", snapshot.getKey());
                                                                         Calendar calendar = Calendar.getInstance();
                                                                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
-                                                                        final String localTime = sdf.format(calendar.getTime());
+                                                                        String localTime = sdf.format(calendar.getTime());
+                                                                        if(localTime.contains("p.m.")){
+                                                                            Log.d("localtime",localTime);
+                                                                            localTime=localTime.replace("p.m.","PM");
+                                                                        }
+                                                                        else if(localTime.contains("pm")){
+                                                                            Log.d("localtime",localTime);
+                                                                            localTime=localTime.replace("pm","PM");
+                                                                        }
+                                                                        else if(localTime.contains("am")){
+                                                                            Log.d("localtime",localTime);
+                                                                            localTime=localTime.replace("am","AM");
+                                                                        }
+                                                                        else if(localTime.contains("a.m.")){
+                                                                            Log.d("localtime",localTime);
+                                                                            localTime=localTime.replace("a.m.","AM");
+                                                                        }
                                                                         Map<String, Object> graceNickname = new HashMap<>();
                                                                         graceNickname.put("Shift Close Time", localTime);
                                                                         reference.child("users").child("timing").child(postid).updateChildren(graceNickname);

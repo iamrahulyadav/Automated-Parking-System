@@ -123,8 +123,24 @@ public class ShiftOpen extends Activity implements AdapterView.OnItemSelectedLis
         dataAdapter = new ArrayAdapter<String>(getBaseContext(), android.R.layout.simple_spinner_item, slotnum);
         dataAdapter.notifyDataSetChanged();
         Calendar calendar = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a");
         localTime = sdf.format(calendar.getTime());
+        if(localTime.contains("p.m.")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("p.m.","PM");
+        }
+        else if(localTime.contains("pm")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("pm","PM");
+        }
+        else if(localTime.contains("am")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("am","AM");
+        }
+        else if(localTime.contains("a.m.")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("a.m.","AM");
+        }
         shiftopen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

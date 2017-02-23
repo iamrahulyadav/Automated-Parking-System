@@ -18,6 +18,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -91,6 +92,7 @@ public class LoginActivity extends Activity {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     Log.d("Sign In", "signInWithEmail:onComplete:" + task.isSuccessful());
+                                    FirebaseCrash.report(new Exception("My first Android non-fatal error"));
                                     Query query=reference.child("users").orderByChild("email-address");
                                             query.addChildEventListener(new ChildEventListener() {
                                         @Override

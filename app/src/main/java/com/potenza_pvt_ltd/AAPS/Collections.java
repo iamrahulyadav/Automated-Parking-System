@@ -108,10 +108,26 @@ public class Collections extends Activity {
         Calendar calendar = Calendar.getInstance();
         final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss a");
         localTime = sdf.format(calendar.getTime());
-        Query qr=reference.child("users").child("cash-handover").orderByChild("Date");
+        if(localTime.contains("p.m.")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("p.m.","PM");
+        }
+        else if(localTime.contains("pm")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("pm","PM");
+        }
+        else if(localTime.contains("am")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("am","AM");
+        }
+        else if(localTime.contains("a.m.")){
+            Log.d("localtime",localTime);
+            localTime=localTime.replace("a.m.","AM");
+        }
         final Date finalDate = date1;
         finaltime=formattedDate+" "+localTime;
         final int[] count = {0};
+        Query qr=reference.child("users").child("cash-handover").orderByChild("date");
         qr.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -121,8 +137,9 @@ public class Collections extends Activity {
                     if(count[0] ==dataSnapshot.getChildrenCount()) {
                         Log.d("key-collections", ds.getKey());
                         TruckDetailsActivity truckDetailsActivity = ds.getValue(TruckDetailsActivity.class);
-                        String dat_time = truckDetailsActivity.getDate() + " " + truckDetailsActivity.getToa();
-                        DateTimeZone timeZone = DateTimeZone.forID("Asia/Kolkata"); // Or, DateTimeZone.UTC
+                        String dat_time = truckDetailsActivity.getDate() + " " + truckDetailsActivity.getCashhandover();
+                        Log.d("dat_time",dat_time);
+                        DateTimeZone timeZone = DateTimeZone.UTC; // Or, DateTimeZone.UTC
                         DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy hh:mm:ss a");
                         DateTime dateTime = formatter.withZone(timeZone).parseDateTime(dat_time);
                         millis = dateTime.getMillis();
@@ -275,8 +292,8 @@ public class Collections extends Activity {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("email", email);
         map.put("Amount Collected", cost);
-        map.put("Date", formattedDate);
-        map.put("Cash Handover", localTime);
+        map.put("date", formattedDate);
+        map.put("cashhandover", localTime);
         DatabaseReference newpostref=reference.child("users").child("cash-handover").push();
         newpostref.setValue(map);
     }

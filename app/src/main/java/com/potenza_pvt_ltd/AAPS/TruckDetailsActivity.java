@@ -24,6 +24,16 @@ public class TruckDetailsActivity {
     private String vtype;
     private String operator;
 
+    public String getCashhandover() {
+        return cashhandover;
+    }
+
+    public void setCashhandover(String cashhandover) {
+        this.cashhandover = cashhandover;
+    }
+
+    private String cashhandover;
+
     public TruckDetailsActivity() {
         /*Blank default constructor essential for Firebase*/
     }

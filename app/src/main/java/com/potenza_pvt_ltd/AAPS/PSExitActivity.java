@@ -279,19 +279,28 @@ public class PSExitActivity extends AppCompatActivity {
         b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(partial==0){
-                    partial=Integer.parseInt(editText.getText().toString());
-                }
-                else {
-                    partial = truck.getPap() + Integer.parseInt(editText.getText().toString());
-                }
-                Map<String, Object> graceNickname = new HashMap<>();
-                graceNickname.put("Partial Amount Paid",String.valueOf(partial));
-                reference.child("users").child("data").child(userkey).updateChildren(graceNickname);
-                try {
-                    sendData(partial);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (!et_search.getText().toString().contentEquals("")) {
+                    if (partial == 0) {
+                        partial = Integer.parseInt(editText.getText().toString());
+                    } else {
+                        partial = truck.getPap() + Integer.parseInt(editText.getText().toString());
+                    }
+                    Map<String, Object> graceNickname = new HashMap<>();
+                    graceNickname.put("Partial Amount Paid", String.valueOf(partial));
+                    reference.child("users").child("data").child(userkey).updateChildren(graceNickname);
+                    try {
+                        sendData(partial);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    et_search.setText("");
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(PSExitActivity.this);
+                    builder.setMessage("Enter the details")
+                            .setTitle("Message")
+                            .setPositiveButton(android.R.string.ok, null);
+                    AlertDialog dialog1 = builder.create();
+                    dialog1.show();
                 }
             }
         });
@@ -344,6 +353,23 @@ public class PSExitActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss a");
         String current = dateFormat.format(calendar.getTime());
+        if(current.contains("p.m.")){
+            Log.d("localtime",current);
+            current=current.replace("p.m.","PM");
+        }
+        else if(current.contains("pm")){
+            Log.d("localtime",current);
+            current=current.replace("pm","PM");
+        }
+        else if(current.contains("am")){
+            Log.d("localtime",current);
+            current=current.replace("am","AM");
+        }
+        else if(current.contains("a.m.")){
+            Log.d("localtime",current);
+            current=current.replace("a.m.","AM");
+        }
+
         try {
             // the text typed by the user
             String titleStr	= "Receipt \n";
